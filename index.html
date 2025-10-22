@@ -264,7 +264,24 @@
 
         // المتغيرات العالمية للبيئة (Firebase & App ID)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        
+        // **التصحيح هنا:** فحص إن كان __firebase_config غير معرف أو فارغ، وتوفير قيمة افتراضية صالحة (بما في ذلك projectId)
+        let firebaseConfig = {};
+        try {
+            const configString = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+            firebaseConfig = JSON.parse(configString);
+        } catch (e) {
+            console.error("Failed to parse __firebase_config:", e);
+        }
+        
+        // التحقق من وجود projectId، إذا لم يكن موجودًا، نضع قيمة افتراضية لتجنب الخطأ
+        if (!firebaseConfig.projectId) {
+            // هذا fallback مهم جداً لمنع الخطأ "projectId" not provided
+            firebaseConfig.projectId = appId; 
+            console.warn("Using appId as default projectId for Firebase configuration.");
+        }
+
+
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
         const geminiApiKey = ""; // مفتاح LLM API
@@ -293,6 +310,7 @@
         /** تهيئة Firebase وتسجيل الدخول */
         async function initializeFirebase() {
             try {
+                // **ملاحظة: استخدام firebaseConfig الذي تم التأكد من وجود projectId فيه**
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
