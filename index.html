@@ -44,14 +44,34 @@
             padding: 20px;
             border-bottom: 4px solid var(--primary);
             box-shadow: 0 4px 15px rgba(0, 255, 255, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         .chat-header h1 {
             text-shadow: 0 0 10px var(--primary);
+            font-size: 1.5rem;
         }
         .chat-header p {
              color: var(--secondary);
              text-shadow: 0 0 5px var(--secondary);
+             font-size: 0.875rem;
+        }
+
+        /* زر محادثة جديدة */
+        #new-chat-btn {
+            background-color: var(--secondary);
+            color: var(--background);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 0 10px var(--secondary);
+            transition: all 0.3s;
+        }
+        #new-chat-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
         }
 
         /* منطقة الرسائل */
@@ -160,6 +180,22 @@
             background-color: #00AAAA;
             box-shadow: 0 0 20px var(--primary);
         }
+        
+        .loader-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(16, 16, 42, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--primary);
+            z-index: 10;
+            border-radius: 16px;
+        }
 
         @keyframes bounce {
             0%, 80%, 100% { transform: scale(0); }
@@ -184,44 +220,203 @@
     </style>
 </head>
 <body>
-    <div class="chat-container">
+    <div class="chat-container relative">
+        <div id="loader" class="loader-overlay">
+            <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
+            <p class="text-lg">Eve بتجهز ليكم القعدة... لحظات بس!</p>
+        </div>
         <!-- رأس الدردشة -->
-        <div class="chat-header text-center">
-            <h1 class="text-2xl font-bold"><i class="fas fa-brain ml-2"></i> Eve - المساعد السوداني المتوهج</h1>
-            <p class="text-sm opacity-80 mt-1">بتكلم سوداني، وبجيب ليك آخر الأخبار والمعلومات يا فردة.</p>
+        <div class="chat-header">
+            <div>
+                <h1 class="font-bold"><i class="fas fa-brain ml-2"></i> Eve السودانية</h1>
+                <p class="opacity-80 mt-1">بتكلم سوداني، وبجيب ليك آخر الأخبار والمعلومات يا فردة.</p>
+            </div>
+            <button id="new-chat-btn" title="ابدأ محادثة جديدة">
+                <i class="fas fa-plus mr-1"></i> محادثة جديدة
+            </button>
         </div>
 
         <!-- منطقة الرسائل -->
         <div id="messages-container">
-            <div class="message ai-message">يا هلا بيك! أنا Eve، موديل ذكاء صناعي عام وودود، وبتكلم سوداني صافي. كيف ممكن أساعدك في بحثك، تحليلك، ولا أي شغلة إبداعية الليلة؟</div>
+            <!-- الرسائل تُضاف هنا بواسطة JavaScript -->
         </div>
         
         <!-- إدخال الدردشة -->
         <div class="chat-input-area flex p-4 border-t border-gray-900">
             <input type="text" id="chat-input" placeholder="اكتب سؤالك ولا طلبك لـ Eve هنا..." class="flex-grow p-3 border border-gray-300 rounded-full ml-3 transition-all" autofocus>
-            <button id="send-message" class="bg-primary text-white px-5 py-3 rounded-full font-semibold hover:bg-primary/80 transition-colors shadow-lg">
+            <button id="send-message" class="bg-primary text-white px-5 py-3 rounded-full font-semibold hover:bg-primary/80 transition-colors shadow-lg" disabled>
                 <i class="fas fa-paper-plane"></i> إرسال
             </button>
         </div>
     </div>
     
-    <script>
-        // ******************************************************
-        // 1. إعدادات API وأدوات LLM
-        // ******************************************************
-        
-        const apiKey = ""; 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-        const ttsApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
-        
-        // سجل المحادثة للحفاظ على السياق
-        let chatHistory = [];
-        let isProcessing = false; // لمنع الإرسال المتعدد
+    <script type="module">
+        // تم تصحيح: setLogLevel تم نقلها إلى استيراد firebase-app.js
+        import { initializeApp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, setDoc, onSnapshot, collection, query, orderBy, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ******************************************************
-        // 2. الدوال المساعدة لتحويل الصوت (PCM to WAV)
+        // 1. إعدادات Firebase والـ API
         // ******************************************************
 
+        setLogLevel('debug'); // لرؤية سجلات Firebase في Console
+
+        // المتغيرات العالمية للبيئة (Firebase & App ID)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        const geminiApiKey = ""; // مفتاح LLM API
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiApiKey}`;
+        const ttsApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${geminiApiKey}`;
+        
+        let db;
+        let auth;
+        let userId = null;
+        let currentChatId = localStorage.getItem('currentChatId') || crypto.randomUUID();
+        let chatHistory = []; // سجل المحادثة لـ Gemini (للسياق)
+        let isProcessing = false;
+        let isFirebaseReady = false;
+        let unsubscribeSnapshot = null; // لتنظيف مستمع onSnapshot
+
+        // ******************************************************
+        // 2. دوال مساعدة لـ Firebase
+        // ******************************************************
+
+        /** يُنشئ المسار الخاص بمجموعة الرسائل لمحادثة معينة */
+        function getMessagesCollectionPath(chatId) {
+            // المسار لحفظ البيانات الخاصة للمستخدم: /artifacts/{appId}/users/{userId}/chats/{chatId}/messages
+            return `artifacts/${appId}/users/${userId}/chats/${chatId}/messages`;
+        }
+        
+        /** تهيئة Firebase وتسجيل الدخول */
+        async function initializeFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // تسجيل الدخول باستخدام الرمز المخصص أو بشكل مجهول
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                // انتظار تأكيد حالة المصادقة
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isFirebaseReady = true;
+                        document.getElementById('loader').remove();
+                        document.getElementById('send-message').disabled = false;
+                        loadChatHistory(); // تحميل المحادثة الحالية
+                    } else {
+                        // في حالة عدم تسجيل الدخول، يبقى userId null (أو نستخدم ID عشوائي، لكن نفضل الـ uid للـ Firestore)
+                        // في هذه البيئة، onAuthStateChanged يتم تنفيذه بعد signIn.
+                        console.error("Auth state change did not return a user.");
+                    }
+                });
+
+            } catch (error) {
+                console.error("فشل في تهيئة Firebase:", error);
+                const loader = document.getElementById('loader');
+                loader.innerHTML = `<p class="text-red-500">مشكلة في الاتصال بقاعدة البيانات: ${error.message}</p>`;
+            }
+        }
+        
+        /** تحميل سجل المحادثة الحالية من Firestore */
+        function loadChatHistory() {
+            if (!isFirebaseReady || !userId) return;
+
+            if (unsubscribeSnapshot) {
+                unsubscribeSnapshot(); // إيقاف الاستماع للمحادثة السابقة
+            }
+            
+            chatHistory = []; // تصفير سجل سياق Gemini
+
+            const messagesContainer = document.getElementById('messages-container');
+            messagesContainer.innerHTML = ''; // تصفير واجهة المستخدم
+
+            const path = getMessagesCollectionPath(currentChatId);
+            // استخدم query(collection(db, path)) بدون orderBy لتجنب أخطاء الفهرسة
+            const q = query(collection(db, path)); 
+
+            // بدء الاستماع للتحديثات في الوقت الفعلي
+            unsubscribeSnapshot = onSnapshot(q, async (snapshot) => {
+                const messages = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    // التأكد من وجود البيانات الأساسية
+                    if (data.text && data.role && data.timestamp) {
+                       messages.push({ ...data, id: doc.id });
+                    }
+                });
+                
+                // فرز الرسائل محلياً حسب الوقت (للتغلب على مشكلة orderBy)
+                messages.sort((a, b) => a.timestamp.seconds - b.timestamp.seconds);
+
+                // تحديث واجهة المستخدم وسجل السياق
+                messagesContainer.innerHTML = ''; 
+                chatHistory = [];
+
+                if (messages.length === 0) {
+                    // إذا كانت المحادثة جديدة، نضع رسالة الترحيب
+                    addMessage("يا هلا بيك! أنا Eve، موديل ذكاء صناعي عام وودود، وبتكلم سوداني صافي. كيف ممكن أساعدك في بحثك، تحليلك، ولا أي شغلة إبداعية الليلة؟", false, false);
+                } else {
+                    messages.forEach(msg => {
+                        addMessage(msg.text, msg.role === 'user', false); // false = لا تحفظ في Firestore مرة أخرى
+                        // إضافة الرسالة إلى سجل سياق Gemini
+                        chatHistory.push({ role: msg.role === 'user' ? 'user' : 'model', parts: [{ text: msg.text }] });
+                    });
+                }
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, (error) => {
+                console.error("خطأ في استماع Firestore:", error);
+                alert("يا خسارة، ما قدرت أحمل المحادثة دي. حاول ابدأ محادثة جديدة.");
+            });
+        }
+        
+        /** حفظ رسالة جديدة في Firestore */
+        async function saveMessage(role, text) {
+            if (!isFirebaseReady || !userId) return;
+
+            const path = getMessagesCollectionPath(currentChatId);
+            try {
+                await addDoc(collection(db, path), {
+                    role: role,
+                    text: text,
+                    timestamp: serverTimestamp() // لتحديد وقت الحفظ
+                });
+            } catch (error) {
+                console.error("فشل في حفظ الرسالة:", error);
+                // لا نعرض alert هنا، نعتمد على log الرسالة فقط لتجنب مقاطعة المستخدم
+            }
+        }
+
+        // ******************************************************
+        // 3. وظيفة محادثة جديدة
+        // ******************************************************
+
+        function startNewChat() {
+            if (isProcessing) {
+                alert("اصبر شوية يا زول، Eve لسه بترد!");
+                return;
+            }
+            // توليد ID محادثة جديد
+            currentChatId = crypto.randomUUID();
+            localStorage.setItem('currentChatId', currentChatId);
+            
+            // إعادة تحميل سجل الدردشة (سيتم تصفير الواجهة وتحميل رسالة الترحيب الافتراضية)
+            loadChatHistory();
+        }
+
+        // ******************************************************
+        // 4. وظائف LLM و TTS
+        // ******************************************************
+
+        // الدوال المساعدة لتحويل الصوت (PCM to WAV)
         function base64ToArrayBuffer(base64) {
             const binaryString = atob(base64);
             const len = binaryString.length;
@@ -237,23 +432,22 @@
             const view = new DataView(buffer);
 
             /* WAVE header */
-            writeString(view, 0, 'RIFF'); // ChunkID
-            view.setUint32(4, 36 + pcm16.length * 2, true); // ChunkSize
-            writeString(view, 8, 'WAVE'); // Format
-            writeString(view, 12, 'fmt '); // Subchunk1ID
-            view.setUint32(16, 16, true); // Subchunk1Size (16 for PCM)
-            view.setUint16(20, 1, true); // AudioFormat (1 for PCM)
-            view.setUint16(22, 1, true); // NumChannels (Mono)
-            view.setUint32(24, sampleRate, true); // SampleRate
-            view.setUint32(28, sampleRate * 2, true); // ByteRate (SampleRate * NumChannels * BitsPerSample/8)
-            view.setUint16(32, 2, true); // BlockAlign (NumChannels * BitsPerSample/8)
-            view.setUint16(34, 16, true); // BitsPerSample
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + pcm16.length * 2, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
 
             /* data sub-chunk */
-            writeString(view, 36, 'data'); // Subchunk2ID
-            view.setUint32(40, pcm16.length * 2, true); // Subchunk2Size (NumSamples * NumChannels * BitsPerSample/8)
+            writeString(view, 36, 'data');
+            view.setUint32(40, pcm16.length * 2, true);
 
-            // Write PCM data
             let offset = 44;
             for (let i = 0; i < pcm16.length; i++, offset += 2) {
                 view.setInt16(offset, pcm16[i], true);
@@ -267,34 +461,26 @@
                 view.setUint8(offset + i, string.charCodeAt(i));
             }
         }
-
-        // ******************************************************
-        // 3. وظيفة توليد الصوت TTS
-        // ******************************************************
-
+        
         async function speakText(text) {
-            // تنظيف النص من تنسيقات HTML/Markdown للمصادر قبل الإرسال لـ TTS
             let cleanText = text.replace(/<(strong|a) [^>]*>|<\/(strong|a)>|\[|\]|\(|\)/g, '');
             cleanText = cleanText.replace(/\n\nالمصادر:[\s\S]*/, '').trim(); 
 
-            const loadingIndicator = document.createElement('i');
-            loadingIndicator.className = 'fas fa-spinner fa-spin text-primary';
-            const speakButton = event.target;
+            const speakButton = event.target.closest('button');
+            if (!speakButton) return;
             const originalIcon = speakButton.innerHTML;
-            speakButton.innerHTML = '';
-            speakButton.appendChild(loadingIndicator);
+            
+            speakButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             speakButton.disabled = true;
 
             const payload = {
                 contents: [{
-                    // توجيه TTS لقراءة النص بلهجة قريبة من السودانية (عبر تحديد اللغة العربية)
                     parts: [{ text: `اقرأ بصوت عربي واضح ومريح: ${cleanText}` }]
                 }],
                 generationConfig: {
                     responseModalities: ["AUDIO"],
                     speechConfig: {
                         voiceConfig: {
-                            // استخدام صوت Kore لـ Eve
                             prebuiltVoiceConfig: { voiceName: "Kore" }
                         }
                     }
@@ -328,9 +514,7 @@
                     const audio = new Audio(audioUrl);
                     audio.play();
                     
-                    audio.onended = () => {
-                        URL.revokeObjectURL(audioUrl);
-                    };
+                    audio.onended = () => { URL.revokeObjectURL(audioUrl); };
                 } else {
                     console.error("TTS response did not contain valid audio data:", result);
                     alert("عفواً، ما قدرت أتكلم (في مشكلة فنية).");
@@ -344,19 +528,13 @@
             }
         }
         
-        // ******************************************************
-        // 4. وظيفة التلخيص الفوري
-        // ******************************************************
-
         async function summarizeText(text, summaryButton) {
-             // تنظيف النص من تنسيقات HTML/Markdown للمصادر قبل الإرسال لـ LLM
             let cleanText = text.replace(/\n\nالمصادر:[\s\S]*/, '').trim(); 
             
             const originalIcon = summaryButton.innerHTML;
             summaryButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             summaryButton.disabled = true;
             
-            // استخدام نفس نموذج LLM للتلخيص (هنا يجب أن تكون التعليمات رسمية لضمان جودة التلخيص)
             const summarySystemInstruction = `أنت مساعد تلخيص فوري. مهمتك هي قراءة النص المُعطى وتلخيصه في **جملة واحدة** فقط تكون شاملة ومفهومة. لا تُضف أي مقدمات أو ختام أو تحية. يجب أن تكون الجملة مباشرة باللغة العربية.`;
             
             const payload = {
@@ -378,7 +556,6 @@
                 const result = await response.json();
                 const summary = result.candidates?.[0]?.content?.parts?.[0]?.text || "عفواً، ما قدرت ألخص الكلام ده.";
                 
-                // عرض التلخيص للمستخدم في نافذة منبثقة بسيطة
                 alert(`ملخص Eve (في جملة واحدة):\n\n${summary}`);
                 
             } catch (error) {
@@ -389,17 +566,13 @@
                 summaryButton.disabled = false;
             }
         }
-        
-        // ******************************************************
-        // 5. منطق الذكاء الاصطناعي (LLM INTEGRATION)
-        // ******************************************************
 
         async function processQuestionWithLLM(question) {
             
             if (isProcessing) return "الرجاء الانتظار حتى تنتهي Eve من الرد السابق.";
             isProcessing = true;
 
-            // إضافة سؤال المستخدم إلى سجل المحادثة
+            // إضافة سؤال المستخدم إلى سجل سياق Gemini (سيتم حفظه في Firestore لاحقاً)
             chatHistory.push({ role: "user", parts: [{ text: question }] });
             
             const systemInstruction = `أنت مساعد ذكي عام وودود، واسمك هو **Eve**.
@@ -413,7 +586,6 @@
 
             const payload = {
                 contents: chatHistory,
-                // تفعيل البحث عبر جوجل ليكون المساعد عاماً ومطلعاً على أحدث المعلومات
                 tools: [{ "google_search": {} }],
                 config: {
                     systemInstruction: { parts: [{ text: systemInstruction }] }
@@ -421,7 +593,6 @@
             };
 
             try {
-                // تنفيذ عملية الإرسال مع آلية المحاولة والرجوع (Exponential Backoff)
                 const MAX_RETRIES = 5;
                 let attempt = 0;
                 let response;
@@ -459,7 +630,7 @@
                 if (candidate?.content?.parts?.[0]?.text) {
                     const responseText = candidate.content.parts[0].text;
                     
-                    // إضافة رد النموذج إلى سجل المحادثة
+                    // إضافة رد النموذج إلى سجل السياق
                     chatHistory.push({ role: "model", parts: [{ text: responseText }] });
                     
                     let sources = [];
@@ -497,43 +668,39 @@
         }
         
         // ******************************************************
-        // 6. تحديث الواجهة والوظائف المساعدة
+        // 5. تحديث الواجهة والوظائف المساعدة
         // ******************************************************
 
-        function addMessage(text, isUser = false) {
+        /** إضافة رسالة لواجهة المستخدم */
+        function addMessage(text, isUser = false, saveToDb = true) {
             const messagesContainer = document.getElementById('messages-container');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
             
-            // تحويل Markdown إلى HTML بسيط (Bold, Newlines, Links for sources)
             let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             
-            // تحويل روابط المصادر إلى تنسيق قابل للنقر
+            // روابط المصادر يجب أن تظهر بلون فاتح داخل صندوق الرسالة الداكن
             formattedText = formattedText.replace(/- \[(.*?)\]\((.*?)\)/g, (match, title, url) => {
-                return `- <a href="${url}" target="_blank" class="text-white hover:text-gray-200 underline">${title}</a>`;
+                return `- <a href="${url}" target="_blank" class="text-secondary hover:text-yellow-200 underline">${title}</a>`;
             });
             
             messageDiv.innerHTML = formattedText;
             
             if (!isUser) {
-                // إضافة شريط الأدوات لرسائل Eve فقط
                 const toolsDiv = document.createElement('div');
                 toolsDiv.className = 'ai-message-tools';
                 
-                // زر التلخيص
                 const summarizeButton = document.createElement('button');
                 summarizeButton.innerHTML = '✨ <i class="fas fa-compress-alt" title="لخص الكلام ده"></i>';
-                summarizeButton.onclick = () => {
-                    // نحتاج النص الأصلي للتلخيص، لذا نستخدم innerHTML قبل التنسيق
+                summarizeButton.onclick = (e) => {
                     const rawText = messageDiv.innerText.replace(/\n\nالمصادر:[\s\S]*/, '').trim(); 
-                    summarizeText(rawText, summarizeButton);
+                    summarizeText(rawText, e.currentTarget);
                 };
                 toolsDiv.appendChild(summarizeButton);
 
-                // زر النطق (TTS)
                 const speakButton = document.createElement('button');
                 speakButton.innerHTML = '✨ <i class="fas fa-volume-up" title="قول الكلام ده"></i>';
-                speakButton.onclick = () => {
+                speakButton.onclick = (e) => {
                      const rawText = messageDiv.innerText.replace(/\n\nالمصادر:[\s\S]*/, '').trim(); 
                      speakText(rawText);
                 };
@@ -543,7 +710,11 @@
             }
             
             messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight; // التمرير للأسفل
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            if (saveToDb) {
+                saveMessage(isUser ? 'user' : 'model', text);
+            }
         }
 
         function showTypingIndicator() {
@@ -557,29 +728,45 @@
         }
 
         // ******************************************************
-        // 7. معالجة الأحداث
+        // 6. معالجة الأحداث
         // ******************************************************
 
         document.addEventListener('DOMContentLoaded', () => {
             const chatInput = document.getElementById('chat-input');
             const sendMessage = document.getElementById('send-message');
+            const newChatBtn = document.getElementById('new-chat-btn');
             
+            newChatBtn.addEventListener('click', startNewChat);
+
             const handleSendMessage = async () => {
                 const question = chatInput.value.trim();
-                if (!question || isProcessing) return;
+                if (!question || isProcessing || !isFirebaseReady) return;
 
-                addMessage(question, true);
+                // 1. إضافة رسالة المستخدم للواجهة وحفظها في Firestore
+                addMessage(question, true, true);
                 chatInput.value = '';
 
                 const typingIndicator = showTypingIndicator();
                 
                 try {
+                    // 2. معالجة السؤال بواسطة LLM
                     const answer = await processQuestionWithLLM(question);
                     typingIndicator.remove();
-                    addMessage(answer);
+                    
+                    // 3. إضافة رد Eve للواجهة وحفظه في Firestore (ملاحظة: onSnapshot سيتولى العرض الفعلي بعد الحفظ)
+                    // بما أننا نستخدم onSnapshot، فالعرض يجب أن يحدث عبر المستمع.
+                    // لكن في هذه الحالة، للحفاظ على سرعة الاستجابة، سنعتمد على addMessage مباشرة، والـ Firestore سيقوم بالتأكد من التزامن لاحقاً
+                    // لحل مشكلة السباق، نحفظ الرسالة أولاً ثم نعتمد على onSnapshot. لكن لتجنب التعقيد، سنعتمد على onSnapshot فقط للعرض، وسنقوم بحفظ الرسالتين متتاليتين.
+                    
+                    // الرسالة تم حفظها مسبقاً في `saveMessage` داخل `addMessage` للـ `user`.
+                    
+                    // نحتاج الآن فقط لحفظ رد الموديل، حيث سيقوم onSnapshot بعرضها
+                    await saveMessage('model', answer); 
+
                 } catch (error) {
                     typingIndicator.remove();
-                    addMessage("عفواً، حصلت مشكلة غير متوقعة. راجع وحدة التحكم (Console) عشان تعرف التفاصيل.", false);
+                    // استخدام addMessage(..., false, true) لحفظ رسالة الخطأ في Firestore أيضاً
+                    addMessage("عفواً، حصلت مشكلة غير متوقعة. راجع وحدة التحكم (Console) عشان تعرف التفاصيل.", false, true);
                     console.error("Critical error in chat process:", error);
                 }
             };
@@ -590,6 +777,9 @@
                     handleSendMessage();
                 }
             });
+            
+            // بدء التهيئة
+            initializeFirebase();
         });
     </script>
 </body>
