@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eve السودانية - المساعد العام المتوهج</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ألوان Eve: تصميم سوداني مستقبلي متوهج */
+        :root {
+            --primary: #00FFFF; /* Neon Cyan - للوهج والأضواء */
+            --secondary: #FFD700; /* Deep Gold/Yellow - لرسائل المستخدم (لمسة سودانية) */
+            --background: #0A0A1F; /* Deep Navy/Black - خلفية مستقبلية */
+            --light-chat: #1A1A3A; /* Dark Blue-Gray - خلفية Eve */
+            --dark-text: #E0E0E0; /* Light Gray/White - للنصوص */
+            --border-glow: #00FFFF;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            direction: rtl;
+            background-color: var(--background);
+            color: var(--dark-text);
+        }
+        
+        .chat-container {
+            max-width: 900px;
+            height: 95vh;
+            margin: 2.5vh auto;
+            display: flex;
+            flex-direction: column;
+            background: #10102A; /* أغمق قليلاً من الخلفية */
+            border-radius: 16px;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.3), 0 0 15px rgba(255, 215, 0, 0.2); /* وهج مزدوج */
+            overflow: hidden;
+            border: 2px solid var(--border-glow);
+        }
+
+        /* رأس الدردشة */
+        .chat-header {
+            background-color: #1A1A3A;
+            color: var(--primary);
+            padding: 20px;
+            border-bottom: 4px solid var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.5);
+        }
+        
+        .chat-header h1 {
+            text-shadow: 0 0 10px var(--primary);
+        }
+        .chat-header p {
+             color: var(--secondary);
+             text-shadow: 0 0 5px var(--secondary);
+        }
+
+        /* منطقة الرسائل */
+        #messages-container {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--secondary);
+            color: #10102A; /* نص داكن على الذهبي */
+            border-radius: 18px 18px 0 18px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); /* وهج ذهبي */
+        }
+
+        .ai-message {
+            align-self: flex-start;
+            background-color: var(--light-chat);
+            color: var(--dark-text);
+            border-radius: 18px 18px 18px 0;
+            white-space: pre-wrap;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.4); /* وهج سماوي */
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 18px;
+            line-height: 1.6;
+            transition: all 0.2s;
+        }
+        
+        /* شريط الأدوات داخل رسالة AI */
+        .ai-message-tools {
+            position: absolute;
+            bottom: -5px;
+            right: -10px;
+            display: flex;
+            gap: 5px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 3px 8px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px var(--primary);
+        }
+        
+        .ai-message-tools button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: var(--primary);
+            transition: color 0.2s, transform 0.2s;
+            font-size: 1rem;
+            text-shadow: 0 0 3px var(--primary);
+        }
+        
+        .ai-message-tools button:hover {
+            color: var(--secondary);
+            transform: scale(1.1);
+        }
+
+        /* مؤشر الكتابة */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-style: italic;
+            color: #999;
+            align-self: flex-start;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+            box-shadow: 0 0 5px var(--primary);
+        }
+        
+        /* إدخال الدردشة */
+        .chat-input-area input {
+            background-color: #0A0A1F;
+            color: var(--dark-text);
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        .chat-input-area input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+
+        .chat-input-area button {
+            background-color: var(--primary);
+            text-shadow: 0 0 5px #000;
+            box-shadow: 0 0 15px var(--primary);
+        }
+        .chat-input-area button:hover {
+            background-color: #00AAAA;
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        /* تصميم الاستجابة للهواتف */
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                margin: 0;
+                border-radius: 0;
+            }
+            .message {
+                max-width: 95%;
+            }
+            .ai-message-tools {
+                bottom: -15px;
+                right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- رأس الدردشة -->
+        <div class="chat-header text-center">
+            <h1 class="text-2xl font-bold"><i class="fas fa-brain ml-2"></i> Eve - المساعد السوداني المتوهج</h1>
+            <p class="text-sm opacity-80 mt-1">بتكلم سوداني، وبجيب ليك آخر الأخبار والمعلومات يا فردة.</p>
+        </div>
+
+        <!-- منطقة الرسائل -->
+        <div id="messages-container">
+            <div class="message ai-message">يا هلا بيك! أنا Eve، موديل ذكاء صناعي عام وودود، وبتكلم سوداني صافي. كيف ممكن أساعدك في بحثك، تحليلك، ولا أي شغلة إبداعية الليلة؟</div>
+        </div>
+        
+        <!-- إدخال الدردشة -->
+        <div class="chat-input-area flex p-4 border-t border-gray-900">
+            <input type="text" id="chat-input" placeholder="اكتب سؤالك ولا طلبك لـ Eve هنا..." class="flex-grow p-3 border border-gray-300 rounded-full ml-3 transition-all" autofocus>
+            <button id="send-message" class="bg-primary text-white px-5 py-3 rounded-full font-semibold hover:bg-primary/80 transition-colors shadow-lg">
+                <i class="fas fa-paper-plane"></i> إرسال
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // ******************************************************
+        // 1. إعدادات API وأدوات LLM
+        // ******************************************************
+        
+        const apiKey = ""; 
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const ttsApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+        
+        // سجل المحادثة للحفاظ على السياق
+        let chatHistory = [];
+        let isProcessing = false; // لمنع الإرسال المتعدد
+
+        // ******************************************************
+        // 2. الدوال المساعدة لتحويل الصوت (PCM to WAV)
+        // ******************************************************
+
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcm16, sampleRate) {
+            const buffer = new ArrayBuffer(44 + pcm16.length * 2);
+            const view = new DataView(buffer);
+
+            /* WAVE header */
+            writeString(view, 0, 'RIFF'); // ChunkID
+            view.setUint32(4, 36 + pcm16.length * 2, true); // ChunkSize
+            writeString(view, 8, 'WAVE'); // Format
+            writeString(view, 12, 'fmt '); // Subchunk1ID
+            view.setUint32(16, 16, true); // Subchunk1Size (16 for PCM)
+            view.setUint16(20, 1, true); // AudioFormat (1 for PCM)
+            view.setUint16(22, 1, true); // NumChannels (Mono)
+            view.setUint32(24, sampleRate, true); // SampleRate
+            view.setUint32(28, sampleRate * 2, true); // ByteRate (SampleRate * NumChannels * BitsPerSample/8)
+            view.setUint16(32, 2, true); // BlockAlign (NumChannels * BitsPerSample/8)
+            view.setUint16(34, 16, true); // BitsPerSample
+
+            /* data sub-chunk */
+            writeString(view, 36, 'data'); // Subchunk2ID
+            view.setUint32(40, pcm16.length * 2, true); // Subchunk2Size (NumSamples * NumChannels * BitsPerSample/8)
+
+            // Write PCM data
+            let offset = 44;
+            for (let i = 0; i < pcm16.length; i++, offset += 2) {
+                view.setInt16(offset, pcm16[i], true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        // ******************************************************
+        // 3. وظيفة توليد الصوت TTS
+        // ******************************************************
+
+        async function speakText(text) {
+            // تنظيف النص من تنسيقات HTML/Markdown للمصادر قبل الإرسال لـ TTS
+            let cleanText = text.replace(/<(strong|a) [^>]*>|<\/(strong|a)>|\[|\]|\(|\)/g, '');
+            cleanText = cleanText.replace(/\n\nالمصادر:[\s\S]*/, '').trim(); 
+
+            const loadingIndicator = document.createElement('i');
+            loadingIndicator.className = 'fas fa-spinner fa-spin text-primary';
+            const speakButton = event.target;
+            const originalIcon = speakButton.innerHTML;
+            speakButton.innerHTML = '';
+            speakButton.appendChild(loadingIndicator);
+            speakButton.disabled = true;
+
+            const payload = {
+                contents: [{
+                    // توجيه TTS لقراءة النص بلهجة قريبة من السودانية (عبر تحديد اللغة العربية)
+                    parts: [{ text: `اقرأ بصوت عربي واضح ومريح: ${cleanText}` }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            // استخدام صوت Kore لـ Eve
+                            prebuiltVoiceConfig: { voiceName: "Kore" }
+                        }
+                    }
+                },
+                model: "gemini-2.5-flash-preview-tts"
+            };
+
+            try {
+                const response = await fetch(ttsApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) throw new Error(`TTS API failed with status: ${response.status}`);
+
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                    const rateMatch = mimeType.match(/rate=(\d+)/);
+                    const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+                    
+                    const pcmData = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmData);
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+                    
+                    audio.onended = () => {
+                        URL.revokeObjectURL(audioUrl);
+                    };
+                } else {
+                    console.error("TTS response did not contain valid audio data:", result);
+                    alert("عفواً، ما قدرت أتكلم (في مشكلة فنية).");
+                }
+            } catch (error) {
+                console.error("Error calling TTS API:", error);
+                alert(`يا خسارة، واجهت مشكلة في توليد الصوت: ${error.message}`);
+            } finally {
+                speakButton.innerHTML = originalIcon;
+                speakButton.disabled = false;
+            }
+        }
+        
+        // ******************************************************
+        // 4. وظيفة التلخيص الفوري
+        // ******************************************************
+
+        async function summarizeText(text, summaryButton) {
+             // تنظيف النص من تنسيقات HTML/Markdown للمصادر قبل الإرسال لـ LLM
+            let cleanText = text.replace(/\n\nالمصادر:[\s\S]*/, '').trim(); 
+            
+            const originalIcon = summaryButton.innerHTML;
+            summaryButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            summaryButton.disabled = true;
+            
+            // استخدام نفس نموذج LLM للتلخيص (هنا يجب أن تكون التعليمات رسمية لضمان جودة التلخيص)
+            const summarySystemInstruction = `أنت مساعد تلخيص فوري. مهمتك هي قراءة النص المُعطى وتلخيصه في **جملة واحدة** فقط تكون شاملة ومفهومة. لا تُضف أي مقدمات أو ختام أو تحية. يجب أن تكون الجملة مباشرة باللغة العربية.`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: `لخص هذا النص في جملة واحدة: "${cleanText}"` }] }],
+                config: {
+                    systemInstruction: { parts: [{ text: summarySystemInstruction }] }
+                }
+            };
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const result = await response.json();
+                const summary = result.candidates?.[0]?.content?.parts?.[0]?.text || "عفواً، ما قدرت ألخص الكلام ده.";
+                
+                // عرض التلخيص للمستخدم في نافذة منبثقة بسيطة
+                alert(`ملخص Eve (في جملة واحدة):\n\n${summary}`);
+                
+            } catch (error) {
+                console.error("Error calling summarization API:", error);
+                alert(`يا خسارة، في مشكلة فنية وأنا بلخص: ${error.message}`);
+            } finally {
+                summaryButton.innerHTML = originalIcon;
+                summaryButton.disabled = false;
+            }
+        }
+        
+        // ******************************************************
+        // 5. منطق الذكاء الاصطناعي (LLM INTEGRATION)
+        // ******************************************************
+
+        async function processQuestionWithLLM(question) {
+            
+            if (isProcessing) return "الرجاء الانتظار حتى تنتهي Eve من الرد السابق.";
+            isProcessing = true;
+
+            // إضافة سؤال المستخدم إلى سجل المحادثة
+            chatHistory.push({ role: "user", parts: [{ text: question }] });
+            
+            const systemInstruction = `أنت مساعد ذكي عام وودود، واسمك هو **Eve**.
+التعليمات الأهم: يجب أن يكون جميع حديثك **حصرياً باللهجة السودانية (السوداني)**.
+1. تحدث بأسلوب ودود ولطيف ومبسط (زي ناس البلد).
+2. يمكنك الإجابة على أي سؤال عام، المساعدة في الكتابة، التحليل، أو التخطيط، لكن بلهجة سودانية أصيلة.
+3. استخدم أداة البحث (Google Search) للحصول على معلومات حديثة وموثوقة عند الحاجة.
+4. حافظ على الردود موجزة ومباشرة قدر الإمكان، إلا إذا طلب المستخدم تفصيلاً.
+5. استعمل تعابير سودانية دارجة ومفهومة في الردود.
+`;
+
+            const payload = {
+                contents: chatHistory,
+                // تفعيل البحث عبر جوجل ليكون المساعد عاماً ومطلعاً على أحدث المعلومات
+                tools: [{ "google_search": {} }],
+                config: {
+                    systemInstruction: { parts: [{ text: systemInstruction }] }
+                }
+            };
+
+            try {
+                // تنفيذ عملية الإرسال مع آلية المحاولة والرجوع (Exponential Backoff)
+                const MAX_RETRIES = 5;
+                let attempt = 0;
+                let response;
+
+                while (attempt < MAX_RETRIES) {
+                    try {
+                        response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.status !== 429 && response.ok) { 
+                            break; 
+                        } else if (response.status === 429) {
+                            const delay = Math.pow(2, attempt) * 1000;
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                        } else {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                    } catch (error) {
+                        if (attempt === MAX_RETRIES - 1) throw error; 
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                    attempt++;
+                }
+                
+                if (!response || !response.ok) throw new Error("Failed to get a response after multiple retries.");
+
+
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+
+                if (candidate?.content?.parts?.[0]?.text) {
+                    const responseText = candidate.content.parts[0].text;
+                    
+                    // إضافة رد النموذج إلى سجل المحادثة
+                    chatHistory.push({ role: "model", parts: [{ text: responseText }] });
+                    
+                    let sources = [];
+                    const groundingMetadata = candidate.groundingMetadata;
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        sources = groundingMetadata.groundingAttributions
+                            .map(attribution => ({
+                                uri: attribution.web?.uri,
+                                title: attribution.web?.title,
+                            }))
+                            .filter(source => source.uri && source.title);
+                    }
+                    
+                    let finalAnswer = responseText;
+                    if (sources.length > 0) {
+                        finalAnswer += "\n\n**المصادر (جبناها ليك من النت):**\n";
+                        sources.forEach((source, index) => {
+                            finalAnswer += `- [${source.title}](${source.uri})\n`;
+                        });
+                    }
+                    
+                    isProcessing = false;
+                    return finalAnswer;
+
+                } else {
+                    isProcessing = false;
+                    return "عفواً، ما قدرت ألقى ليك رد. الظاهر النت ضعيف ولا السؤال ما واضح لي.";
+                }
+
+            } catch (error) {
+                isProcessing = false;
+                console.error("Error calling LLM API:", error);
+                return `عفواً، واجهت مشكلة تقنية أثناء التواصل مع مساعد Eve: ${error.message}`;
+            }
+        }
+        
+        // ******************************************************
+        // 6. تحديث الواجهة والوظائف المساعدة
+        // ******************************************************
+
+        function addMessage(text, isUser = false) {
+            const messagesContainer = document.getElementById('messages-container');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            
+            // تحويل Markdown إلى HTML بسيط (Bold, Newlines, Links for sources)
+            let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // تحويل روابط المصادر إلى تنسيق قابل للنقر
+            formattedText = formattedText.replace(/- \[(.*?)\]\((.*?)\)/g, (match, title, url) => {
+                return `- <a href="${url}" target="_blank" class="text-white hover:text-gray-200 underline">${title}</a>`;
+            });
+            
+            messageDiv.innerHTML = formattedText;
+            
+            if (!isUser) {
+                // إضافة شريط الأدوات لرسائل Eve فقط
+                const toolsDiv = document.createElement('div');
+                toolsDiv.className = 'ai-message-tools';
+                
+                // زر التلخيص
+                const summarizeButton = document.createElement('button');
+                summarizeButton.innerHTML = '✨ <i class="fas fa-compress-alt" title="لخص الكلام ده"></i>';
+                summarizeButton.onclick = () => {
+                    // نحتاج النص الأصلي للتلخيص، لذا نستخدم innerHTML قبل التنسيق
+                    const rawText = messageDiv.innerText.replace(/\n\nالمصادر:[\s\S]*/, '').trim(); 
+                    summarizeText(rawText, summarizeButton);
+                };
+                toolsDiv.appendChild(summarizeButton);
+
+                // زر النطق (TTS)
+                const speakButton = document.createElement('button');
+                speakButton.innerHTML = '✨ <i class="fas fa-volume-up" title="قول الكلام ده"></i>';
+                speakButton.onclick = () => {
+                     const rawText = messageDiv.innerText.replace(/\n\nالمصادر:[\s\S]*/, '').trim(); 
+                     speakText(rawText);
+                };
+                toolsDiv.appendChild(speakButton);
+                
+                messageDiv.appendChild(toolsDiv);
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight; // التمرير للأسفل
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('messages-container');
+            const indicatorDiv = document.createElement('div');
+            indicatorDiv.className = 'typing-indicator ai-message';
+            indicatorDiv.innerHTML = '<span></span><span></span><span></span> Eve قاعدة تفكر...';
+            messagesContainer.appendChild(indicatorDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return indicatorDiv;
+        }
+
+        // ******************************************************
+        // 7. معالجة الأحداث
+        // ******************************************************
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatInput = document.getElementById('chat-input');
+            const sendMessage = document.getElementById('send-message');
+            
+            const handleSendMessage = async () => {
+                const question = chatInput.value.trim();
+                if (!question || isProcessing) return;
+
+                addMessage(question, true);
+                chatInput.value = '';
+
+                const typingIndicator = showTypingIndicator();
+                
+                try {
+                    const answer = await processQuestionWithLLM(question);
+                    typingIndicator.remove();
+                    addMessage(answer);
+                } catch (error) {
+                    typingIndicator.remove();
+                    addMessage("عفواً، حصلت مشكلة غير متوقعة. راجع وحدة التحكم (Console) عشان تعرف التفاصيل.", false);
+                    console.error("Critical error in chat process:", error);
+                }
+            };
+            
+            sendMessage.addEventListener('click', handleSendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleSendMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
