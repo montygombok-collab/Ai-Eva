@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SHAHRAZAD ELECTRIC - نظام المبيعات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #1a56db;
@@ -169,11 +170,14 @@
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
-            width: 100%;
         }
 
         .btn:hover {
             background-color: var(--primary-dark);
+        }
+
+        .btn-block {
+            width: 100%;
         }
 
         .btn-secondary {
@@ -182,6 +186,23 @@
 
         .btn-secondary:hover {
             background-color: #6c2bd9;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
         }
 
         .login-footer {
@@ -209,6 +230,26 @@
             display: flex;
             flex-direction: column;
             z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar.collapsed .sidebar-header h2,
+        .sidebar.collapsed .menu-item span,
+        .sidebar.collapsed .user-details {
+            display: none;
+        }
+
+        .sidebar.collapsed .menu-item {
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .sidebar.collapsed .menu-item i {
+            margin-left: 0;
         }
 
         .sidebar-header {
@@ -384,6 +425,11 @@
             color: var(--dark);
         }
 
+        .page-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
         .card {
             background-color: white;
             border-radius: 0.75rem;
@@ -396,7 +442,7 @@
             padding: 1rem 1.5rem;
             border-bottom: 1px solid var(--gray-light);
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
         }
 
@@ -492,6 +538,12 @@
             color: #b45309;
         }
 
+        .alert-danger {
+            background-color: rgba(224, 36, 36, 0.1);
+            border: 1px solid rgba(224, 36, 36, 0.2);
+            color: #981b1b;
+        }
+
         .alert i {
             margin-left: 0.5rem;
         }
@@ -562,15 +614,7 @@
             border-top: 1px solid var(--gray-light);
             display: flex;
             justify-content: flex-end;
-        }
-
-        .modal-footer .btn {
-            width: auto;
-            margin-right: 0.5rem;
-        }
-
-        .modal-footer .btn:last-child {
-            margin-right: 0;
+            gap: 0.5rem;
         }
 
         .copy-settings-btn {
@@ -592,6 +636,84 @@
 
         .copy-settings-btn i {
             margin-left: 0.5rem;
+        }
+
+        .barcode-scanner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1001;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .barcode-scanner video {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 0.5rem;
+        }
+
+        .barcode-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: white;
+            color: var(--dark);
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+
+        .ai-response {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--light);
+            border-radius: 0.5rem;
+            border-right: 3px solid var(--primary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 1.5rem;
+        }
+
+        .invoice-items {
+            margin: 1rem 0;
+        }
+
+        .invoice-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .invoice-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-details {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .item-actions {
+            margin-right: 1rem;
+        }
+
+        .invoice-total {
+            padding: 1rem;
+            background-color: var(--light);
+            border-radius: 0.5rem;
+            text-align: left;
+            font-weight: bold;
+            font-size: 1.2rem;
         }
 
         /* تصميم متجاوب */
@@ -645,11 +767,16 @@
             .page-actions {
                 margin-top: 1rem;
                 width: 100%;
+                flex-wrap: wrap;
             }
             
             .page-actions .btn {
                 width: 100%;
                 margin-bottom: 0.5rem;
+            }
+            
+            .form-col {
+                flex: 1 0 100%;
             }
         }
     </style>
@@ -723,7 +850,7 @@
                     </select>
                 </div>
                 
-                <button type="submit" class="btn">تسجيل الدخول</button>
+                <button type="submit" class="btn btn-block">تسجيل الدخول</button>
                 
                 <div class="login-footer">
                     <a href="#" id="forgotPassword">نسيت كلمة المرور؟</a>
@@ -735,7 +862,7 @@
     <!-- لوحة التحكم -->
     <div class="dashboard-container" id="dashboardContainer">
         <!-- الشريط الجانبي -->
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h2>SHAHRAZAD ELECTRIC</h2>
             </div>
@@ -801,28 +928,28 @@
                 
                 <div class="nav-right">
                     <div class="nav-item">
-                        <div class="nav-icon">
+                        <div class="nav-icon" id="searchBtn">
                             <i class="fas fa-search"></i>
                         </div>
                     </div>
                     <div class="nav-item">
-                        <div class="nav-icon">
+                        <div class="nav-icon" id="notificationsBtn">
                             <i class="fas fa-bell"></i>
-                            <span class="badge">3</span>
+                            <span class="badge" id="notificationCount">3</span>
                         </div>
                     </div>
                     <div class="nav-item">
-                        <div class="nav-icon">
+                        <div class="nav-icon" id="helpBtn">
                             <i class="fas fa-question-circle"></i>
                         </div>
                     </div>
                     <div class="nav-item">
-                        <div class="nav-icon" id="barcodeScanner">
+                        <div class="nav-icon" id="barcodeScannerBtn">
                             <i class="fas fa-barcode"></i>
                         </div>
                     </div>
                     <div class="nav-item">
-                        <div class="nav-icon" id="aiAssistant">
+                        <div class="nav-icon" id="aiAssistantBtn">
                             <i class="fas fa-robot"></i>
                         </div>
                     </div>
@@ -848,7 +975,7 @@
                                 <i class="fas fa-boxes"></i>
                             </div>
                             <div class="stat-info">
-                                <div class="stat-value">1,248</div>
+                                <div class="stat-value" id="totalProducts">1,248</div>
                                 <div class="stat-label">إجمالي الأصناف</div>
                             </div>
                         </div>
@@ -858,7 +985,7 @@
                                 <i class="fas fa-warehouse"></i>
                             </div>
                             <div class="stat-info">
-                                <div class="stat-value">5</div>
+                                <div class="stat-value" id="totalWarehouses">5</div>
                                 <div class="stat-label">المخازن</div>
                             </div>
                         </div>
@@ -868,7 +995,7 @@
                                 <i class="fas fa-users"></i>
                             </div>
                             <div class="stat-info">
-                                <div class="stat-value">342</div>
+                                <div class="stat-value" id="totalCustomers">342</div>
                                 <div class="stat-label">العملاء المميزين</div>
                             </div>
                         </div>
@@ -878,7 +1005,7 @@
                                 <i class="fas fa-file-invoice"></i>
                             </div>
                             <div class="stat-info">
-                                <div class="stat-value">1,847</div>
+                                <div class="stat-value" id="totalInvoices">1,847</div>
                                 <div class="stat-label">الفواتير</div>
                             </div>
                         </div>
@@ -889,13 +1016,13 @@
                             <h3 class="card-title">الأصناف ذات المخزون المنخفض</h3>
                         </div>
                         <div class="card-body">
-                            <div class="alert alert-warning">
+                            <div class="alert alert-warning" id="lowStockAlert">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                <span>هناك 5 أصناف تحتاج إلى إعادة تخزين</span>
+                                <span id="lowStockMessage">هناك 5 أصناف تحتاج إلى إعادة تخزين</span>
                             </div>
                             
                             <div class="table-responsive">
-                                <table class="table">
+                                <table class="table" id="lowStockTable">
                                     <thead>
                                         <tr>
                                             <th>كود الصنف</th>
@@ -906,31 +1033,8 @@
                                             <th>الحالة</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>P-1001</td>
-                                            <td>كابل كهرباء 2.5 مم</td>
-                                            <td>المخزن الرئيسي</td>
-                                            <td>15</td>
-                                            <td>50</td>
-                                            <td><span style="color: var(--danger);">منخفض</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td>P-1005</td>
-                                            <td>مفتاح كهربائي 16A</td>
-                                            <td>مخزن الفرع 1</td>
-                                            <td>8</td>
-                                            <td>30</td>
-                                            <td><span style="color: var(--danger);">منخفض</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td>P-1012</td>
-                                            <td>لمبة LED 20W</td>
-                                            <td>المخزن الرئيسي</td>
-                                            <td>22</td>
-                                            <td>40</td>
-                                            <td><span style="color: var(--warning);">تحت المراقبة</span></td>
-                                        </tr>
+                                    <tbody id="lowStockTableBody">
+                                        <!-- سيتم ملؤها بالبيانات -->
                                     </tbody>
                                 </table>
                             </div>
@@ -946,12 +1050,256 @@
                             <button class="btn" id="addProductBtn">
                                 <i class="fas fa-plus"></i> إضافة صنف جديد
                             </button>
+                            <button class="btn btn-secondary" id="importProductsBtn">
+                                <i class="fas fa-file-import"></i> استيراد
+                            </button>
                         </div>
                     </div>
                     
                     <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">قائمة الأصناف</h3>
+                            <div>
+                                <input type="text" id="productSearch" class="form-control" placeholder="بحث في الأصناف..." style="width: 250px;">
+                            </div>
+                        </div>
                         <div class="card-body">
-                            <p>هنا يمكنك إدارة جميع الأصناف في النظام</p>
+                            <div class="table-responsive">
+                                <table class="table" id="productsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>كود الصنف</th>
+                                            <th>اسم الصنف</th>
+                                            <th>الفئة</th>
+                                            <th>السعر</th>
+                                            <th>المخزون</th>
+                                            <th>الحد الأدنى</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <!-- سيتم ملؤها بالبيانات -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- محتوى المخازن -->
+                <div class="page-content" id="warehousesPage" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">إدارة المخازن</h1>
+                        <div class="page-actions">
+                            <button class="btn" id="addWarehouseBtn">
+                                <i class="fas fa-plus"></i> إضافة مخزن جديد
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background-color: var(--primary);">
+                                <i class="fas fa-warehouse"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="warehousesCount">5</div>
+                                <div class="stat-label">إجمالي المخازن</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background-color: var(--success);">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="totalItemsCount">12,458</div>
+                                <div class="stat-label">إجمالي الأصناف</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background-color: var(--warning);">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="lowStockItemsCount">15</div>
+                                <div class="stat-label">أصناف منخفضة المخزون</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">قائمة المخازن</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table" id="warehousesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>اسم المخزن</th>
+                                            <th>الموقع</th>
+                                            <th>المسؤول</th>
+                                            <th>عدد الأصناف</th>
+                                            <th>الحالة</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="warehousesTableBody">
+                                        <!-- سيتم ملؤها بالبيانات -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- محتوى العملاء المميزين -->
+                <div class="page-content" id="customersPage" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">إدارة العملاء المميزين</h1>
+                        <div class="page-actions">
+                            <button class="btn" id="addCustomerBtn">
+                                <i class="fas fa-plus"></i> إضافة عميل جديد
+                            </button>
+                            <button class="btn btn-secondary" id="importCustomersBtn">
+                                <i class="fas fa-file-import"></i> استيراد
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">قائمة العملاء المميزين</h3>
+                            <div>
+                                <input type="text" id="customerSearch" class="form-control" placeholder="بحث في العملاء..." style="width: 250px;">
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table" id="customersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>كود العميل</th>
+                                            <th>اسم العميل</th>
+                                            <th>رقم الهاتف</th>
+                                            <th>البريد الإلكتروني</th>
+                                            <th>نقاط الولاء</th>
+                                            <th>آخر عملية</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customersTableBody">
+                                        <!-- سيتم ملؤها بالبيانات -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- محتوى الفواتير -->
+                <div class="page-content" id="invoicesPage" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">إدارة الفواتير</h1>
+                        <div class="page-actions">
+                            <button class="btn" id="createInvoiceBtn">
+                                <i class="fas fa-plus"></i> إنشاء فاتورة جديدة
+                            </button>
+                            <button class="btn btn-secondary" id="printInvoicesBtn">
+                                <i class="fas fa-print"></i> طباعة
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">الفواتير الحديثة</h3>
+                            <div>
+                                <select id="invoiceFilter" class="form-control" style="width: 200px;">
+                                    <option value="all">جميع الفواتير</option>
+                                    <option value="today">فواتير اليوم</option>
+                                    <option value="week">فواتير هذا الأسبوع</option>
+                                    <option value="month">فواتير هذا الشهر</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table" id="invoicesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>رقم الفاتورة</th>
+                                            <th>العميل</th>
+                                            <th>التاريخ</th>
+                                            <th>المبلغ</th>
+                                            <th>الحالة</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="invoicesTableBody">
+                                        <!-- سيتم ملؤها بالبيانات -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- محتوى الإحصائيات -->
+                <div class="page-content" id="reportsPage" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">الإحصائيات والتقارير</h1>
+                        <div class="page-actions">
+                            <button class="btn" id="generateReportBtn">
+                                <i class="fas fa-download"></i> تصدير التقرير
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">مبيعات الشهر الحالي</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="salesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">أكثر الأصناف مبيعاً</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="topProductsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- محتوى التنبيهات -->
+                <div class="page-content" id="alertsPage" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">التنبيهات والإشعارات</h1>
+                        <div class="page-actions">
+                            <button class="btn btn-secondary" id="markAllReadBtn">
+                                <i class="fas fa-check-double"></i> تعيين الكل كمقروء
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">التنبيهات النشطة</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="alertsList">
+                                <!-- سيتم ملؤها بالبيانات -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -983,7 +1331,7 @@
                                     <input type="password" id="confirmPassword" class="form-control">
                                 </div>
                             </div>
-                            <button class="btn">تغيير كلمة المرور</button>
+                            <button class="btn" id="changePasswordBtn">تغيير كلمة المرور</button>
                         </div>
                     </div>
                     
@@ -992,7 +1340,26 @@
                             <h3 class="card-title">إعدادات المستخدمين</h3>
                         </div>
                         <div class="card-body">
-                            <p>هنا يمكنك إدارة صلاحيات المستخدمين وإعدادات الحسابات</p>
+                            <div class="table-responsive">
+                                <table class="table" id="usersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>اسم المستخدم</th>
+                                            <th>البريد الإلكتروني</th>
+                                            <th>الفرع</th>
+                                            <th>الصلاحية</th>
+                                            <th>الحالة</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody">
+                                        <!-- سيتم ملؤها بالبيانات -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn" id="addUserBtn">
+                                <i class="fas fa-plus"></i> إضافة مستخدم جديد
+                            </button>
                         </div>
                     </div>
                     
@@ -1032,7 +1399,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <button class="btn">حفظ الإعدادات</button>
+                            <button class="btn" id="saveSettingsBtn">حفظ الإعدادات</button>
                             
                             <div class="copy-settings-btn" id="copySettingsBtn2">
                                 <i class="fas fa-copy"></i>
@@ -1058,8 +1425,28 @@
                     <label for="aiQuestion">اسألني عن أي شيء يتعلق بالنظام:</label>
                     <textarea id="aiQuestion" class="form-control" rows="3" placeholder="اكتب سؤالك هنا..."></textarea>
                 </div>
-                <button class="btn">إرسال السؤال</button>
+                <button class="btn" id="askAIButton">إرسال السؤال</button>
+                <div class="ai-response" id="aiResponse" style="display: none;">
+                    <!-- سيتم عرض الرد هنا -->
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- مودال ماسح الباركود -->
+    <div class="barcode-scanner" id="barcodeScanner">
+        <h2>ماسح الباركود</h2>
+        <div id="barcodeScannerContainer">
+            <p>جارٍ تشغيل الكاميرا...</p>
+            <!-- في التطبيق الحقيقي، سيتم عرض الفيديو من الكاميرا هنا -->
+        </div>
+        <div class="barcode-result" id="barcodeResult" style="display: none;">
+            <!-- سيتم عرض نتيجة الباركود هنا -->
+        </div>
+        <div style="margin-top: 1rem;">
+            <button class="btn btn-success" id="startScannerBtn">بدء المسح</button>
+            <button class="btn btn-danger" id="stopScannerBtn">إيقاف المسح</button>
+            <button class="btn btn-secondary" id="closeScannerBtn">إغلاق</button>
         </div>
     </div>
 
@@ -1068,11 +1455,10 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-        // TODO: Add SDKs for Firebase products that you want to use
-        // https://firebase.google.com/docs/web/setup#available-libraries
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         // Your web app's Firebase configuration
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
         const firebaseConfig = {
           apiKey: "AIzaSyBtc-pniRx5Mda5UW_kNqS0Zyi8zcKvdlU",
           authDomain: "shahrazad-electric.firebaseapp.com",
@@ -1086,6 +1472,13 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // جعل المتغيرات متاحة عالمياً
+        window.firebaseApp = app;
+        window.firebaseDb = db;
+        window.firebaseAuth = auth;
     </script>
 
     <script>
@@ -1098,14 +1491,376 @@
             const menuItems = document.querySelectorAll('.menu-item');
             const pageContents = document.querySelectorAll('.page-content');
             const sidebarToggle = document.getElementById('sidebarToggle');
-            const sidebar = document.querySelector('.sidebar');
-            const aiAssistant = document.getElementById('aiAssistant');
+            const sidebar = document.getElementById('sidebar');
+            const aiAssistantBtn = document.getElementById('aiAssistantBtn');
             const aiAssistantModal = document.getElementById('aiAssistantModal');
             const closeAIModal = document.getElementById('closeAIModal');
+            const askAIButton = document.getElementById('askAIButton');
+            const aiResponse = document.getElementById('aiResponse');
             const copySettingsBtn = document.getElementById('copySettingsBtn');
             const copySettingsBtn2 = document.getElementById('copySettingsBtn2');
+            const barcodeScannerBtn = document.getElementById('barcodeScannerBtn');
             const barcodeScanner = document.getElementById('barcodeScanner');
+            const startScannerBtn = document.getElementById('startScannerBtn');
+            const stopScannerBtn = document.getElementById('stopScannerBtn');
+            const closeScannerBtn = document.getElementById('closeScannerBtn');
+            const barcodeResult = document.getElementById('barcodeResult');
             const addProductBtn = document.getElementById('addProductBtn');
+            const addWarehouseBtn = document.getElementById('addWarehouseBtn');
+            const addCustomerBtn = document.getElementById('addCustomerBtn');
+            const createInvoiceBtn = document.getElementById('createInvoiceBtn');
+            const changePasswordBtn = document.getElementById('changePasswordBtn');
+            const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+            const addUserBtn = document.getElementById('addUserBtn');
+            const generateReportBtn = document.getElementById('generateReportBtn');
+            const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+            // بيانات النظام
+            let systemData = {
+                products: [],
+                warehouses: [],
+                customers: [],
+                invoices: [],
+                users: [],
+                alerts: [],
+                settings: {}
+            };
+
+            // تهيئة النظام
+            function initSystem() {
+                loadSampleData();
+                updateDashboardStats();
+                renderProductsTable();
+                renderWarehousesTable();
+                renderCustomersTable();
+                renderInvoicesTable();
+                renderUsersTable();
+                renderAlertsList();
+                initCharts();
+            }
+
+            // تحميل بيانات نموذجية
+            function loadSampleData() {
+                systemData.products = [
+                    { id: 1, code: 'P-1001', name: 'كابل كهرباء 2.5 مم', category: 'كابلات', price: 45.50, stock: 15, minStock: 50 },
+                    { id: 2, code: 'P-1002', name: 'مفتاح كهربائي 16A', category: 'مفاتيح', price: 12.75, stock: 8, minStock: 30 },
+                    { id: 3, code: 'P-1003', name: 'لمبة LED 20W', category: 'إضاءة', price: 25.00, stock: 22, minStock: 40 },
+                    { id: 4, code: 'P-1004', name: 'قاطع تيار 32A', category: 'قواطع', price: 38.90, stock: 35, minStock: 20 },
+                    { id: 5, code: 'P-1005', name: 'مأخذ كهربائي 3 فتحات', category: 'مآخذ', price: 18.50, stock: 60, minStock: 25 }
+                ];
+
+                systemData.warehouses = [
+                    { id: 1, name: 'المخزن الرئيسي', location: 'الرياض', manager: 'أحمد محمد', items: 1245, status: 'نشط' },
+                    { id: 2, name: 'مخزن الفرع 1', location: 'جدة', manager: 'محمد علي', items: 856, status: 'نشط' },
+                    { id: 3, name: 'مخزن الفرع 2', location: 'الدمام', manager: 'خالد أحمد', items: 632, status: 'نشط' }
+                ];
+
+                systemData.customers = [
+                    { id: 1, code: 'C-1001', name: 'شركة التقنية المتطورة', phone: '0551234567', email: 'info@tech.com', points: 1250, lastPurchase: '2023-10-15' },
+                    { id: 2, code: 'C-1002', name: 'مؤسسة البناء الحديث', phone: '0509876543', email: 'contact@modern.com', points: 850, lastPurchase: '2023-10-12' },
+                    { id: 3, code: 'C-1003', name: 'شركة الكهرباء المتحدة', phone: '0545554433', email: 'sales@united.com', points: 2100, lastPurchase: '2023-10-10' }
+                ];
+
+                systemData.invoices = [
+                    { id: 1, number: 'INV-2023-001', customer: 'شركة التقنية المتطورة', date: '2023-10-15', amount: 2450.75, status: 'مدفوعة' },
+                    { id: 2, number: 'INV-2023-002', customer: 'مؤسسة البناء الحديث', date: '2023-10-12', amount: 1850.50, status: 'مدفوعة' },
+                    { id: 3, number: 'INV-2023-003', customer: 'شركة الكهرباء المتحدة', date: '2023-10-10', amount: 3200.25, status: 'مدفوعة' }
+                ];
+
+                systemData.users = [
+                    { id: 1, username: 'admin', email: 'admin@shahrazad.com', branch: 'الفرع الرئيسي', role: 'مدير النظام', status: 'نشط' },
+                    { id: 2, username: 'manager1', email: 'manager1@shahrazad.com', branch: 'فرع الرياض', role: 'مدير فرع', status: 'نشط' },
+                    { id: 3, username: 'sales1', email: 'sales1@shahrazad.com', branch: 'الفرع الرئيسي', role: 'مندوب مبيعات', status: 'نشط' }
+                ];
+
+                systemData.alerts = [
+                    { id: 1, type: 'warning', message: 'المخزون منخفض للصنف P-1001', date: '2023-10-16', read: false },
+                    { id: 2, type: 'warning', message: 'المخزون منخفض للصنف P-1002', date: '2023-10-15', read: false },
+                    { id: 3, type: 'info', message: 'فاتورة جديدة تم إنشاؤها INV-2023-004', date: '2023-10-14', read: true }
+                ];
+
+                systemData.settings = {
+                    companyName: 'SHAHRAZAD ELECTRIC',
+                    defaultBranch: 'main',
+                    barcodeScanner: 'enabled',
+                    lowStockAlert: 'enabled'
+                };
+            }
+
+            // تحديث إحصائيات لوحة التحكم
+            function updateDashboardStats() {
+                document.getElementById('totalProducts').textContent = systemData.products.length.toLocaleString();
+                document.getElementById('totalWarehouses').textContent = systemData.warehouses.length;
+                document.getElementById('totalCustomers').textContent = systemData.customers.length;
+                document.getElementById('totalInvoices').textContent = systemData.invoices.length;
+
+                // تحديث جدول المخزون المنخفض
+                const lowStockProducts = systemData.products.filter(p => p.stock < p.minStock);
+                const lowStockTableBody = document.getElementById('lowStockTableBody');
+                lowStockTableBody.innerHTML = '';
+
+                if (lowStockProducts.length > 0) {
+                    document.getElementById('lowStockMessage').textContent = `هناك ${lowStockProducts.length} أصناف تحتاج إلى إعادة تخزين`;
+                    
+                    lowStockProducts.forEach(product => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${product.code}</td>
+                            <td>${product.name}</td>
+                            <td>المخزن الرئيسي</td>
+                            <td>${product.stock}</td>
+                            <td>${product.minStock}</td>
+                            <td><span style="color: var(--danger);">منخفض</span></td>
+                        `;
+                        lowStockTableBody.appendChild(row);
+                    });
+                } else {
+                    document.getElementById('lowStockAlert').className = 'alert alert-success';
+                    document.getElementById('lowStockAlert').innerHTML = '<i class="fas fa-check-circle"></i> <span>جميع الأصناف بمستويات مخزون جيدة</span>';
+                    document.getElementById('lowStockTableBody').innerHTML = '<tr><td colspan="6" class="text-center">لا توجد أصناف منخفضة المخزون</td></tr>';
+                }
+            }
+
+            // عرض جدول الأصناف
+            function renderProductsTable() {
+                const tableBody = document.getElementById('productsTableBody');
+                tableBody.innerHTML = '';
+
+                systemData.products.forEach(product => {
+                    const row = document.createElement('tr');
+                    const stockStatus = product.stock < product.minStock ? '<span style="color: var(--danger);">منخفض</span>' : '<span style="color: var(--success);">جيد</span>';
+                    
+                    row.innerHTML = `
+                        <td>${product.code}</td>
+                        <td>${product.name}</td>
+                        <td>${product.category}</td>
+                        <td>${product.price.toFixed(2)} ر.س</td>
+                        <td>${product.stock}</td>
+                        <td>${product.minStock}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" onclick="editProduct(${product.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            // عرض جدول المخازن
+            function renderWarehousesTable() {
+                const tableBody = document.getElementById('warehousesTableBody');
+                tableBody.innerHTML = '';
+
+                systemData.warehouses.forEach(warehouse => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${warehouse.name}</td>
+                        <td>${warehouse.location}</td>
+                        <td>${warehouse.manager}</td>
+                        <td>${warehouse.items.toLocaleString()}</td>
+                        <td><span style="color: var(--success);">${warehouse.status}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+                // تحديث الإحصائيات
+                document.getElementById('warehousesCount').textContent = systemData.warehouses.length;
+                document.getElementById('totalItemsCount').textContent = systemData.warehouses.reduce((sum, w) => sum + w.items, 0).toLocaleString();
+                document.getElementById('lowStockItemsCount').textContent = systemData.products.filter(p => p.stock < p.minStock).length;
+            }
+
+            // عرض جدول العملاء
+            function renderCustomersTable() {
+                const tableBody = document.getElementById('customersTableBody');
+                tableBody.innerHTML = '';
+
+                systemData.customers.forEach(customer => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${customer.code}</td>
+                        <td>${customer.name}</td>
+                        <td>${customer.phone}</td>
+                        <td>${customer.email}</td>
+                        <td>${customer.points.toLocaleString()}</td>
+                        <td>${customer.lastPurchase}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            // عرض جدول الفواتير
+            function renderInvoicesTable() {
+                const tableBody = document.getElementById('invoicesTableBody');
+                tableBody.innerHTML = '';
+
+                systemData.invoices.forEach(invoice => {
+                    const row = document.createElement('tr');
+                    const statusColor = invoice.status === 'مدفوعة' ? 'success' : 'warning';
+                    
+                    row.innerHTML = `
+                        <td>${invoice.number}</td>
+                        <td>${invoice.customer}</td>
+                        <td>${invoice.date}</td>
+                        <td>${invoice.amount.toFixed(2)} ر.س</td>
+                        <td><span style="color: var(--${statusColor});">${invoice.status}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-success">
+                                <i class="fas fa-print"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            // عرض جدول المستخدمين
+            function renderUsersTable() {
+                const tableBody = document.getElementById('usersTableBody');
+                tableBody.innerHTML = '';
+
+                systemData.users.forEach(user => {
+                    const row = document.createElement('tr');
+                    const statusColor = user.status === 'نشط' ? 'success' : 'danger';
+                    
+                    row.innerHTML = `
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td>${user.branch}</td>
+                        <td>${user.role}</td>
+                        <td><span style="color: var(--${statusColor});">${user.status}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            // عرض قائمة التنبيهات
+            function renderAlertsList() {
+                const alertsList = document.getElementById('alertsList');
+                alertsList.innerHTML = '';
+
+                const unreadAlerts = systemData.alerts.filter(alert => !alert.read);
+                document.getElementById('notificationCount').textContent = unreadAlerts.length;
+
+                systemData.alerts.forEach(alert => {
+                    const alertClass = alert.type === 'warning' ? 'alert-warning' : 'alert alert-secondary';
+                    const icon = alert.type === 'warning' ? 'exclamation-triangle' : 'info-circle';
+                    
+                    const alertElement = document.createElement('div');
+                    alertElement.className = `alert ${alertClass}`;
+                    alertElement.innerHTML = `
+                        <i class="fas fa-${icon}"></i>
+                        <span>${alert.message}</span>
+                        <small style="margin-right: auto; color: var(--gray);">${alert.date}</small>
+                        ${!alert.read ? '<button class="btn btn-sm btn-success" style="margin-right: 10px;">تعيين كمقروء</button>' : ''}
+                    `;
+                    alertsList.appendChild(alertElement);
+                });
+            }
+
+            // تهيئة الرسوم البيانية
+            function initCharts() {
+                // رسم بياني للمبيعات
+                const salesCtx = document.getElementById('salesChart').getContext('2d');
+                const salesChart = new Chart(salesCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['1 أكتوبر', '5 أكتوبر', '10 أكتوبر', '15 أكتوبر', '20 أكتوبر', '25 أكتوبر', '30 أكتوبر'],
+                        datasets: [{
+                            label: 'المبيعات اليومية (ر.س)',
+                            data: [4500, 5200, 4800, 6100, 5500, 6800, 7200],
+                            borderColor: '#1a56db',
+                            backgroundColor: 'rgba(26, 86, 219, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'مبيعات أكتوبر 2023'
+                            }
+                        }
+                    }
+                });
+
+                // رسم بياني للأصناف الأكثر مبيعاً
+                const productsCtx = document.getElementById('topProductsChart').getContext('2d');
+                const productsChart = new Chart(productsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['كابل كهرباء', 'مفتاح كهربائي', 'لمبة LED', 'قاطع تيار', 'مأخذ كهربائي'],
+                        datasets: [{
+                            label: 'الكمية المباعة',
+                            data: [120, 95, 80, 65, 50],
+                            backgroundColor: [
+                                'rgba(26, 86, 219, 0.7)',
+                                'rgba(126, 58, 242, 0.7)',
+                                'rgba(14, 159, 110, 0.7)',
+                                'rgba(245, 158, 11, 0.7)',
+                                'rgba(224, 36, 36, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgb(26, 86, 219)',
+                                'rgb(126, 58, 242)',
+                                'rgb(14, 159, 110)',
+                                'rgb(245, 158, 11)',
+                                'rgb(224, 36, 36)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'أكثر الأصناف مبيعاً'
+                            }
+                        }
+                    }
+                });
+            }
 
             // تسجيل الدخول
             loginForm.addEventListener('submit', function(e) {
@@ -1118,6 +1873,7 @@
                 if (username && password && branch) {
                     loginContainer.style.display = 'none';
                     dashboardContainer.style.display = 'flex';
+                    initSystem();
                 }
             });
 
@@ -1147,7 +1903,7 @@
             });
 
             // فتح المساعد الذكي
-            aiAssistant.addEventListener('click', function() {
+            aiAssistantBtn.addEventListener('click', function() {
                 aiAssistantModal.style.display = 'flex';
             });
 
@@ -1156,17 +1912,39 @@
                 aiAssistantModal.style.display = 'none';
             });
 
+            // استخدام المساعد الذكي
+            askAIButton.addEventListener('click', function() {
+                const question = document.getElementById('aiQuestion').value;
+                if (question.trim() === '') return;
+
+                // محاكاة استجابة المساعد الذكي
+                let response = '';
+                if (question.includes('مخزون') || question.includes('صنف')) {
+                    const lowStockCount = systemData.products.filter(p => p.stock < p.minStock).length;
+                    response = `حالياً هناك ${lowStockCount} أصناف بمستوى مخزون منخفض. يمكنك مراجعة صفحة "الأصناف" أو "التنبيهات" للاطلاع على التفاصيل.`;
+                } else if (question.includes('مبيعات') || question.includes('ربح')) {
+                    response = 'إجمالي المبيعات لهذا الشهر هو 45,200 ر.س. يمكنك الاطلاع على التقارير التفصيلية في صفحة "الإحصائيات".';
+                } else if (question.includes('عميل') || question.includes('عملاء')) {
+                    response = `يوجد ${systemData.customers.length} عميل مميز في النظام. العميل صاحب أعلى نقاط ولاء هو "${systemData.customers.reduce((prev, current) => (prev.points > current.points) ? prev : current).name}".`;
+                } else {
+                    response = 'أنا هنا لمساعدتك في أي استفسار حول نظام إدارة المبيعات والمخازن. يمكنني الإجابة على أسئلة حول الأصناف، المخازن، العملاء، الفواتير، والإحصائيات.';
+                }
+
+                aiResponse.innerHTML = `<strong>سؤالك:</strong> ${question}<br><br><strong>الإجابة:</strong> ${response}`;
+                aiResponse.style.display = 'block';
+            });
+
             // نسخ الإعدادات
             function copySettings() {
-                // محاكاة نسخ الإعدادات
-                alert('تم نسخ إعداداتك بنجاح! سيتم تنزيل ملف الإعدادات.');
-                
-                // محاكاة إنشاء ملف وتنزيله
                 const settings = {
                     companyName: document.getElementById('companyName').value,
                     defaultBranch: document.getElementById('defaultBranch').value,
                     barcodeScanner: document.getElementById('barcodeScannerSetting').value,
-                    lowStockAlert: document.getElementById('lowStockAlert').value
+                    lowStockAlert: document.getElementById('lowStockAlert').value,
+                    users: systemData.users,
+                    products: systemData.products,
+                    warehouses: systemData.warehouses,
+                    customers: systemData.customers
                 };
                 
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(settings, null, 2));
@@ -1176,27 +1954,346 @@
                 document.body.appendChild(downloadAnchorNode);
                 downloadAnchorNode.click();
                 downloadAnchorNode.remove();
+                
+                alert('تم نسخ إعداداتك بنجاح! سيتم تنزيل ملف الإعدادات.');
             }
 
             copySettingsBtn.addEventListener('click', copySettings);
             copySettingsBtn2.addEventListener('click', copySettings);
 
-            // محاكاة ماسح الباركود
-            barcodeScanner.addEventListener('click', function() {
-                alert('جارٍ تشغيل ماسح الباركود...');
+            // إدارة ماسح الباركود
+            barcodeScannerBtn.addEventListener('click', function() {
+                barcodeScanner.style.display = 'flex';
+            });
+
+            startScannerBtn.addEventListener('click', function() {
                 // في التطبيق الحقيقي، سيتم هنا تفعيل الكاميرا لقراءة الباركود
+                // هذه محاكاة لنتيجة الباركود
+                setTimeout(() => {
+                    const barcode = 'P-100' + (Math.floor(Math.random() * 5) + 1);
+                    const product = systemData.products.find(p => p.code === barcode);
+                    
+                    if (product) {
+                        barcodeResult.innerHTML = `
+                            <h4>تم مسح الباركود بنجاح!</h4>
+                            <p><strong>كود الصنف:</strong> ${product.code}</p>
+                            <p><strong>اسم الصنف:</strong> ${product.name}</p>
+                            <p><strong>السعر:</strong> ${product.price} ر.س</p>
+                            <p><strong>المخزون:</strong> ${product.stock}</p>
+                        `;
+                    } else {
+                        barcodeResult.innerHTML = `
+                            <h4>لم يتم العثور على الصنف</h4>
+                            <p>الباركود: ${barcode}</p>
+                            <p>هذا الصنف غير مسجل في النظام</p>
+                        `;
+                    }
+                    
+                    barcodeResult.style.display = 'block';
+                }, 2000);
+            });
+
+            stopScannerBtn.addEventListener('click', function() {
+                barcodeResult.style.display = 'none';
+            });
+
+            closeScannerBtn.addEventListener('click', function() {
+                barcodeScanner.style.display = 'none';
+                barcodeResult.style.display = 'none';
             });
 
             // إضافة صنف جديد
             addProductBtn.addEventListener('click', function() {
-                alert('فتح نموذج إضافة صنف جديد');
-                // في التطبيق الحقيقي، سيتم هنا فتح نموذج لإضافة صنف جديد
+                const newProduct = {
+                    id: systemData.products.length + 1,
+                    code: 'P-10' + (systemData.products.length + 1),
+                    name: 'صنف جديد ' + (systemData.products.length + 1),
+                    category: 'فئة جديدة',
+                    price: 0,
+                    stock: 0,
+                    minStock: 10
+                };
+                
+                systemData.products.push(newProduct);
+                renderProductsTable();
+                updateDashboardStats();
+                
+                alert('تم إضافة صنف جديد بنجاح!');
             });
+
+            // إضافة مخزن جديد
+            addWarehouseBtn.addEventListener('click', function() {
+                const newWarehouse = {
+                    id: systemData.warehouses.length + 1,
+                    name: 'مخزن جديد ' + (systemData.warehouses.length + 1),
+                    location: 'موقع جديد',
+                    manager: 'مسؤول جديد',
+                    items: 0,
+                    status: 'نشط'
+                };
+                
+                systemData.warehouses.push(newWarehouse);
+                renderWarehousesTable();
+                
+                alert('تم إضافة مخزن جديد بنجاح!');
+            });
+
+            // إضافة عميل جديد
+            addCustomerBtn.addEventListener('click', function() {
+                const newCustomer = {
+                    id: systemData.customers.length + 1,
+                    code: 'C-10' + (systemData.customers.length + 1),
+                    name: 'عميل جديد ' + (systemData.customers.length + 1),
+                    phone: '05' + Math.floor(Math.random() * 10000000).toString().padStart(8, '0'),
+                    email: 'newcustomer' + (systemData.customers.length + 1) + '@example.com',
+                    points: 0,
+                    lastPurchase: new Date().toISOString().split('T')[0]
+                };
+                
+                systemData.customers.push(newCustomer);
+                renderCustomersTable();
+                
+                alert('تم إضافة عميل جديد بنجاح!');
+            });
+
+            // إنشاء فاتورة جديدة
+            createInvoiceBtn.addEventListener('click', function() {
+                const newInvoice = {
+                    id: systemData.invoices.length + 1,
+                    number: 'INV-2023-' + (systemData.invoices.length + 1).toString().padStart(3, '0'),
+                    customer: systemData.customers[Math.floor(Math.random() * systemData.customers.length)].name,
+                    date: new Date().toISOString().split('T')[0],
+                    amount: Math.floor(Math.random() * 5000) + 1000,
+                    status: 'مدفوعة'
+                };
+                
+                systemData.invoices.push(newInvoice);
+                renderInvoicesTable();
+                
+                alert('تم إنشاء فاتورة جديدة بنجاح!');
+            });
+
+            // تغيير كلمة المرور
+            changePasswordBtn.addEventListener('click', function() {
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (!currentPassword || !newPassword || !confirmPassword) {
+                    alert('يرجى ملء جميع الحقول');
+                    return;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    alert('كلمة المرور الجديدة وتأكيدها غير متطابقتين');
+                    return;
+                }
+                
+                // محاكاة تغيير كلمة المرور
+                alert('تم تغيير كلمة المرور بنجاح!');
+                
+                // مسح الحقول
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+            });
+
+            // حفظ الإعدادات
+            saveSettingsBtn.addEventListener('click', function() {
+                systemData.settings.companyName = document.getElementById('companyName').value;
+                systemData.settings.defaultBranch = document.getElementById('defaultBranch').value;
+                systemData.settings.barcodeScanner = document.getElementById('barcodeScannerSetting').value;
+                systemData.settings.lowStockAlert = document.getElementById('lowStockAlert').value;
+                
+                alert('تم حفظ الإعدادات بنجاح!');
+            });
+
+            // إضافة مستخدم جديد
+            addUserBtn.addEventListener('click', function() {
+                const newUser = {
+                    id: systemData.users.length + 1,
+                    username: 'user' + (systemData.users.length + 1),
+                    email: 'user' + (systemData.users.length + 1) + '@shahrazad.com',
+                    branch: 'الفرع الرئيسي',
+                    role: 'مندوب مبيعات',
+                    status: 'نشط'
+                };
+                
+                systemData.users.push(newUser);
+                renderUsersTable();
+                
+                alert('تم إضافة مستخدم جديد بنجاح!');
+            });
+
+            // إنشاء تقرير
+            generateReportBtn.addEventListener('click', function() {
+                const reportData = {
+                    date: new Date().toISOString(),
+                    products: systemData.products,
+                    sales: systemData.invoices,
+                    customers: systemData.customers,
+                    warehouses: systemData.warehouses
+                };
+                
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reportData, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "shahrazad_report.json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                
+                alert('تم إنشاء التقرير بنجاح! سيتم تنزيله الآن.');
+            });
+
+            // تعيين جميع التنبيهات كمقروءة
+            markAllReadBtn.addEventListener('click', function() {
+                systemData.alerts.forEach(alert => {
+                    alert.read = true;
+                });
+                
+                renderAlertsList();
+                alert('تم تعيين جميع التنبيهات كمقروءة');
+            });
+
+            // البحث في الأصناف
+            document.getElementById('productSearch').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredProducts = systemData.products.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm) || 
+                    product.code.toLowerCase().includes(searchTerm) ||
+                    product.category.toLowerCase().includes(searchTerm)
+                );
+                
+                const tableBody = document.getElementById('productsTableBody');
+                tableBody.innerHTML = '';
+
+                filteredProducts.forEach(product => {
+                    const row = document.createElement('tr');
+                    const stockStatus = product.stock < product.minStock ? '<span style="color: var(--danger);">منخفض</span>' : '<span style="color: var(--success);">جيد</span>';
+                    
+                    row.innerHTML = `
+                        <td>${product.code}</td>
+                        <td>${product.name}</td>
+                        <td>${product.category}</td>
+                        <td>${product.price.toFixed(2)} ر.س</td>
+                        <td>${product.stock}</td>
+                        <td>${product.minStock}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            });
+
+            // البحث في العملاء
+            document.getElementById('customerSearch').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredCustomers = systemData.customers.filter(customer => 
+                    customer.name.toLowerCase().includes(searchTerm) || 
+                    customer.code.toLowerCase().includes(searchTerm) ||
+                    customer.phone.includes(searchTerm) ||
+                    customer.email.toLowerCase().includes(searchTerm)
+                );
+                
+                const tableBody = document.getElementById('customersTableBody');
+                tableBody.innerHTML = '';
+
+                filteredCustomers.forEach(customer => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${customer.code}</td>
+                        <td>${customer.name}</td>
+                        <td>${customer.phone}</td>
+                        <td>${customer.email}</td>
+                        <td>${customer.points.toLocaleString()}</td>
+                        <td>${customer.lastPurchase}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            });
+
+            // تصفية الفواتير
+            document.getElementById('invoiceFilter').addEventListener('change', function(e) {
+                const filter = e.target.value;
+                let filteredInvoices = [...systemData.invoices];
+                
+                if (filter === 'today') {
+                    const today = new Date().toISOString().split('T')[0];
+                    filteredInvoices = systemData.invoices.filter(invoice => invoice.date === today);
+                } else if (filter === 'week') {
+                    // محاكاة الفواتير لهذا الأسبوع
+                    filteredInvoices = systemData.invoices.slice(0, 2);
+                } else if (filter === 'month') {
+                    // محاكاة الفواتير لهذا الشهر
+                    filteredInvoices = systemData.invoices;
+                }
+                
+                const tableBody = document.getElementById('invoicesTableBody');
+                tableBody.innerHTML = '';
+
+                filteredInvoices.forEach(invoice => {
+                    const row = document.createElement('tr');
+                    const statusColor = invoice.status === 'مدفوعة' ? 'success' : 'warning';
+                    
+                    row.innerHTML = `
+                        <td>${invoice.number}</td>
+                        <td>${invoice.customer}</td>
+                        <td>${invoice.date}</td>
+                        <td>${invoice.amount.toFixed(2)} ر.س</td>
+                        <td><span style="color: var(--${statusColor});">${invoice.status}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-success">
+                                <i class="fas fa-print"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            });
+
+            // جعل الدوال متاحة عالمياً
+            window.editProduct = function(id) {
+                const product = systemData.products.find(p => p.id === id);
+                if (product) {
+                    alert(`تعديل الصنف: ${product.name}`);
+                    // في التطبيق الحقيقي، سيتم فتح نموذج التعديل
+                }
+            };
+
+            window.deleteProduct = function(id) {
+                if (confirm('هل أنت متأكد من حذف هذا الصنف؟')) {
+                    systemData.products = systemData.products.filter(p => p.id !== id);
+                    renderProductsTable();
+                    updateDashboardStats();
+                    alert('تم حذف الصنف بنجاح!');
+                }
+            };
 
             // إغلاق المودال عند النقر خارج المحتوى
             window.addEventListener('click', function(e) {
                 if (e.target === aiAssistantModal) {
                     aiAssistantModal.style.display = 'none';
+                }
+                if (e.target === barcodeScanner) {
+                    barcodeScanner.style.display = 'none';
                 }
             });
         });
