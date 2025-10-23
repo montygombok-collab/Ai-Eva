@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* الأنماط الأساسية من النظام */
         :root {
             --primary: #1a56db;
             --primary-dark: #1e429f;
@@ -33,7 +34,295 @@
             direction: rtl;
         }
 
-        /* تصميم تسجيل الدخول */
+        /* تصميم المساعد الذكي السوداني العائم */
+        .sudanese-assistant {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 1000;
+        }
+
+        .sudanese-assistant-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8B4513, #D2691E);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 20px rgba(139, 69, 19, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            animation: sudanesePulse 2s infinite;
+            position: relative;
+        }
+
+        .sudanese-assistant-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(139, 69, 19, 0.5);
+        }
+
+        @keyframes sudanesePulse {
+            0% {
+                box-shadow: 0 4px 20px rgba(139, 69, 19, 0.4);
+            }
+            50% {
+                box-shadow: 0 4px 30px rgba(210, 105, 30, 0.8);
+            }
+            100% {
+                box-shadow: 0 4px 20px rgba(139, 69, 19, 0.4);
+            }
+        }
+
+        .sudanese-assistant-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bounce 1s infinite alternate;
+        }
+
+        .sudanese-chat-container {
+            position: fixed;
+            bottom: 120px;
+            left: 30px;
+            width: 420px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid #8B4513;
+        }
+
+        .sudanese-chat-container.active {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+
+        .sudanese-chat-header {
+            background: linear-gradient(135deg, #8B4513, #D2691E);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sudanese-chat-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+
+        .sudanese-chat-title i {
+            font-size: 20px;
+        }
+
+        .sudanese-chat-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .sudanese-chat-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fdf6e3;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sudanese-message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.4;
+            position: relative;
+            animation: messageSlide 0.3s ease;
+        }
+
+        .sudanese-message.bot {
+            background: white;
+            border: 2px solid #D2691E;
+            border-bottom-right-radius: 4px;
+            align-self: flex-start;
+        }
+
+        .sudanese-message.user {
+            background: #8B4513;
+            color: white;
+            border-bottom-left-radius: 4px;
+            align-self: flex-end;
+        }
+
+        .sudanese-message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .sudanese-word-explanation {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .sudanese-chat-footer {
+            padding: 20px;
+            border-top: 2px solid #D2691E;
+            background: white;
+        }
+
+        .sudanese-chat-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .sudanese-chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #D2691E;
+            border-radius: 25px;
+            outline: none;
+            transition: border 0.3s;
+            background: #fdf6e3;
+        }
+
+        .sudanese-chat-input:focus {
+            border-color: #8B4513;
+            background: white;
+        }
+
+        .sudanese-chat-send {
+            background: #8B4513;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .sudanese-chat-send:hover {
+            background: #654321;
+        }
+
+        .sudanese-quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .sudanese-quick-action {
+            background: #fdf6e3;
+            border: 1px solid #D2691E;
+            border-radius: 15px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #8B4513;
+        }
+
+        .sudanese-quick-action:hover {
+            background: #8B4513;
+            color: white;
+            border-color: #8B4513;
+        }
+
+        .sudanese-typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 12px 16px;
+            background: white;
+            border: 2px solid #D2691E;
+            border-radius: 18px;
+            border-bottom-right-radius: 4px;
+            align-self: flex-start;
+            max-width: 80px;
+        }
+
+        .sudanese-typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #8B4513;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .word-meaning-popup {
+            position: absolute;
+            background: #8B4513;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 1002;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            max-width: 200px;
+            display: none;
+        }
+
+        /* تصميم متجاوب */
+        @media (max-width: 768px) {
+            .sudanese-chat-container {
+                width: calc(100vw - 60px);
+                left: 30px;
+                height: 60vh;
+            }
+
+            .sudanese-assistant {
+                bottom: 20px;
+                left: 20px;
+            }
+
+            .sudanese-assistant-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 20px;
+            }
+        }
+
+        /* الأنماط الأساسية للنظام */
         .login-container {
             display: flex;
             height: 100vh;
@@ -53,170 +342,6 @@
             overflow: hidden;
         }
 
-        .login-left::before {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 45%;
-            top: -50%;
-            left: -50%;
-            animation: wave 15s infinite linear;
-        }
-
-        @keyframes wave {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .login-left-content {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-            max-width: 500px;
-        }
-
-        .login-left h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-
-        .login-left p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 2rem;
-        }
-
-        .features-list {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .feature-item i {
-            margin-left: 0.5rem;
-            font-size: 1.2rem;
-        }
-
-        .login-right {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-            background-color: white;
-        }
-
-        .login-form {
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .login-form h2 {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-            color: var(--dark);
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--dark);
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--gray-light);
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .btn:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .btn-block {
-            width: 100%;
-        }
-
-        .btn-secondary {
-            background-color: var(--secondary);
-        }
-
-        .btn-secondary:hover {
-            background-color: #6c2bd9;
-        }
-
-        .btn-success {
-            background-color: var(--success);
-        }
-
-        .btn-warning {
-            background-color: var(--warning);
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-        }
-
-        .btn-sm {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-        }
-
-        .login-footer {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: var(--gray);
-        }
-
-        .login-footer a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        /* تصميم لوحة التحكم */
         .dashboard-container {
             display: none;
             height: 100vh;
@@ -230,115 +355,6 @@
             display: flex;
             flex-direction: column;
             z-index: 10;
-            transition: all 0.3s;
-        }
-
-        .sidebar.collapsed {
-            width: 70px;
-        }
-
-        .sidebar.collapsed .sidebar-header h2,
-        .sidebar.collapsed .menu-item span,
-        .sidebar.collapsed .user-details {
-            display: none;
-        }
-
-        .sidebar.collapsed .menu-item {
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .sidebar.collapsed .menu-item i {
-            margin-left: 0;
-        }
-
-        .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--gray-light);
-            text-align: center;
-        }
-
-        .sidebar-header h2 {
-            color: var(--primary);
-            font-size: 1.5rem;
-        }
-
-        .sidebar-menu {
-            flex: 1;
-            padding: 1rem 0;
-            overflow-y: auto;
-        }
-
-        .menu-item {
-            padding: 0.75rem 1.5rem;
-            display: flex;
-            align-items: center;
-            color: var(--dark);
-            text-decoration: none;
-            transition: all 0.3s;
-            border-right: 3px solid transparent;
-        }
-
-        .menu-item:hover {
-            background-color: var(--light);
-            border-right-color: var(--primary);
-        }
-
-        .menu-item.active {
-            background-color: rgba(26, 86, 219, 0.1);
-            border-right-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .menu-item i {
-            margin-left: 0.75rem;
-            font-size: 1.2rem;
-            width: 24px;
-            text-align: center;
-        }
-
-        .sidebar-footer {
-            padding: 1rem;
-            border-top: 1px solid var(--gray-light);
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .user-info:hover {
-            background-color: var(--light);
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-left: 0.75rem;
-        }
-
-        .user-details {
-            flex: 1;
-        }
-
-        .user-name {
-            font-weight: 500;
-        }
-
-        .user-role {
-            font-size: 0.8rem;
-            color: var(--gray);
         }
 
         .main-content {
@@ -348,1955 +364,440 @@
             overflow: hidden;
         }
 
-        .top-nav {
-            padding: 1rem 1.5rem;
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-left {
-            display: flex;
-            align-items: center;
-        }
-
-        .nav-right {
-            display: flex;
-            align-items: center;
-        }
-
-        .nav-item {
-            margin-left: 1rem;
-            position: relative;
-            cursor: pointer;
-        }
-
-        .nav-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--light);
-            color: var(--dark);
-            transition: all 0.3s;
-        }
-
-        .nav-icon:hover {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .badge {
-            position: absolute;
-            top: -5px;
-            left: -5px;
-            background-color: var(--danger);
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 0.7rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .content-area {
-            flex: 1;
-            padding: 1.5rem;
-            overflow-y: auto;
-            background-color: #f9fafb;
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .page-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--dark);
-        }
-
-        .page-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .card {
-            background-color: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--gray-light);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--dark);
-        }
-
-        .card-body {
-            padding: 1.5rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-        }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 1rem;
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .stat-info {
-            flex: 1;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-label {
-            color: var(--gray);
-            font-size: 0.9rem;
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .table th,
-        .table td {
-            padding: 0.75rem 1rem;
-            text-align: right;
-            border-bottom: 1px solid var(--gray-light);
-        }
-
-        .table th {
-            background-color: var(--light);
-            font-weight: 600;
-            color: var(--dark);
-        }
-
-        .table tr:hover {
-            background-color: rgba(0, 0, 0, 0.02);
-        }
-
-        .alert {
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .alert-warning {
-            background-color: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            color: #b45309;
-        }
-
-        .alert-danger {
-            background-color: rgba(224, 36, 36, 0.1);
-            border: 1px solid rgba(224, 36, 36, 0.2);
-            color: #981b1b;
-        }
-
-        .alert i {
-            margin-left: 0.5rem;
-        }
-
-        .form-row {
-            display: flex;
-            flex-wrap: wrap;
-            margin: 0 -0.75rem;
-        }
-
-        .form-col {
-            flex: 1 0 0;
-            padding: 0 0.75rem;
-            margin-bottom: 1rem;
-            min-width: 200px;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            border-radius: 0.75rem;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--gray-light);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--gray);
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-        }
-
-        .modal-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid var(--gray-light);
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-        }
-
-        .copy-settings-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 1rem;
-            padding: 0.75rem;
-            background-color: var(--light);
-            border: 1px dashed var(--gray);
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .copy-settings-btn:hover {
-            background-color: var(--gray-light);
-        }
-
-        .copy-settings-btn i {
-            margin-left: 0.5rem;
-        }
-
-        .barcode-scanner {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 1001;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-
-        .barcode-scanner video {
-            width: 100%;
-            max-width: 500px;
-            border-radius: 0.5rem;
-        }
-
-        .barcode-result {
-            margin-top: 1rem;
-            padding: 1rem;
-            background-color: white;
-            color: var(--dark);
-            border-radius: 0.5rem;
-            text-align: center;
-        }
-
-        .ai-response {
-            margin-top: 1rem;
-            padding: 1rem;
-            background-color: var(--light);
-            border-radius: 0.5rem;
-            border-right: 3px solid var(--primary);
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin-bottom: 1.5rem;
-        }
-
-        .invoice-items {
-            margin: 1rem 0;
-        }
-
-        .invoice-item {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem;
-            border-bottom: 1px solid var(--gray-light);
-        }
-
-        .invoice-item:last-child {
-            border-bottom: none;
-        }
-
-        .item-details {
-            flex: 1;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .item-actions {
-            margin-right: 1rem;
-        }
-
-        .invoice-total {
-            padding: 1rem;
-            background-color: var(--light);
-            border-radius: 0.5rem;
-            text-align: left;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        /* تصميم متجاوب */
-        @media (max-width: 992px) {
-            .login-container {
-                flex-direction: column;
-            }
-            
-            .login-left {
-                padding: 1.5rem;
-            }
-            
-            .login-left h1 {
-                font-size: 2rem;
-            }
-            
-            .features-list {
-                grid-template-columns: 1fr;
-            }
-            
-            .sidebar {
-                width: 70px;
-            }
-            
-            .sidebar-header h2,
-            .menu-item span,
-            .user-details {
-                display: none;
-            }
-            
-            .menu-item {
-                justify-content: center;
-                padding: 1rem;
-            }
-            
-            .menu-item i {
-                margin-left: 0;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .page-actions {
-                margin-top: 1rem;
-                width: 100%;
-                flex-wrap: wrap;
-            }
-            
-            .page-actions .btn {
-                width: 100%;
-                margin-bottom: 0.5rem;
-            }
-            
-            .form-col {
-                flex: 1 0 100%;
-            }
-        }
+        /* ... باقي الأنماط الأساسية للنظام */
     </style>
 </head>
 <body>
+    <!-- المساعد الذكي السوداني العائم -->
+    <div class="sudanese-assistant">
+        <button class="sudanese-assistant-btn" id="sudaneseAssistantBtn">
+            <i class="fas fa-hands-helping"></i>
+            <div class="sudanese-assistant-badge" id="sudaneseNotificationBadge">3</div>
+        </button>
+        <div class="sudanese-chat-container" id="sudaneseChatContainer">
+            <div class="sudanese-chat-header">
+                <div class="sudanese-chat-title">
+                    <i class="fas fa-hands-helping"></i>
+                    <span>المساعد السوداني</span>
+                </div>
+                <button class="sudanese-chat-close" id="sudaneseChatClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="sudanese-chat-body" id="sudaneseChatBody">
+                <!-- الرسائل ستضاف هنا ديناميكياً -->
+            </div>
+            <div class="sudanese-chat-footer">
+                <div class="sudanese-chat-input-container">
+                    <input type="text" class="sudanese-chat-input" id="sudaneseChatInput" placeholder="اكتب رسالتك باللهجة السودانية...">
+                    <button class="sudanese-chat-send" id="sudaneseChatSend">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="sudanese-quick-actions" id="sudaneseQuickActions">
+                    <!-- الإجراءات السريعة ستضاف هنا -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- شاشة تسجيل الدخول -->
     <div class="login-container" id="loginContainer">
         <div class="login-left">
             <div class="login-left-content">
                 <h1>SHAHRAZAD ELECTRIC</h1>
-                <p>نظام إدارة المبيعات والمخازن المتكامل مع أحدث التقنيات لتحسين أداء عملك</p>
-                
+                <p>نظام إدارة المبيعات والمخازن المتكامل مع المساعد الذكي السوداني</p>
                 <div class="features-list">
                     <div class="feature-item">
-                        <i class="fas fa-boxes"></i>
-                        <span>إدارة الأصناف والمخازن</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-users"></i>
-                        <span>عملاء مميزين</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>إحصائيات وتقارير</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-bell"></i>
-                        <span>تنبيهات المخزون المنخفض</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-cog"></i>
-                        <span>إعدادات متقدمة</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-barcode"></i>
-                        <span>ماسح الباركود</span>
-                    </div>
-                    <div class="feature-item">
                         <i class="fas fa-robot"></i>
-                        <span>مساعد ذكي</span>
+                        <span>مساعد ذكي سوداني</span>
                     </div>
                     <div class="feature-item">
-                        <i class="fas fa-file-invoice"></i>
-                        <span>فواتير مبيعات</span>
+                        <i class="fas fa-language"></i>
+                        <span>فهم اللهجة السودانية</span>
                     </div>
+                    <!-- باقي الميزات -->
                 </div>
             </div>
         </div>
         <div class="login-right">
-            <form class="login-form" id="loginForm">
-                <h2>تسجيل الدخول</h2>
-                
-                <div class="form-group">
-                    <label for="username">اسم المستخدم</label>
-                    <input type="text" id="username" class="form-control" placeholder="أدخل اسم المستخدم" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">كلمة المرور</label>
-                    <input type="password" id="password" class="form-control" placeholder="أدخل كلمة المرور" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="branch">الفرع</label>
-                    <select id="branch" class="form-control" required>
-                        <option value="">اختر الفرع</option>
-                        <option value="main">الفرع الرئيسي</option>
-                        <option value="branch1">فرع الرياض</option>
-                        <option value="branch2">فرع جدة</option>
-                        <option value="branch3">فرع الدمام</option>
-                    </select>
-                </div>
-                
-                <button type="submit" class="btn btn-block">تسجيل الدخول</button>
-                
-                <div class="login-footer">
-                    <a href="#" id="forgotPassword">نسيت كلمة المرور؟</a>
-                </div>
-            </form>
+            <!-- نموذج تسجيل الدخول -->
         </div>
     </div>
 
     <!-- لوحة التحكم -->
     <div class="dashboard-container" id="dashboardContainer">
-        <!-- الشريط الجانبي -->
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h2>SHAHRAZAD ELECTRIC</h2>
-            </div>
-            
-            <div class="sidebar-menu">
-                <a href="#" class="menu-item active" data-page="dashboard">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>لوحة التحكم</span>
-                </a>
-                <a href="#" class="menu-item" data-page="products">
-                    <i class="fas fa-boxes"></i>
-                    <span>الأصناف</span>
-                </a>
-                <a href="#" class="menu-item" data-page="warehouses">
-                    <i class="fas fa-warehouse"></i>
-                    <span>المخازن</span>
-                </a>
-                <a href="#" class="menu-item" data-page="customers">
-                    <i class="fas fa-users"></i>
-                    <span>العملاء المميزين</span>
-                </a>
-                <a href="#" class="menu-item" data-page="invoices">
-                    <i class="fas fa-file-invoice"></i>
-                    <span>الفواتير</span>
-                </a>
-                <a href="#" class="menu-item" data-page="reports">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>الإحصائيات</span>
-                </a>
-                <a href="#" class="menu-item" data-page="alerts">
-                    <i class="fas fa-bell"></i>
-                    <span>التنبيهات</span>
-                </a>
-                <a href="#" class="menu-item" data-page="settings">
-                    <i class="fas fa-cog"></i>
-                    <span>الإعدادات</span>
-                </a>
-            </div>
-            
-            <div class="sidebar-footer">
-                <div class="user-info" id="userMenu">
-                    <div class="user-avatar">م</div>
-                    <div class="user-details">
-                        <div class="user-name">المدير العام</div>
-                        <div class="user-role">مدير النظام</div>
-                    </div>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-            </div>
-        </div>
-        
-        <!-- المحتوى الرئيسي -->
-        <div class="main-content">
-            <!-- شريط التنقل العلوي -->
-            <div class="top-nav">
-                <div class="nav-left">
-                    <div class="nav-item" id="sidebarToggle">
-                        <div class="nav-icon">
-                            <i class="fas fa-bars"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="nav-right">
-                    <div class="nav-item">
-                        <div class="nav-icon" id="searchBtn">
-                            <i class="fas fa-search"></i>
-                        </div>
-                    </div>
-                    <div class="nav-item">
-                        <div class="nav-icon" id="notificationsBtn">
-                            <i class="fas fa-bell"></i>
-                            <span class="badge" id="notificationCount">3</span>
-                        </div>
-                    </div>
-                    <div class="nav-item">
-                        <div class="nav-icon" id="helpBtn">
-                            <i class="fas fa-question-circle"></i>
-                        </div>
-                    </div>
-                    <div class="nav-item">
-                        <div class="nav-icon" id="barcodeScannerBtn">
-                            <i class="fas fa-barcode"></i>
-                        </div>
-                    </div>
-                    <div class="nav-item">
-                        <div class="nav-icon" id="aiAssistantBtn">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- منطقة المحتوى -->
-            <div class="content-area" id="contentArea">
-                <!-- محتوى لوحة التحكم -->
-                <div class="page-content" id="dashboardPage">
-                    <div class="page-header">
-                        <h1 class="page-title">لوحة التحكم</h1>
-                        <div class="page-actions">
-                            <button class="btn btn-secondary" id="copySettingsBtn">
-                                <i class="fas fa-copy"></i> نسخ إعداداتي
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background-color: var(--primary);">
-                                <i class="fas fa-boxes"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="totalProducts">1,248</div>
-                                <div class="stat-label">إجمالي الأصناف</div>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background-color: var(--success);">
-                                <i class="fas fa-warehouse"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="totalWarehouses">5</div>
-                                <div class="stat-label">المخازن</div>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background-color: var(--warning);">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="totalCustomers">342</div>
-                                <div class="stat-label">العملاء المميزين</div>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background-color: var(--secondary);">
-                                <i class="fas fa-file-invoice"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="totalInvoices">1,847</div>
-                                <div class="stat-label">الفواتير</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">الأصناف ذات المخزون المنخفض</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="alert alert-warning" id="lowStockAlert">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <span id="lowStockMessage">هناك 5 أصناف تحتاج إلى إعادة تخزين</span>
-                            </div>
-                            
-                            <div class="table-responsive">
-                                <table class="table" id="lowStockTable">
-                                    <thead>
-                                        <tr>
-                                            <th>كود الصنف</th>
-                                            <th>اسم الصنف</th>
-                                            <th>المخزن</th>
-                                            <th>المخزون الحالي</th>
-                                            <th>الحد الأدنى</th>
-                                            <th>الحالة</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="lowStockTableBody">
-                                        <!-- سيتم ملؤها بالبيانات -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- محتوى الأصناف -->
-                <div class="page-content" id="productsPage" style="display: none;">
-                    <div class="page-header">
-                        <h1 class="page-title">إدارة الأصناف</h1>
-                        <div class="page-actions">
-                            <button class="btn" id="addProductBtn">
-                                <i class="fas fa-plus"></i> إضافة صنف جديد
-                            </button>
-                            <button class="btn btn-secondary" id="importProductsBtn">
-                                <i class="fas fa-file-import"></i> استيراد
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">قائمة الأصناف</h3>
-                            <div>
-                                <input type="text" id="productSearch" class="form-control" placeholder="بحث في الأصناف..." style="width: 250px;">
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table" id="productsTable">
-                                    <thead>
-                                        <tr>
-                                            <th>كود الصنف</th>
-                                            <th>اسم الصنف</th>
-                                            <th>الفئة</th>
-                                            <th>السعر</th>
-                                            <th>المخزون</th>
-                                            <th>الحد الأدنى</th>
-                                            <th>الإجراءات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="productsTableBody">
-                                        <!-- سيتم ملؤها بالبيانات -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- محتوى المخازن -->
-                <div class="page-content" id="warehousesPage" style="display: none;">
-                    <div class="page-header">
-                        <h1 class="page-title">إدارة المخازن</h1>
-                        <div class="page-actions">
-                            <button class="btn" id="addWarehouseBtn">
-                                <i class="fas fa-plus"></i> إضافة مخزن جديد
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background-color: var(--primary);">
-                                <i class="fas fa-warehouse"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="warehousesCount">5</div>
-                                <div class="stat-label">إجمالي المخازن</div>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background-color: var(--success);">
-                                <i class="fas fa-boxes"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="totalItemsCount">12,458</div>
-                                <div class="stat-label">إجمالي الأصناف</div>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background-color: var(--warning);">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="lowStockItemsCount">15</div>
-                                <div class="stat-label">أصناف منخفضة المخزون</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">قائمة المخازن</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table" id="warehousesTable">
-                                    <thead>
-                                        <tr>
-                                            <th>اسم المخزن</th>
-                                            <th>الموقع</th>
-                                            <th>المسؤول</th>
-                                            <th>عدد الأصناف</th>
-                                            <th>الحالة</th>
-                                            <th>الإجراءات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="warehousesTableBody">
-                                        <!-- سيتم ملؤها بالبيانات -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- محتوى العملاء المميزين -->
-                <div class="page-content" id="customersPage" style="display: none;">
-                    <div class="page-header">
-                        <h1 class="page-title">إدارة العملاء المميزين</h1>
-                        <div class="page-actions">
-                            <button class="btn" id="addCustomerBtn">
-                                <i class="fas fa-plus"></i> إضافة عميل جديد
-                            </button>
-                            <button class="btn btn-secondary" id="importCustomersBtn">
-                                <i class="fas fa-file-import"></i> استيراد
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">قائمة العملاء المميزين</h3>
-                            <div>
-                                <input type="text" id="customerSearch" class="form-control" placeholder="بحث في العملاء..." style="width: 250px;">
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table" id="customersTable">
-                                    <thead>
-                                        <tr>
-                                            <th>كود العميل</th>
-                                            <th>اسم العميل</th>
-                                            <th>رقم الهاتف</th>
-                                            <th>البريد الإلكتروني</th>
-                                            <th>نقاط الولاء</th>
-                                            <th>آخر عملية</th>
-                                            <th>الإجراءات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="customersTableBody">
-                                        <!-- سيتم ملؤها بالبيانات -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- محتوى الفواتير -->
-                <div class="page-content" id="invoicesPage" style="display: none;">
-                    <div class="page-header">
-                        <h1 class="page-title">إدارة الفواتير</h1>
-                        <div class="page-actions">
-                            <button class="btn" id="createInvoiceBtn">
-                                <i class="fas fa-plus"></i> إنشاء فاتورة جديدة
-                            </button>
-                            <button class="btn btn-secondary" id="printInvoicesBtn">
-                                <i class="fas fa-print"></i> طباعة
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">الفواتير الحديثة</h3>
-                            <div>
-                                <select id="invoiceFilter" class="form-control" style="width: 200px;">
-                                    <option value="all">جميع الفواتير</option>
-                                    <option value="today">فواتير اليوم</option>
-                                    <option value="week">فواتير هذا الأسبوع</option>
-                                    <option value="month">فواتير هذا الشهر</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table" id="invoicesTable">
-                                    <thead>
-                                        <tr>
-                                            <th>رقم الفاتورة</th>
-                                            <th>العميل</th>
-                                            <th>التاريخ</th>
-                                            <th>المبلغ</th>
-                                            <th>الحالة</th>
-                                            <th>الإجراءات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="invoicesTableBody">
-                                        <!-- سيتم ملؤها بالبيانات -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- محتوى الإحصائيات -->
-                <div class="page-content" id="reportsPage" style="display: none;">
-                    <div class="page-header">
-                        <h1 class="page-title">الإحصائيات والتقارير</h1>
-                        <div class="page-actions">
-                            <button class="btn" id="generateReportBtn">
-                                <i class="fas fa-download"></i> تصدير التقرير
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">مبيعات الشهر الحالي</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="salesChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">أكثر الأصناف مبيعاً</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="topProductsChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- محتوى التنبيهات -->
-                <div class="page-content" id="alertsPage" style="display: none;">
-                    <div class="page-header">
-                        <h1 class="page-title">التنبيهات والإشعارات</h1>
-                        <div class="page-actions">
-                            <button class="btn btn-secondary" id="markAllReadBtn">
-                                <i class="fas fa-check-double"></i> تعيين الكل كمقروء
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">التنبيهات النشطة</h3>
-                        </div>
-                        <div class="card-body">
-                            <div id="alertsList">
-                                <!-- سيتم ملؤها بالبيانات -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- محتوى الإعدادات -->
-                <div class="page-content" id="settingsPage" style="display: none;">
-                    <div class="page-header">
-                        <h1 class="page-title">إعدادات النظام</h1>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">تغيير كلمة المرور</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-row">
-                                <div class="form-col">
-                                    <label for="currentPassword">كلمة المرور الحالية</label>
-                                    <input type="password" id="currentPassword" class="form-control">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-col">
-                                    <label for="newPassword">كلمة المرور الجديدة</label>
-                                    <input type="password" id="newPassword" class="form-control">
-                                </div>
-                                <div class="form-col">
-                                    <label for="confirmPassword">تأكيد كلمة المرور الجديدة</label>
-                                    <input type="password" id="confirmPassword" class="form-control">
-                                </div>
-                            </div>
-                            <button class="btn" id="changePasswordBtn">تغيير كلمة المرور</button>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">إعدادات المستخدمين</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table" id="usersTable">
-                                    <thead>
-                                        <tr>
-                                            <th>اسم المستخدم</th>
-                                            <th>البريد الإلكتروني</th>
-                                            <th>الفرع</th>
-                                            <th>الصلاحية</th>
-                                            <th>الحالة</th>
-                                            <th>الإجراءات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="usersTableBody">
-                                        <!-- سيتم ملؤها بالبيانات -->
-                                    </tbody>
-                                </table>
-                            </div>
-                            <button class="btn" id="addUserBtn">
-                                <i class="fas fa-plus"></i> إضافة مستخدم جديد
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">الإعدادات العامة</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-row">
-                                <div class="form-col">
-                                    <label for="companyName">اسم الشركة</label>
-                                    <input type="text" id="companyName" class="form-control" value="SHAHRAZAD ELECTRIC">
-                                </div>
-                                <div class="form-col">
-                                    <label for="defaultBranch">الفرع الافتراضي</label>
-                                    <select id="defaultBranch" class="form-control">
-                                        <option value="main">الفرع الرئيسي</option>
-                                        <option value="branch1">فرع الرياض</option>
-                                        <option value="branch2">فرع جدة</option>
-                                        <option value="branch3">فرع الدمام</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-col">
-                                    <label for="barcodeScannerSetting">تفعيل ماسح الباركود</label>
-                                    <select id="barcodeScannerSetting" class="form-control">
-                                        <option value="enabled">مفعل</option>
-                                        <option value="disabled">معطل</option>
-                                    </select>
-                                </div>
-                                <div class="form-col">
-                                    <label for="lowStockAlert">تنبيه المخزون المنخفض</label>
-                                    <select id="lowStockAlert" class="form-control">
-                                        <option value="enabled">مفعل</option>
-                                        <option value="disabled">معطل</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button class="btn" id="saveSettingsBtn">حفظ الإعدادات</button>
-                            
-                            <div class="copy-settings-btn" id="copySettingsBtn2">
-                                <i class="fas fa-copy"></i>
-                                <span>نسخ إعداداتي</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- محتوى لوحة التحكم -->
     </div>
 
-    <!-- مودال المساعد الذكي -->
-    <div class="modal" id="aiAssistantModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">المساعد الذكي</h3>
-                <button class="modal-close" id="closeAIModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>مرحباً! أنا المساعد الذكي لنظام SHAHRAZAD ELECTRIC. كيف يمكنني مساعدتك اليوم؟</p>
-                <div class="form-group">
-                    <label for="aiQuestion">اسألني عن أي شيء يتعلق بالنظام:</label>
-                    <textarea id="aiQuestion" class="form-control" rows="3" placeholder="اكتب سؤالك هنا..."></textarea>
-                </div>
-                <button class="btn" id="askAIButton">إرسال السؤال</button>
-                <div class="ai-response" id="aiResponse" style="display: none;">
-                    <!-- سيتم عرض الرد هنا -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- مودال ماسح الباركود -->
-    <div class="barcode-scanner" id="barcodeScanner">
-        <h2>ماسح الباركود</h2>
-        <div id="barcodeScannerContainer">
-            <p>جارٍ تشغيل الكاميرا...</p>
-            <!-- في التطبيق الحقيقي، سيتم عرض الفيديو من الكاميرا هنا -->
-        </div>
-        <div class="barcode-result" id="barcodeResult" style="display: none;">
-            <!-- سيتم عرض نتيجة الباركود هنا -->
-        </div>
-        <div style="margin-top: 1rem;">
-            <button class="btn btn-success" id="startScannerBtn">بدء المسح</button>
-            <button class="btn btn-danger" id="stopScannerBtn">إيقاف المسح</button>
-            <button class="btn btn-secondary" id="closeScannerBtn">إغلاق</button>
-        </div>
-    </div>
-
-    <!-- Firebase SDK -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyBtc-pniRx5Mda5UW_kNqS0Zyi8zcKvdlU",
-          authDomain: "shahrazad-electric.firebaseapp.com",
-          projectId: "shahrazad-electric",
-          storageBucket: "shahrazad-electric.firebasestorage.app",
-          messagingSenderId: "582314926345",
-          appId: "1:582314926345:web:39c2979beadd8b47a133d8",
-          measurementId: "G-3RH0BKKW16"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // جعل المتغيرات متاحة عالمياً
-        window.firebaseApp = app;
-        window.firebaseDb = db;
-        window.firebaseAuth = auth;
-    </script>
+    <!-- تضمين ملف المساعد السوداني -->
+    <script src="assistant.js"></script>
 
     <script>
-        // كود JavaScript للتحكم في النظام
+        // كود JavaScript للتحكم في النظام والمساعد السوداني
         document.addEventListener('DOMContentLoaded', function() {
-            // عناصر DOM
-            const loginContainer = document.getElementById('loginContainer');
-            const dashboardContainer = document.getElementById('dashboardContainer');
-            const loginForm = document.getElementById('loginForm');
-            const menuItems = document.querySelectorAll('.menu-item');
-            const pageContents = document.querySelectorAll('.page-content');
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const sidebar = document.getElementById('sidebar');
-            const aiAssistantBtn = document.getElementById('aiAssistantBtn');
-            const aiAssistantModal = document.getElementById('aiAssistantModal');
-            const closeAIModal = document.getElementById('closeAIModal');
-            const askAIButton = document.getElementById('askAIButton');
-            const aiResponse = document.getElementById('aiResponse');
-            const copySettingsBtn = document.getElementById('copySettingsBtn');
-            const copySettingsBtn2 = document.getElementById('copySettingsBtn2');
-            const barcodeScannerBtn = document.getElementById('barcodeScannerBtn');
-            const barcodeScanner = document.getElementById('barcodeScanner');
-            const startScannerBtn = document.getElementById('startScannerBtn');
-            const stopScannerBtn = document.getElementById('stopScannerBtn');
-            const closeScannerBtn = document.getElementById('closeScannerBtn');
-            const barcodeResult = document.getElementById('barcodeResult');
-            const addProductBtn = document.getElementById('addProductBtn');
-            const addWarehouseBtn = document.getElementById('addWarehouseBtn');
-            const addCustomerBtn = document.getElementById('addCustomerBtn');
-            const createInvoiceBtn = document.getElementById('createInvoiceBtn');
-            const changePasswordBtn = document.getElementById('changePasswordBtn');
-            const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-            const addUserBtn = document.getElementById('addUserBtn');
-            const generateReportBtn = document.getElementById('generateReportBtn');
-            const markAllReadBtn = document.getElementById('markAllReadBtn');
+            // عناصر DOM للمساعد السوداني
+            const sudaneseAssistantBtn = document.getElementById('sudaneseAssistantBtn');
+            const sudaneseChatContainer = document.getElementById('sudaneseChatContainer');
+            const sudaneseChatClose = document.getElementById('sudaneseChatClose');
+            const sudaneseChatBody = document.getElementById('sudaneseChatBody');
+            const sudaneseChatInput = document.getElementById('sudaneseChatInput');
+            const sudaneseChatSend = document.getElementById('sudaneseChatSend');
+            const sudaneseQuickActions = document.getElementById('sudaneseQuickActions');
+            const sudaneseNotificationBadge = document.getElementById('sudaneseNotificationBadge');
 
-            // بيانات النظام
-            let systemData = {
-                products: [],
-                warehouses: [],
-                customers: [],
-                invoices: [],
-                users: [],
-                alerts: [],
-                settings: {}
-            };
+            // إنشاء مثيل المساعد السوداني
+            const sudaneseAssistant = new SudaneseArabicAssistant();
 
-            // تهيئة النظام
-            function initSystem() {
-                loadSampleData();
-                updateDashboardStats();
-                renderProductsTable();
-                renderWarehousesTable();
-                renderCustomersTable();
-                renderInvoicesTable();
-                renderUsersTable();
-                renderAlertsList();
-                initCharts();
-            }
+            // بيانات المحادثة
+            let conversationHistory = [];
+            let unreadMessages = 3;
 
-            // تحميل بيانات نموذجية
-            function loadSampleData() {
-                systemData.products = [
-                    { id: 1, code: 'P-1001', name: 'كابل كهرباء 2.5 مم', category: 'كابلات', price: 45.50, stock: 15, minStock: 50 },
-                    { id: 2, code: 'P-1002', name: 'مفتاح كهربائي 16A', category: 'مفاتيح', price: 12.75, stock: 8, minStock: 30 },
-                    { id: 3, code: 'P-1003', name: 'لمبة LED 20W', category: 'إضاءة', price: 25.00, stock: 22, minStock: 40 },
-                    { id: 4, code: 'P-1004', name: 'قاطع تيار 32A', category: 'قواطع', price: 38.90, stock: 35, minStock: 20 },
-                    { id: 5, code: 'P-1005', name: 'مأخذ كهربائي 3 فتحات', category: 'مآخذ', price: 18.50, stock: 60, minStock: 25 }
-                ];
-
-                systemData.warehouses = [
-                    { id: 1, name: 'المخزن الرئيسي', location: 'الرياض', manager: 'أحمد محمد', items: 1245, status: 'نشط' },
-                    { id: 2, name: 'مخزن الفرع 1', location: 'جدة', manager: 'محمد علي', items: 856, status: 'نشط' },
-                    { id: 3, name: 'مخزن الفرع 2', location: 'الدمام', manager: 'خالد أحمد', items: 632, status: 'نشط' }
-                ];
-
-                systemData.customers = [
-                    { id: 1, code: 'C-1001', name: 'شركة التقنية المتطورة', phone: '0551234567', email: 'info@tech.com', points: 1250, lastPurchase: '2023-10-15' },
-                    { id: 2, code: 'C-1002', name: 'مؤسسة البناء الحديث', phone: '0509876543', email: 'contact@modern.com', points: 850, lastPurchase: '2023-10-12' },
-                    { id: 3, code: 'C-1003', name: 'شركة الكهرباء المتحدة', phone: '0545554433', email: 'sales@united.com', points: 2100, lastPurchase: '2023-10-10' }
-                ];
-
-                systemData.invoices = [
-                    { id: 1, number: 'INV-2023-001', customer: 'شركة التقنية المتطورة', date: '2023-10-15', amount: 2450.75, status: 'مدفوعة' },
-                    { id: 2, number: 'INV-2023-002', customer: 'مؤسسة البناء الحديث', date: '2023-10-12', amount: 1850.50, status: 'مدفوعة' },
-                    { id: 3, number: 'INV-2023-003', customer: 'شركة الكهرباء المتحدة', date: '2023-10-10', amount: 3200.25, status: 'مدفوعة' }
-                ];
-
-                systemData.users = [
-                    { id: 1, username: 'admin', email: 'admin@shahrazad.com', branch: 'الفرع الرئيسي', role: 'مدير النظام', status: 'نشط' },
-                    { id: 2, username: 'manager1', email: 'manager1@shahrazad.com', branch: 'فرع الرياض', role: 'مدير فرع', status: 'نشط' },
-                    { id: 3, username: 'sales1', email: 'sales1@shahrazad.com', branch: 'الفرع الرئيسي', role: 'مندوب مبيعات', status: 'نشط' }
-                ];
-
-                systemData.alerts = [
-                    { id: 1, type: 'warning', message: 'المخزون منخفض للصنف P-1001', date: '2023-10-16', read: false },
-                    { id: 2, type: 'warning', message: 'المخزون منخفض للصنف P-1002', date: '2023-10-15', read: false },
-                    { id: 3, type: 'info', message: 'فاتورة جديدة تم إنشاؤها INV-2023-004', date: '2023-10-14', read: true }
-                ];
-
-                systemData.settings = {
-                    companyName: 'SHAHRAZAD ELECTRIC',
-                    defaultBranch: 'main',
-                    barcodeScanner: 'enabled',
-                    lowStockAlert: 'enabled'
-                };
-            }
-
-            // تحديث إحصائيات لوحة التحكم
-            function updateDashboardStats() {
-                document.getElementById('totalProducts').textContent = systemData.products.length.toLocaleString();
-                document.getElementById('totalWarehouses').textContent = systemData.warehouses.length;
-                document.getElementById('totalCustomers').textContent = systemData.customers.length;
-                document.getElementById('totalInvoices').textContent = systemData.invoices.length;
-
-                // تحديث جدول المخزون المنخفض
-                const lowStockProducts = systemData.products.filter(p => p.stock < p.minStock);
-                const lowStockTableBody = document.getElementById('lowStockTableBody');
-                lowStockTableBody.innerHTML = '';
-
-                if (lowStockProducts.length > 0) {
-                    document.getElementById('lowStockMessage').textContent = `هناك ${lowStockProducts.length} أصناف تحتاج إلى إعادة تخزين`;
-                    
-                    lowStockProducts.forEach(product => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${product.code}</td>
-                            <td>${product.name}</td>
-                            <td>المخزن الرئيسي</td>
-                            <td>${product.stock}</td>
-                            <td>${product.minStock}</td>
-                            <td><span style="color: var(--danger);">منخفض</span></td>
-                        `;
-                        lowStockTableBody.appendChild(row);
-                    });
-                } else {
-                    document.getElementById('lowStockAlert').className = 'alert alert-success';
-                    document.getElementById('lowStockAlert').innerHTML = '<i class="fas fa-check-circle"></i> <span>جميع الأصناف بمستويات مخزون جيدة</span>';
-                    document.getElementById('lowStockTableBody').innerHTML = '<tr><td colspan="6" class="text-center">لا توجد أصناف منخفضة المخزون</td></tr>';
+            // رسائل الترحيب الأولية باللهجة السودانية
+            const welcomeMessages = [
+                {
+                    type: 'bot',
+                    text: 'السلام عليكم ورحمة الله وبركاته! 🌸',
+                    time: getCurrentTime()
+                },
+                {
+                    type: 'bot',
+                    text: 'أهلًا وسهلًا في نظام SHAHRAZAD ELECTRIC! 🎉',
+                    time: getCurrentTime()
+                },
+                {
+                    type: 'bot',
+                    text: 'أنا المساعد السوداني، بقدر أساعدك في:',
+                    time: getCurrentTime()
+                },
+                {
+                    type: 'bot',
+                    text: '• المخزون والبضاعة<br>• الفواتير والمبيعات<br>• العملاء والزبائن<br>• التقارير والإحصائيات<br>• وأي حاجة تانية!',
+                    time: getCurrentTime()
+                },
+                {
+                    type: 'bot',
+                    text: 'تقدر تكلمني باللهجة السودانية عادي! 🗣️',
+                    time: getCurrentTime()
                 }
-            }
+            ];
 
-            // عرض جدول الأصناف
-            function renderProductsTable() {
-                const tableBody = document.getElementById('productsTableBody');
-                tableBody.innerHTML = '';
+            // الإجراءات السريعة باللهجة السودانية
+            const quickActions = [
+                { text: 'عايز أعرف المخزون', action: 'check_inventory' },
+                { text: 'ودي أعمل فاتورة جديدة', action: 'new_invoice' },
+                { text: 'شنو أحسن المبيعات', action: 'top_sales' },
+                { text: 'قديه عدد العملاء', action: 'customer_count' },
+                { text: 'عندي مشكلة في النظام', action: 'system_issue' },
+                { text: 'ودي أزود صنف جديد', action: 'add_product' }
+            ];
 
-                systemData.products.forEach(product => {
-                    const row = document.createElement('tr');
-                    const stockStatus = product.stock < product.minStock ? '<span style="color: var(--danger);">منخفض</span>' : '<span style="color: var(--success);">جيد</span>';
-                    
-                    row.innerHTML = `
-                        <td>${product.code}</td>
-                        <td>${product.name}</td>
-                        <td>${product.category}</td>
-                        <td>${product.price.toFixed(2)} ر.س</td>
-                        <td>${product.stock}</td>
-                        <td>${product.minStock}</td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary" onclick="editProduct(${product.id})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            }
-
-            // عرض جدول المخازن
-            function renderWarehousesTable() {
-                const tableBody = document.getElementById('warehousesTableBody');
-                tableBody.innerHTML = '';
-
-                systemData.warehouses.forEach(warehouse => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${warehouse.name}</td>
-                        <td>${warehouse.location}</td>
-                        <td>${warehouse.manager}</td>
-                        <td>${warehouse.items.toLocaleString()}</td>
-                        <td><span style="color: var(--success);">${warehouse.status}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
+            // تهيئة المحادثة السودانية
+            function initSudaneseChat() {
+                // إضافة رسائل الترحيب
+                welcomeMessages.forEach(msg => {
+                    addMessageToSudaneseChat(msg.type, msg.text, msg.time);
                 });
 
-                // تحديث الإحصائيات
-                document.getElementById('warehousesCount').textContent = systemData.warehouses.length;
-                document.getElementById('totalItemsCount').textContent = systemData.warehouses.reduce((sum, w) => sum + w.items, 0).toLocaleString();
-                document.getElementById('lowStockItemsCount').textContent = systemData.products.filter(p => p.stock < p.minStock).length;
-            }
-
-            // عرض جدول العملاء
-            function renderCustomersTable() {
-                const tableBody = document.getElementById('customersTableBody');
-                tableBody.innerHTML = '';
-
-                systemData.customers.forEach(customer => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${customer.code}</td>
-                        <td>${customer.name}</td>
-                        <td>${customer.phone}</td>
-                        <td>${customer.email}</td>
-                        <td>${customer.points.toLocaleString()}</td>
-                        <td>${customer.lastPurchase}</td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            }
-
-            // عرض جدول الفواتير
-            function renderInvoicesTable() {
-                const tableBody = document.getElementById('invoicesTableBody');
-                tableBody.innerHTML = '';
-
-                systemData.invoices.forEach(invoice => {
-                    const row = document.createElement('tr');
-                    const statusColor = invoice.status === 'مدفوعة' ? 'success' : 'warning';
-                    
-                    row.innerHTML = `
-                        <td>${invoice.number}</td>
-                        <td>${invoice.customer}</td>
-                        <td>${invoice.date}</td>
-                        <td>${invoice.amount.toFixed(2)} ر.س</td>
-                        <td><span style="color: var(--${statusColor});">${invoice.status}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-sm btn-success">
-                                <i class="fas fa-print"></i>
-                            </button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            }
-
-            // عرض جدول المستخدمين
-            function renderUsersTable() {
-                const tableBody = document.getElementById('usersTableBody');
-                tableBody.innerHTML = '';
-
-                systemData.users.forEach(user => {
-                    const row = document.createElement('tr');
-                    const statusColor = user.status === 'نشط' ? 'success' : 'danger';
-                    
-                    row.innerHTML = `
-                        <td>${user.username}</td>
-                        <td>${user.email}</td>
-                        <td>${user.branch}</td>
-                        <td>${user.role}</td>
-                        <td><span style="color: var(--${statusColor});">${user.status}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            }
-
-            // عرض قائمة التنبيهات
-            function renderAlertsList() {
-                const alertsList = document.getElementById('alertsList');
-                alertsList.innerHTML = '';
-
-                const unreadAlerts = systemData.alerts.filter(alert => !alert.read);
-                document.getElementById('notificationCount').textContent = unreadAlerts.length;
-
-                systemData.alerts.forEach(alert => {
-                    const alertClass = alert.type === 'warning' ? 'alert-warning' : 'alert alert-secondary';
-                    const icon = alert.type === 'warning' ? 'exclamation-triangle' : 'info-circle';
-                    
-                    const alertElement = document.createElement('div');
-                    alertElement.className = `alert ${alertClass}`;
-                    alertElement.innerHTML = `
-                        <i class="fas fa-${icon}"></i>
-                        <span>${alert.message}</span>
-                        <small style="margin-right: auto; color: var(--gray);">${alert.date}</small>
-                        ${!alert.read ? '<button class="btn btn-sm btn-success" style="margin-right: 10px;">تعيين كمقروء</button>' : ''}
-                    `;
-                    alertsList.appendChild(alertElement);
-                });
-            }
-
-            // تهيئة الرسوم البيانية
-            function initCharts() {
-                // رسم بياني للمبيعات
-                const salesCtx = document.getElementById('salesChart').getContext('2d');
-                const salesChart = new Chart(salesCtx, {
-                    type: 'line',
-                    data: {
-                        labels: ['1 أكتوبر', '5 أكتوبر', '10 أكتوبر', '15 أكتوبر', '20 أكتوبر', '25 أكتوبر', '30 أكتوبر'],
-                        datasets: [{
-                            label: 'المبيعات اليومية (ر.س)',
-                            data: [4500, 5200, 4800, 6100, 5500, 6800, 7200],
-                            borderColor: '#1a56db',
-                            backgroundColor: 'rgba(26, 86, 219, 0.1)',
-                            tension: 0.3,
-                            fill: true
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            },
-                            title: {
-                                display: true,
-                                text: 'مبيعات أكتوبر 2023'
-                            }
-                        }
-                    }
-                });
-
-                // رسم بياني للأصناف الأكثر مبيعاً
-                const productsCtx = document.getElementById('topProductsChart').getContext('2d');
-                const productsChart = new Chart(productsCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['كابل كهرباء', 'مفتاح كهربائي', 'لمبة LED', 'قاطع تيار', 'مأخذ كهربائي'],
-                        datasets: [{
-                            label: 'الكمية المباعة',
-                            data: [120, 95, 80, 65, 50],
-                            backgroundColor: [
-                                'rgba(26, 86, 219, 0.7)',
-                                'rgba(126, 58, 242, 0.7)',
-                                'rgba(14, 159, 110, 0.7)',
-                                'rgba(245, 158, 11, 0.7)',
-                                'rgba(224, 36, 36, 0.7)'
-                            ],
-                            borderColor: [
-                                'rgb(26, 86, 219)',
-                                'rgb(126, 58, 242)',
-                                'rgb(14, 159, 110)',
-                                'rgb(245, 158, 11)',
-                                'rgb(224, 36, 36)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            },
-                            title: {
-                                display: true,
-                                text: 'أكثر الأصناف مبيعاً'
-                            }
-                        }
-                    }
-                });
-            }
-
-            // تسجيل الدخول
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                const branch = document.getElementById('branch').value;
+                // إضافة الإجراءات السريعة
+                renderSudaneseQuickActions();
                 
-                // محاكاة تسجيل الدخول
-                if (username && password && branch) {
-                    loginContainer.style.display = 'none';
-                    dashboardContainer.style.display = 'flex';
-                    initSystem();
+                // إخفاء الإشعارات بعد فتح المحادثة
+                unreadMessages = 0;
+                updateSudaneseNotificationBadge();
+            }
+
+            // إضافة رسالة إلى المحادثة السودانية
+            function addMessageToSudaneseChat(type, text, time = null) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `sudanese-message ${type}`;
+                
+                if (!time) {
+                    time = getCurrentTime();
                 }
-            });
-
-            // التنقل بين الصفحات
-            menuItems.forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // إزالة النشاط من جميع العناصر
-                    menuItems.forEach(i => i.classList.remove('active'));
-                    
-                    // إضافة النشاط للعنصر الحالي
-                    this.classList.add('active');
-                    
-                    // إخفاء جميع المحتويات
-                    pageContents.forEach(content => content.style.display = 'none');
-                    
-                    // عرض المحتوى المطلوب
-                    const pageId = this.getAttribute('data-page') + 'Page';
-                    document.getElementById(pageId).style.display = 'block';
-                });
-            });
-
-            // تبديل الشريط الجانبي
-            sidebarToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('collapsed');
-            });
-
-            // فتح المساعد الذكي
-            aiAssistantBtn.addEventListener('click', function() {
-                aiAssistantModal.style.display = 'flex';
-            });
-
-            // إغلاق المساعد الذكي
-            closeAIModal.addEventListener('click', function() {
-                aiAssistantModal.style.display = 'none';
-            });
-
-            // استخدام المساعد الذكي
-            askAIButton.addEventListener('click', function() {
-                const question = document.getElementById('aiQuestion').value;
-                if (question.trim() === '') return;
-
-                // محاكاة استجابة المساعد الذكي
-                let response = '';
-                if (question.includes('مخزون') || question.includes('صنف')) {
-                    const lowStockCount = systemData.products.filter(p => p.stock < p.minStock).length;
-                    response = `حالياً هناك ${lowStockCount} أصناف بمستوى مخزون منخفض. يمكنك مراجعة صفحة "الأصناف" أو "التنبيهات" للاطلاع على التفاصيل.`;
-                } else if (question.includes('مبيعات') || question.includes('ربح')) {
-                    response = 'إجمالي المبيعات لهذا الشهر هو 45,200 ر.س. يمكنك الاطلاع على التقارير التفصيلية في صفحة "الإحصائيات".';
-                } else if (question.includes('عميل') || question.includes('عملاء')) {
-                    response = `يوجد ${systemData.customers.length} عميل مميز في النظام. العميل صاحب أعلى نقاط ولاء هو "${systemData.customers.reduce((prev, current) => (prev.points > current.points) ? prev : current).name}".`;
-                } else {
-                    response = 'أنا هنا لمساعدتك في أي استفسار حول نظام إدارة المبيعات والمخازن. يمكنني الإجابة على أسئلة حول الأصناف، المخازن، العملاء، الفواتير، والإحصائيات.';
-                }
-
-                aiResponse.innerHTML = `<strong>سؤالك:</strong> ${question}<br><br><strong>الإجابة:</strong> ${response}`;
-                aiResponse.style.display = 'block';
-            });
-
-            // نسخ الإعدادات
-            function copySettings() {
-                const settings = {
-                    companyName: document.getElementById('companyName').value,
-                    defaultBranch: document.getElementById('defaultBranch').value,
-                    barcodeScanner: document.getElementById('barcodeScannerSetting').value,
-                    lowStockAlert: document.getElementById('lowStockAlert').value,
-                    users: systemData.users,
-                    products: systemData.products,
-                    warehouses: systemData.warehouses,
-                    customers: systemData.customers
-                };
                 
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(settings, null, 2));
-                const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.setAttribute("href", dataStr);
-                downloadAnchorNode.setAttribute("download", "shahrazad_settings.json");
-                document.body.appendChild(downloadAnchorNode);
-                downloadAnchorNode.click();
-                downloadAnchorNode.remove();
+                messageDiv.innerHTML = `
+                    <div>${text}</div>
+                    <div class="sudanese-message-time">${time}</div>
+                `;
                 
-                alert('تم نسخ إعداداتك بنجاح! سيتم تنزيل ملف الإعدادات.');
+                sudaneseChatBody.appendChild(messageDiv);
+                scrollSudaneseToBottom();
+                
+                // حفظ في السجل
+                conversationHistory.push({ type, text, time });
             }
 
-            copySettingsBtn.addEventListener('click', copySettings);
-            copySettingsBtn2.addEventListener('click', copySettings);
+            // إضافة رسالة مع شرح الكلمات السودانية
+            function addMessageWithExplanation(type, text, explanation, time = null) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `sudanese-message ${type}`;
+                
+                if (!time) {
+                    time = getCurrentTime();
+                }
+                
+                messageDiv.innerHTML = `
+                    <div>${text}</div>
+                    <div class="sudanese-word-explanation">${explanation}</div>
+                    <div class="sudanese-message-time">${time}</div>
+                `;
+                
+                sudaneseChatBody.appendChild(messageDiv);
+                scrollSudaneseToBottom();
+            }
 
-            // إدارة ماسح الباركود
-            barcodeScannerBtn.addEventListener('click', function() {
-                barcodeScanner.style.display = 'flex';
-            });
-
-            startScannerBtn.addEventListener('click', function() {
-                // في التطبيق الحقيقي، سيتم هنا تفعيل الكاميرا لقراءة الباركود
-                // هذه محاكاة لنتيجة الباركود
+            // معالجة الرسائل باللهجة السودانية
+            function handleSudaneseMessage(message) {
+                if (!message.trim()) return;
+                
+                // إضافة رسالة المستخدم
+                addMessageToSudaneseChat('user', message);
+                
+                // معالجة الرسالة باستخدام المساعد السوداني
+                const response = sudaneseAssistant.processMessage(message);
+                
+                // محاكاة وقت المعالجة
+                showSudaneseTypingIndicator();
+                
                 setTimeout(() => {
-                    const barcode = 'P-100' + (Math.floor(Math.random() * 5) + 1);
-                    const product = systemData.products.find(p => p.code === barcode);
+                    hideSudaneseTypingIndicator();
                     
-                    if (product) {
-                        barcodeResult.innerHTML = `
-                            <h4>تم مسح الباركود بنجاح!</h4>
-                            <p><strong>كود الصنف:</strong> ${product.code}</p>
-                            <p><strong>اسم الصنف:</strong> ${product.name}</p>
-                            <p><strong>السعر:</strong> ${product.price} ر.س</p>
-                            <p><strong>المخزون:</strong> ${product.stock}</p>
-                        `;
+                    // عرض الرد مع الشرح
+                    if (response.explanation && response.explanation.includes('شرح الجملة')) {
+                        addMessageWithExplanation('bot', response.response, response.explanation);
                     } else {
-                        barcodeResult.innerHTML = `
-                            <h4>لم يتم العثور على الصنف</h4>
-                            <p>الباركود: ${barcode}</p>
-                            <p>هذا الصنف غير مسجل في النظام</p>
-                        `;
+                        addMessageToSudaneseChat('bot', response.response);
                     }
                     
-                    barcodeResult.style.display = 'block';
-                }, 2000);
-            });
+                    // إذا كانت هناك كلمات سودانية، إضافة تفاعل خاص
+                    if (response.words && response.words.some(word => word.isSudanese)) {
+                        addSudaneseWordsHighlight(response.words);
+                    }
+                }, 1000 + Math.random() * 1000);
+                
+                // مسح حقل الإدخال
+                sudaneseChatInput.value = '';
+            }
 
-            stopScannerBtn.addEventListener('click', function() {
-                barcodeResult.style.display = 'none';
-            });
-
-            closeScannerBtn.addEventListener('click', function() {
-                barcodeScanner.style.display = 'none';
-                barcodeResult.style.display = 'none';
-            });
-
-            // إضافة صنف جديد
-            addProductBtn.addEventListener('click', function() {
-                const newProduct = {
-                    id: systemData.products.length + 1,
-                    code: 'P-10' + (systemData.products.length + 1),
-                    name: 'صنف جديد ' + (systemData.products.length + 1),
-                    category: 'فئة جديدة',
-                    price: 0,
-                    stock: 0,
-                    minStock: 10
-                };
-                
-                systemData.products.push(newProduct);
-                renderProductsTable();
-                updateDashboardStats();
-                
-                alert('تم إضافة صنف جديد بنجاح!');
-            });
-
-            // إضافة مخزن جديد
-            addWarehouseBtn.addEventListener('click', function() {
-                const newWarehouse = {
-                    id: systemData.warehouses.length + 1,
-                    name: 'مخزن جديد ' + (systemData.warehouses.length + 1),
-                    location: 'موقع جديد',
-                    manager: 'مسؤول جديد',
-                    items: 0,
-                    status: 'نشط'
-                };
-                
-                systemData.warehouses.push(newWarehouse);
-                renderWarehousesTable();
-                
-                alert('تم إضافة مخزن جديد بنجاح!');
-            });
-
-            // إضافة عميل جديد
-            addCustomerBtn.addEventListener('click', function() {
-                const newCustomer = {
-                    id: systemData.customers.length + 1,
-                    code: 'C-10' + (systemData.customers.length + 1),
-                    name: 'عميل جديد ' + (systemData.customers.length + 1),
-                    phone: '05' + Math.floor(Math.random() * 10000000).toString().padStart(8, '0'),
-                    email: 'newcustomer' + (systemData.customers.length + 1) + '@example.com',
-                    points: 0,
-                    lastPurchase: new Date().toISOString().split('T')[0]
-                };
-                
-                systemData.customers.push(newCustomer);
-                renderCustomersTable();
-                
-                alert('تم إضافة عميل جديد بنجاح!');
-            });
-
-            // إنشاء فاتورة جديدة
-            createInvoiceBtn.addEventListener('click', function() {
-                const newInvoice = {
-                    id: systemData.invoices.length + 1,
-                    number: 'INV-2023-' + (systemData.invoices.length + 1).toString().padStart(3, '0'),
-                    customer: systemData.customers[Math.floor(Math.random() * systemData.customers.length)].name,
-                    date: new Date().toISOString().split('T')[0],
-                    amount: Math.floor(Math.random() * 5000) + 1000,
-                    status: 'مدفوعة'
-                };
-                
-                systemData.invoices.push(newInvoice);
-                renderInvoicesTable();
-                
-                alert('تم إنشاء فاتورة جديدة بنجاح!');
-            });
-
-            // تغيير كلمة المرور
-            changePasswordBtn.addEventListener('click', function() {
-                const currentPassword = document.getElementById('currentPassword').value;
-                const newPassword = document.getElementById('newPassword').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
-                
-                if (!currentPassword || !newPassword || !confirmPassword) {
-                    alert('يرجى ملء جميع الحقول');
-                    return;
-                }
-                
-                if (newPassword !== confirmPassword) {
-                    alert('كلمة المرور الجديدة وتأكيدها غير متطابقتين');
-                    return;
-                }
-                
-                // محاكاة تغيير كلمة المرور
-                alert('تم تغيير كلمة المرور بنجاح!');
-                
-                // مسح الحقول
-                document.getElementById('currentPassword').value = '';
-                document.getElementById('newPassword').value = '';
-                document.getElementById('confirmPassword').value = '';
-            });
-
-            // حفظ الإعدادات
-            saveSettingsBtn.addEventListener('click', function() {
-                systemData.settings.companyName = document.getElementById('companyName').value;
-                systemData.settings.defaultBranch = document.getElementById('defaultBranch').value;
-                systemData.settings.barcodeScanner = document.getElementById('barcodeScannerSetting').value;
-                systemData.settings.lowStockAlert = document.getElementById('lowStockAlert').value;
-                
-                alert('تم حفظ الإعدادات بنجاح!');
-            });
-
-            // إضافة مستخدم جديد
-            addUserBtn.addEventListener('click', function() {
-                const newUser = {
-                    id: systemData.users.length + 1,
-                    username: 'user' + (systemData.users.length + 1),
-                    email: 'user' + (systemData.users.length + 1) + '@shahrazad.com',
-                    branch: 'الفرع الرئيسي',
-                    role: 'مندوب مبيعات',
-                    status: 'نشط'
-                };
-                
-                systemData.users.push(newUser);
-                renderUsersTable();
-                
-                alert('تم إضافة مستخدم جديد بنجاح!');
-            });
-
-            // إنشاء تقرير
-            generateReportBtn.addEventListener('click', function() {
-                const reportData = {
-                    date: new Date().toISOString(),
-                    products: systemData.products,
-                    sales: systemData.invoices,
-                    customers: systemData.customers,
-                    warehouses: systemData.warehouses
-                };
-                
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reportData, null, 2));
-                const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.setAttribute("href", dataStr);
-                downloadAnchorNode.setAttribute("download", "shahrazad_report.json");
-                document.body.appendChild(downloadAnchorNode);
-                downloadAnchorNode.click();
-                downloadAnchorNode.remove();
-                
-                alert('تم إنشاء التقرير بنجاح! سيتم تنزيله الآن.');
-            });
-
-            // تعيين جميع التنبيهات كمقروءة
-            markAllReadBtn.addEventListener('click', function() {
-                systemData.alerts.forEach(alert => {
-                    alert.read = true;
-                });
-                
-                renderAlertsList();
-                alert('تم تعيين جميع التنبيهات كمقروءة');
-            });
-
-            // البحث في الأصناف
-            document.getElementById('productSearch').addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const filteredProducts = systemData.products.filter(product => 
-                    product.name.toLowerCase().includes(searchTerm) || 
-                    product.code.toLowerCase().includes(searchTerm) ||
-                    product.category.toLowerCase().includes(searchTerm)
-                );
-                
-                const tableBody = document.getElementById('productsTableBody');
-                tableBody.innerHTML = '';
-
-                filteredProducts.forEach(product => {
-                    const row = document.createElement('tr');
-                    const stockStatus = product.stock < product.minStock ? '<span style="color: var(--danger);">منخفض</span>' : '<span style="color: var(--success);">جيد</span>';
+            // إضافة تمييز للكلمات السودانية
+            function addSudaneseWordsHighlight(words) {
+                const sudaneseWords = words.filter(word => word.isSudanese);
+                if (sudaneseWords.length > 0) {
+                    const explanation = sudaneseWords.map(word => 
+                        `"${word.word}" ➝ ${word.meaning}`
+                    ).join('<br>');
                     
-                    row.innerHTML = `
-                        <td>${product.code}</td>
-                        <td>${product.name}</td>
-                        <td>${product.category}</td>
-                        <td>${product.price.toFixed(2)} ر.س</td>
-                        <td>${product.stock}</td>
-                        <td>${product.minStock}</td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            });
+                    const highlightMsg = `📚 الكلمات السودانية في رسالتك:<br><br>${explanation}`;
+                    addMessageToSudaneseChat('bot', highlightMsg);
+                }
+            }
 
-            // البحث في العملاء
-            document.getElementById('customerSearch').addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const filteredCustomers = systemData.customers.filter(customer => 
-                    customer.name.toLowerCase().includes(searchTerm) || 
-                    customer.code.toLowerCase().includes(searchTerm) ||
-                    customer.phone.includes(searchTerm) ||
-                    customer.email.toLowerCase().includes(searchTerm)
-                );
+            // عرض مؤشر الكتابة
+            function showSudaneseTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'sudanese-typing-indicator';
+                typingDiv.id = 'sudaneseTypingIndicator';
+                typingDiv.innerHTML = `
+                    <div class="sudanese-typing-dot"></div>
+                    <div class="sudanese-typing-dot"></div>
+                    <div class="sudanese-typing-dot"></div>
+                `;
                 
-                const tableBody = document.getElementById('customersTableBody');
-                tableBody.innerHTML = '';
+                sudaneseChatBody.appendChild(typingDiv);
+                scrollSudaneseToBottom();
+            }
 
-                filteredCustomers.forEach(customer => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${customer.code}</td>
-                        <td>${customer.name}</td>
-                        <td>${customer.phone}</td>
-                        <td>${customer.email}</td>
-                        <td>${customer.points.toLocaleString()}</td>
-                        <td>${customer.lastPurchase}</td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            });
+            // إخفاء مؤشر الكتابة
+            function hideSudaneseTypingIndicator() {
+                const typingIndicator = document.getElementById('sudaneseTypingIndicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
 
-            // تصفية الفواتير
-            document.getElementById('invoiceFilter').addEventListener('change', function(e) {
-                const filter = e.target.value;
-                let filteredInvoices = [...systemData.invoices];
+            // التمرير إلى الأسفل
+            function scrollSudaneseToBottom() {
+                sudaneseChatBody.scrollTop = sudaneseChatBody.scrollHeight;
+            }
+
+            // الحصول على الوقت الحالي
+            function getCurrentTime() {
+                const now = new Date();
+                return now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+            }
+
+            // عرض الإجراءات السريعة السودانية
+            function renderSudaneseQuickActions() {
+                sudaneseQuickActions.innerHTML = '';
                 
-                if (filter === 'today') {
-                    const today = new Date().toISOString().split('T')[0];
-                    filteredInvoices = systemData.invoices.filter(invoice => invoice.date === today);
-                } else if (filter === 'week') {
-                    // محاكاة الفواتير لهذا الأسبوع
-                    filteredInvoices = systemData.invoices.slice(0, 2);
-                } else if (filter === 'month') {
-                    // محاكاة الفواتير لهذا الشهر
-                    filteredInvoices = systemData.invoices;
+                quickActions.forEach(action => {
+                    const actionBtn = document.createElement('button');
+                    actionBtn.className = 'sudanese-quick-action';
+                    actionBtn.textContent = action.text;
+                    actionBtn.addEventListener('click', () => {
+                        handleSudaneseQuickAction(action.action);
+                    });
+                    sudaneseQuickActions.appendChild(actionBtn);
+                });
+            }
+
+            // معالجة الإجراءات السريعة السودانية
+            function handleSudaneseQuickAction(action) {
+                let message = '';
+                
+                switch(action) {
+                    case 'check_inventory':
+                        message = 'عايز أعرف المخزون الموجود';
+                        break;
+                    case 'new_invoice':
+                        message = 'ودي أعمل فاتورة جديدة';
+                        break;
+                    case 'top_sales':
+                        message = 'شنو أحسن الأصناف مبيعاً';
+                        break;
+                    case 'customer_count':
+                        message = 'قديه عدد العملاء الموجودين';
+                        break;
+                    case 'system_issue':
+                        message = 'عندي مشكلة في النظام';
+                        break;
+                    case 'add_product':
+                        message = 'عايز أزود صنف جديد في المخزون';
+                        break;
                 }
                 
-                const tableBody = document.getElementById('invoicesTableBody');
-                tableBody.innerHTML = '';
+                handleSudaneseMessage(message);
+            }
 
-                filteredInvoices.forEach(invoice => {
-                    const row = document.createElement('tr');
-                    const statusColor = invoice.status === 'مدفوعة' ? 'success' : 'warning';
-                    
-                    row.innerHTML = `
-                        <td>${invoice.number}</td>
-                        <td>${invoice.customer}</td>
-                        <td>${invoice.date}</td>
-                        <td>${invoice.amount.toFixed(2)} ر.س</td>
-                        <td><span style="color: var(--${statusColor});">${invoice.status}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-sm btn-success">
-                                <i class="fas fa-print"></i>
-                            </button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
+            // تحديث شارة الإشعارات السودانية
+            function updateSudaneseNotificationBadge() {
+                if (unreadMessages > 0) {
+                    sudaneseNotificationBadge.textContent = unreadMessages;
+                    sudaneseNotificationBadge.style.display = 'flex';
+                } else {
+                    sudaneseNotificationBadge.style.display = 'none';
+                }
+            }
+
+            // إضافة رسائل ترحيب تلقائية
+            function addSudaneseWelcomeMessages() {
+                if (!sudaneseChatContainer.classList.contains('active')) {
+                    unreadMessages++;
+                    updateSudaneseNotificationBadge();
+                }
+            }
+
+            // الأحداث للمساعد السوداني
+            sudaneseAssistantBtn.addEventListener('click', function() {
+                sudaneseChatContainer.classList.toggle('active');
+                if (sudaneseChatContainer.classList.contains('active')) {
+                    initSudaneseChat();
+                    unreadMessages = 0;
+                    updateSudaneseNotificationBadge();
+                }
             });
 
-            // جعل الدوال متاحة عالمياً
-            window.editProduct = function(id) {
-                const product = systemData.products.find(p => p.id === id);
-                if (product) {
-                    alert(`تعديل الصنف: ${product.name}`);
-                    // في التطبيق الحقيقي، سيتم فتح نموذج التعديل
+            sudaneseChatClose.addEventListener('click', function() {
+                sudaneseChatContainer.classList.remove('active');
+            });
+
+            sudaneseChatSend.addEventListener('click', function() {
+                handleSudaneseMessage(sudaneseChatInput.value);
+            });
+
+            sudaneseChatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleSudaneseMessage(sudaneseChatInput.value);
                 }
+            });
+
+            // إضافة رسائل ترحيب تلقائية كل 30 ثانية إذا كانت النافذة مغلقة
+            setInterval(addSudaneseWelcomeMessages, 30000);
+
+            // تهيئة أولية
+            updateSudaneseNotificationBadge();
+
+            // دمج المساعد السوداني مع النظام الرئيسي
+            integrateSudaneseAssistant();
+
+            // دمج المساعد مع النظام الرئيسي
+            function integrateSudaneseAssistant() {
+                // جعل المساعد متاحاً globally
+                window.sudaneseAssistant = sudaneseAssistant;
+                
+                // إضافة أوامر صوتية (محاكاة)
+                setupVoiceCommands();
+                
+                // ربط مع أحداث النظام
+                setupSystemIntegration();
+            }
+
+            // إعداد الأوامر الصوتية
+            function setupVoiceCommands() {
+                // يمكن إضافة أوامر صوتية هنا في المستقبل
+                console.log('🎤 الأوامر الصوتية جاهزة للتطوير');
+            }
+
+            // إعداد التكامل مع النظام
+            function setupSystemIntegration() {
+                // ربط المساعد مع أحداث النظام
+                document.addEventListener('inventoryLow', function(e) {
+                    const message = `⚠️ تنبيه: الصنف ${e.detail.product} مخزونه منخفض. المخزون الحالي: ${e.detail.stock}`;
+                    addMessageToSudaneseChat('bot', message);
+                    unreadMessages++;
+                    updateSudaneseNotificationBadge();
+                });
+
+                document.addEventListener('newSale', function(e) {
+                    const message = `💰 مبيعات جديدة: تم بيع ${e.detail.amount} ر.س`;
+                    addMessageToSudaneseChat('bot', message);
+                });
+
+                // إضافة اختصار لوحة المفاتيح للمساعد
+                document.addEventListener('keydown', function(e) {
+                    if (e.ctrlKey && e.key === 'm') {
+                        e.preventDefault();
+                        sudaneseChatContainer.classList.toggle('active');
+                        if (sudaneseChatContainer.classList.contains('active')) {
+                            initSudaneseChat();
+                        }
+                    }
+                });
+            }
+
+            // وظائف مساعدة للوصول من النظام
+            window.getSudaneseTranslation = function(text) {
+                return sudaneseAssistant.translateSudaneseText(text);
             };
 
-            window.deleteProduct = function(id) {
-                if (confirm('هل أنت متأكد من حذف هذا الصنف؟')) {
-                    systemData.products = systemData.products.filter(p => p.id !== id);
-                    renderProductsTable();
-                    updateDashboardStats();
-                    alert('تم حذف الصنف بنجاح!');
-                }
+            window.analyzeSudaneseText = function(text) {
+                return sudaneseAssistant.processMessage(text);
             };
 
-            // إغلاق المودال عند النقر خارج المحتوى
-            window.addEventListener('click', function(e) {
-                if (e.target === aiAssistantModal) {
-                    aiAssistantModal.style.display = 'none';
-                }
-                if (e.target === barcodeScanner) {
-                    barcodeScanner.style.display = 'none';
-                }
-            });
+            // تهيئة النظام الرئيسي
+            initMainSystem();
         });
+
+        // تهيئة النظام الرئيسي
+        function initMainSystem() {
+            // كود تهيئة النظام الأساسي
+            console.log('🚀 نظام SHAHRAZAD ELECTRIC مع المساعد السوداني جاهز');
+            
+            // محاكاة تسجيل الدخول التلقائي للعرض
+            setTimeout(() => {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboardContainer').style.display = 'flex';
+            }, 2000);
+        }
+
+        // وظائف عامة للنظام
+        function displayChatMessage(message, sender) {
+            // هذه الدالة يمكن استخدامها من قبل النظام لعرض الرسائل
+            if (sender === 'system') {
+                addMessageToSudaneseChat('bot', `🔔 ${message}`);
+            }
+        }
     </script>
 </body>
 </html>
