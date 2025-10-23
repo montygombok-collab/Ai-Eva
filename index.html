@@ -3,801 +3,1202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eve السودانية - المساعد العام المتوهج</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>SHAHRAZAD ELECTRIC - نظام المبيعات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ألوان Eve: تصميم سوداني مستقبلي متوهج */
         :root {
-            --primary: #00FFFF; /* Neon Cyan - للوهج والأضواء */
-            --secondary: #FFD700; /* Deep Gold/Yellow - لرسائل المستخدم (لمسة سودانية) */
-            --background: #0A0A1F; /* Deep Navy/Black - خلفية مستقبلية */
-            --light-chat: #1A1A3A; /* Dark Blue-Gray - خلفية Eve */
-            --dark-text: #E0E0E0; /* Light Gray/White - للنصوص */
-            --border-glow: #00FFFF;
+            --primary: #1a56db;
+            --primary-dark: #1e429f;
+            --secondary: #7e3af2;
+            --success: #0e9f6e;
+            --warning: #f59e0b;
+            --danger: #e02424;
+            --light: #f3f4f6;
+            --dark: #1f2937;
+            --gray: #6b7280;
+            --gray-light: #e5e7eb;
         }
-        
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: var(--dark);
             direction: rtl;
-            background-color: var(--background);
-            color: var(--dark-text);
         }
-        
-        .chat-container {
-            max-width: 900px;
-            height: 95vh;
-            margin: 2.5vh auto;
+
+        /* تصميم تسجيل الدخول */
+        .login-container {
             display: flex;
-            flex-direction: column;
-            background: #10102A; /* أغمق قليلاً من الخلفية */
-            border-radius: 16px;
-            box-shadow: 0 0 40px rgba(0, 255, 255, 0.3), 0 0 15px rgba(255, 215, 0, 0.2); /* وهج مزدوج */
+            height: 100vh;
             overflow: hidden;
-            border: 2px solid var(--border-glow);
         }
 
-        /* رأس الدردشة */
-        .chat-header {
-            background-color: #1A1A3A;
-            color: var(--primary);
-            padding: 20px;
-            border-bottom: 4px solid var(--primary);
-            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.5);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .chat-header h1 {
-            text-shadow: 0 0 10px var(--primary);
-            font-size: 1.5rem;
-        }
-        .chat-header p {
-             color: var(--secondary);
-             text-shadow: 0 0 5px var(--secondary);
-             font-size: 0.875rem;
-        }
-
-        /* زر محادثة جديدة */
-        #new-chat-btn {
-            background-color: var(--secondary);
-            color: var(--background);
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: bold;
-            box-shadow: 0 0 10px var(--secondary);
-            transition: all 0.3s;
-        }
-        #new-chat-btn:hover {
-            opacity: 0.9;
-            transform: scale(1.05);
-        }
-
-        /* منطقة الرسائل */
-        #messages-container {
-            flex-grow: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .user-message {
-            align-self: flex-end;
-            background-color: var(--secondary);
-            color: #10102A; /* نص داكن على الذهبي */
-            border-radius: 18px 18px 0 18px;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); /* وهج ذهبي */
-        }
-
-        .ai-message {
-            align-self: flex-start;
-            background-color: var(--light-chat);
-            color: var(--dark-text);
-            border-radius: 18px 18px 18px 0;
-            white-space: pre-wrap;
-            position: relative;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.4); /* وهج سماوي */
-        }
-        
-        .message {
-            max-width: 80%;
-            padding: 12px 18px;
-            line-height: 1.6;
-            transition: all 0.2s;
-        }
-        
-        /* شريط الأدوات داخل رسالة AI */
-        .ai-message-tools {
-            position: absolute;
-            bottom: -5px;
-            right: -10px;
-            display: flex;
-            gap: 5px;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 3px 8px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px var(--primary);
-        }
-        
-        .ai-message-tools button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 4px;
-            color: var(--primary);
-            transition: color 0.2s, transform 0.2s;
-            font-size: 1rem;
-            text-shadow: 0 0 3px var(--primary);
-        }
-        
-        .ai-message-tools button:hover {
-            color: var(--secondary);
-            transform: scale(1.1);
-        }
-
-        /* مؤشر الكتابة */
-        .typing-indicator {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-style: italic;
-            color: #999;
-            align-self: flex-start;
-        }
-
-        .typing-indicator span {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: var(--primary);
-            border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out both;
-            box-shadow: 0 0 5px var(--primary);
-        }
-        
-        /* إدخال الدردشة */
-        .chat-input-area input {
-            background-color: #0A0A1F;
-            color: var(--dark-text);
-            border: 2px solid var(--primary);
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-        }
-        .chat-input-area input:focus {
-            outline: none;
-            border-color: var(--secondary);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
-        }
-
-        .chat-input-area button {
-            background-color: var(--primary);
-            text-shadow: 0 0 5px #000;
-            box-shadow: 0 0 15px var(--primary);
-        }
-        .chat-input-area button:hover {
-            background-color: #00AAAA;
-            box-shadow: 0 0 20px var(--primary);
-        }
-        
-        .loader-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(16, 16, 42, 0.9);
+        .login-left {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            color: white;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-left::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 45%;
+            top: -50%;
+            left: -50%;
+            animation: wave 15s infinite linear;
+        }
+
+        @keyframes wave {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .login-left-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .login-left h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .login-left p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-item i {
+            margin-left: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .login-right {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background-color: white;
+        }
+
+        .login-form {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-form h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background-color: #6c2bd9;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--gray);
+        }
+
+        .login-footer a {
             color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* تصميم لوحة التحكم */
+        .dashboard-container {
+            display: none;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
             z-index: 10;
-            border-radius: 16px;
         }
 
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1.0); }
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            text-align: center;
         }
 
-        /* تصميم الاستجابة للهواتف */
+        .sidebar-header h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            color: var(--dark);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-right: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background-color: var(--light);
+            border-right-color: var(--primary);
+        }
+
+        .menu-item.active {
+            background-color: rgba(26, 86, 219, 0.1);
+            border-right-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .menu-item i {
+            margin-left: 0.75rem;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .user-info:hover {
+            background-color: var(--light);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-left: 0.75rem;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .top-nav {
+            padding: 1rem 1.5rem;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-item {
+            margin-left: 1rem;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .nav-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--light);
+            color: var(--dark);
+            transition: all 0.3s;
+        }
+
+        .nav-icon:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            background-color: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background-color: #f9fafb;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 1rem;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem 1rem;
+            text-align: right;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .table th {
+            background-color: var(--light);
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            color: #b45309;
+        }
+
+        .alert i {
+            margin-left: 0.5rem;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -0.75rem;
+        }
+
+        .form-col {
+            flex: 1 0 0;
+            padding: 0 0.75rem;
+            margin-bottom: 1rem;
+            min-width: 200px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .modal-footer .btn {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+
+        .modal-footer .btn:last-child {
+            margin-right: 0;
+        }
+
+        .copy-settings-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: var(--light);
+            border: 1px dashed var(--gray);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .copy-settings-btn:hover {
+            background-color: var(--gray-light);
+        }
+
+        .copy-settings-btn i {
+            margin-left: 0.5rem;
+        }
+
+        /* تصميم متجاوب */
+        @media (max-width: 992px) {
+            .login-container {
+                flex-direction: column;
+            }
+            
+            .login-left {
+                padding: 1.5rem;
+            }
+            
+            .login-left h1 {
+                font-size: 2rem;
+            }
+            
+            .features-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar-header h2,
+            .menu-item span,
+            .user-details {
+                display: none;
+            }
+            
+            .menu-item {
+                justify-content: center;
+                padding: 1rem;
+            }
+            
+            .menu-item i {
+                margin-left: 0;
+            }
+        }
+
         @media (max-width: 768px) {
-            .chat-container {
-                height: 100vh;
-                margin: 0;
-                border-radius: 0;
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
-            .message {
-                max-width: 95%;
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
             }
-            .ai-message-tools {
-                bottom: -15px;
-                right: 0;
+            
+            .page-actions {
+                margin-top: 1rem;
+                width: 100%;
+            }
+            
+            .page-actions .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="chat-container relative">
-        <div id="loader" class="loader-overlay">
-            <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
-            <p class="text-lg">Eve بتجهز ليكم القعدة... لحظات بس!</p>
-        </div>
-        <!-- رأس الدردشة -->
-        <div class="chat-header">
-            <div>
-                <h1 class="font-bold"><i class="fas fa-brain ml-2"></i> Eve السودانية</h1>
-                <p class="opacity-80 mt-1">بتكلم سوداني، وبجيب ليك آخر الأخبار والمعلومات يا فردة.</p>
+    <!-- شاشة تسجيل الدخول -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-left">
+            <div class="login-left-content">
+                <h1>SHAHRAZAD ELECTRIC</h1>
+                <p>نظام إدارة المبيعات والمخازن المتكامل مع أحدث التقنيات لتحسين أداء عملك</p>
+                
+                <div class="features-list">
+                    <div class="feature-item">
+                        <i class="fas fa-boxes"></i>
+                        <span>إدارة الأصناف والمخازن</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-users"></i>
+                        <span>عملاء مميزين</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>إحصائيات وتقارير</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-bell"></i>
+                        <span>تنبيهات المخزون المنخفض</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-cog"></i>
+                        <span>إعدادات متقدمة</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-barcode"></i>
+                        <span>ماسح الباركود</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-robot"></i>
+                        <span>مساعد ذكي</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-file-invoice"></i>
+                        <span>فواتير مبيعات</span>
+                    </div>
+                </div>
             </div>
-            <button id="new-chat-btn" title="ابدأ محادثة جديدة">
-                <i class="fas fa-plus mr-1"></i> محادثة جديدة
-            </button>
         </div>
-
-        <!-- منطقة الرسائل -->
-        <div id="messages-container">
-            <!-- الرسائل تُضاف هنا بواسطة JavaScript -->
-        </div>
-        
-        <!-- إدخال الدردشة -->
-        <div class="chat-input-area flex p-4 border-t border-gray-900">
-            <input type="text" id="chat-input" placeholder="اكتب سؤالك ولا طلبك لـ Eve هنا..." class="flex-grow p-3 border border-gray-300 rounded-full ml-3 transition-all" autofocus>
-            <button id="send-message" class="bg-primary text-white px-5 py-3 rounded-full font-semibold hover:bg-primary/80 transition-colors shadow-lg" disabled>
-                <i class="fas fa-paper-plane"></i> إرسال
-            </button>
+        <div class="login-right">
+            <form class="login-form" id="loginForm">
+                <h2>تسجيل الدخول</h2>
+                
+                <div class="form-group">
+                    <label for="username">اسم المستخدم</label>
+                    <input type="text" id="username" class="form-control" placeholder="أدخل اسم المستخدم" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">كلمة المرور</label>
+                    <input type="password" id="password" class="form-control" placeholder="أدخل كلمة المرور" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="branch">الفرع</label>
+                    <select id="branch" class="form-control" required>
+                        <option value="">اختر الفرع</option>
+                        <option value="main">الفرع الرئيسي</option>
+                        <option value="branch1">فرع الرياض</option>
+                        <option value="branch2">فرع جدة</option>
+                        <option value="branch3">فرع الدمام</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn">تسجيل الدخول</button>
+                
+                <div class="login-footer">
+                    <a href="#" id="forgotPassword">نسيت كلمة المرور؟</a>
+                </div>
+            </form>
         </div>
     </div>
-    
+
+    <!-- لوحة التحكم -->
+    <div class="dashboard-container" id="dashboardContainer">
+        <!-- الشريط الجانبي -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>SHAHRAZAD ELECTRIC</h2>
+            </div>
+            
+            <div class="sidebar-menu">
+                <a href="#" class="menu-item active" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>لوحة التحكم</span>
+                </a>
+                <a href="#" class="menu-item" data-page="products">
+                    <i class="fas fa-boxes"></i>
+                    <span>الأصناف</span>
+                </a>
+                <a href="#" class="menu-item" data-page="warehouses">
+                    <i class="fas fa-warehouse"></i>
+                    <span>المخازن</span>
+                </a>
+                <a href="#" class="menu-item" data-page="customers">
+                    <i class="fas fa-users"></i>
+                    <span>العملاء المميزين</span>
+                </a>
+                <a href="#" class="menu-item" data-page="invoices">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>الفواتير</span>
+                </a>
+                <a href="#" class="menu-item" data-page="reports">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>الإحصائيات</span>
+                </a>
+                <a href="#" class="menu-item" data-page="alerts">
+                    <i class="fas fa-bell"></i>
+                    <span>التنبيهات</span>
+                </a>
+                <a href="#" class="menu-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>الإعدادات</span>
+                </a>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-info" id="userMenu">
+                    <div class="user-avatar">م</div>
+                    <div class="user-details">
+                        <div class="user-name">المدير العام</div>
+                        <div class="user-role">مدير النظام</div>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content">
+            <!-- شريط التنقل العلوي -->
+            <div class="top-nav">
+                <div class="nav-left">
+                    <div class="nav-item" id="sidebarToggle">
+                        <div class="nav-icon">
+                            <i class="fas fa-bars"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="nav-right">
+                    <div class="nav-item">
+                        <div class="nav-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                    <div class="nav-item">
+                        <div class="nav-icon">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge">3</span>
+                        </div>
+                    </div>
+                    <div class="nav-item">
+                        <div class="nav-icon">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                    </div>
+                    <div class="nav-item">
+                        <div class="nav-icon" id="barcodeScanner">
+                            <i class="fas fa-barcode"></i>
+                        </div>
+                    </div>
+                    <div class="nav-item">
+                        <div class="nav-icon" id="aiAssistant">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- منطقة المحتوى -->
+            <div class="content-area" id="contentArea">
+                <!-- محتوى لوحة التحكم -->
+                <div class="page-content" id="dashboardPage">
+                    <div class="page-header">
+                        <h1 class="page-title">لوحة التحكم</h1>
+                        <div class="page-actions">
+                            <button class="btn btn-secondary" id="copySettingsBtn">
+                                <i class="fas fa-copy"></i> نسخ إعداداتي
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background-color: var(--primary);">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">1,248</div>
+                                <div class="stat-label">إجمالي الأصناف</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background-color: var(--success);">
+                                <i class="fas fa-warehouse"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">5</div>
+                                <div class="stat-label">المخازن</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background-color: var(--warning);">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">342</div>
+                                <div class="stat-label">العملاء المميزين</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background-color: var(--secondary);">
+                                <i class="fas fa-file-invoice"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">1,847</div>
+                                <div class="stat-label">الفواتير</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">الأصناف ذات المخزون المنخفض</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>هناك 5 أصناف تحتاج إلى إعادة تخزين</span>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>كود الصنف</th>
+                                            <th>اسم الصنف</th>
+                                            <th>المخزن</th>
+                                            <th>المخزون الحالي</th>
+                                            <th>الحد الأدنى</th>
+                                            <th>الحالة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>P-1001</td>
+                                            <td>كابل كهرباء 2.5 مم</td>
+                                            <td>المخزن الرئيسي</td>
+                                            <td>15</td>
+                                            <td>50</td>
+                                            <td><span style="color: var(--danger);">منخفض</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>P-1005</td>
+                                            <td>مفتاح كهربائي 16A</td>
+                                            <td>مخزن الفرع 1</td>
+                                            <td>8</td>
+                                            <td>30</td>
+                                            <td><span style="color: var(--danger);">منخفض</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>P-1012</td>
+                                            <td>لمبة LED 20W</td>
+                                            <td>المخزن الرئيسي</td>
+                                            <td>22</td>
+                                            <td>40</td>
+                                            <td><span style="color: var(--warning);">تحت المراقبة</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- محتوى الأصناف -->
+                <div class="page-content" id="productsPage" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">إدارة الأصناف</h1>
+                        <div class="page-actions">
+                            <button class="btn" id="addProductBtn">
+                                <i class="fas fa-plus"></i> إضافة صنف جديد
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <p>هنا يمكنك إدارة جميع الأصناف في النظام</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- محتوى الإعدادات -->
+                <div class="page-content" id="settingsPage" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">إعدادات النظام</h1>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">تغيير كلمة المرور</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label for="currentPassword">كلمة المرور الحالية</label>
+                                    <input type="password" id="currentPassword" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label for="newPassword">كلمة المرور الجديدة</label>
+                                    <input type="password" id="newPassword" class="form-control">
+                                </div>
+                                <div class="form-col">
+                                    <label for="confirmPassword">تأكيد كلمة المرور الجديدة</label>
+                                    <input type="password" id="confirmPassword" class="form-control">
+                                </div>
+                            </div>
+                            <button class="btn">تغيير كلمة المرور</button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">إعدادات المستخدمين</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>هنا يمكنك إدارة صلاحيات المستخدمين وإعدادات الحسابات</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">الإعدادات العامة</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label for="companyName">اسم الشركة</label>
+                                    <input type="text" id="companyName" class="form-control" value="SHAHRAZAD ELECTRIC">
+                                </div>
+                                <div class="form-col">
+                                    <label for="defaultBranch">الفرع الافتراضي</label>
+                                    <select id="defaultBranch" class="form-control">
+                                        <option value="main">الفرع الرئيسي</option>
+                                        <option value="branch1">فرع الرياض</option>
+                                        <option value="branch2">فرع جدة</option>
+                                        <option value="branch3">فرع الدمام</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label for="barcodeScannerSetting">تفعيل ماسح الباركود</label>
+                                    <select id="barcodeScannerSetting" class="form-control">
+                                        <option value="enabled">مفعل</option>
+                                        <option value="disabled">معطل</option>
+                                    </select>
+                                </div>
+                                <div class="form-col">
+                                    <label for="lowStockAlert">تنبيه المخزون المنخفض</label>
+                                    <select id="lowStockAlert" class="form-control">
+                                        <option value="enabled">مفعل</option>
+                                        <option value="disabled">معطل</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn">حفظ الإعدادات</button>
+                            
+                            <div class="copy-settings-btn" id="copySettingsBtn2">
+                                <i class="fas fa-copy"></i>
+                                <span>نسخ إعداداتي</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال المساعد الذكي -->
+    <div class="modal" id="aiAssistantModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">المساعد الذكي</h3>
+                <button class="modal-close" id="closeAIModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>مرحباً! أنا المساعد الذكي لنظام SHAHRAZAD ELECTRIC. كيف يمكنني مساعدتك اليوم؟</p>
+                <div class="form-group">
+                    <label for="aiQuestion">اسألني عن أي شيء يتعلق بالنظام:</label>
+                    <textarea id="aiQuestion" class="form-control" rows="3" placeholder="اكتب سؤالك هنا..."></textarea>
+                </div>
+                <button class="btn">إرسال السؤال</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
     <script type="module">
-        // تم تصحيح: setLogLevel تم نقلها إلى استيراد firebase-app.js
-        import { initializeApp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, addDoc, setDoc, onSnapshot, collection, query, orderBy, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
 
-        // ******************************************************
-        // 1. إعدادات Firebase والـ API
-        // ******************************************************
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyBtc-pniRx5Mda5UW_kNqS0Zyi8zcKvdlU",
+          authDomain: "shahrazad-electric.firebaseapp.com",
+          projectId: "shahrazad-electric",
+          storageBucket: "shahrazad-electric.firebasestorage.app",
+          messagingSenderId: "582314926345",
+          appId: "1:582314926345:web:39c2979beadd8b47a133d8",
+          measurementId: "G-3RH0BKKW16"
+        };
 
-        setLogLevel('debug'); // لرؤية سجلات Firebase في Console
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+    </script>
 
-        // المتغيرات العالمية للبيئة (Firebase & App ID)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        // **التصحيح هنا:** فحص إن كان __firebase_config غير معرف أو فارغ، وتوفير قيمة افتراضية صالحة (بما في ذلك projectId)
-        let firebaseConfig = {};
-        try {
-            const configString = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
-            firebaseConfig = JSON.parse(configString);
-        } catch (e) {
-            console.error("Failed to parse __firebase_config:", e);
-        }
-        
-        // التحقق من وجود projectId، إذا لم يكن موجودًا، نضع قيمة افتراضية لتجنب الخطأ
-        if (!firebaseConfig.projectId) {
-            // هذا fallback مهم جداً لمنع الخطأ "projectId" not provided
-            firebaseConfig.projectId = appId; 
-            console.warn("Using appId as default projectId for Firebase configuration.");
-        }
+    <script>
+        // كود JavaScript للتحكم في النظام
+        document.addEventListener('DOMContentLoaded', function() {
+            // عناصر DOM
+            const loginContainer = document.getElementById('loginContainer');
+            const dashboardContainer = document.getElementById('dashboardContainer');
+            const loginForm = document.getElementById('loginForm');
+            const menuItems = document.querySelectorAll('.menu-item');
+            const pageContents = document.querySelectorAll('.page-content');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
+            const aiAssistant = document.getElementById('aiAssistant');
+            const aiAssistantModal = document.getElementById('aiAssistantModal');
+            const closeAIModal = document.getElementById('closeAIModal');
+            const copySettingsBtn = document.getElementById('copySettingsBtn');
+            const copySettingsBtn2 = document.getElementById('copySettingsBtn2');
+            const barcodeScanner = document.getElementById('barcodeScanner');
+            const addProductBtn = document.getElementById('addProductBtn');
 
-
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        const geminiApiKey = ""; // مفتاح LLM API
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiApiKey}`;
-        const ttsApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${geminiApiKey}`;
-        
-        let db;
-        let auth;
-        let userId = null;
-        let currentChatId = localStorage.getItem('currentChatId') || crypto.randomUUID();
-        let chatHistory = []; // سجل المحادثة لـ Gemini (للسياق)
-        let isProcessing = false;
-        let isFirebaseReady = false;
-        let unsubscribeSnapshot = null; // لتنظيف مستمع onSnapshot
-
-        // ******************************************************
-        // 2. دوال مساعدة لـ Firebase
-        // ******************************************************
-
-        /** يُنشئ المسار الخاص بمجموعة الرسائل لمحادثة معينة */
-        function getMessagesCollectionPath(chatId) {
-            // المسار لحفظ البيانات الخاصة للمستخدم: /artifacts/{appId}/users/{userId}/chats/{chatId}/messages
-            return `artifacts/${appId}/users/${userId}/chats/${chatId}/messages`;
-        }
-        
-        /** تهيئة Firebase وتسجيل الدخول */
-        async function initializeFirebase() {
-            try {
-                // **ملاحظة: استخدام firebaseConfig الذي تم التأكد من وجود projectId فيه**
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
+            // تسجيل الدخول
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const branch = document.getElementById('branch').value;
                 
-                // تسجيل الدخول باستخدام الرمز المخصص أو بشكل مجهول
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
+                // محاكاة تسجيل الدخول
+                if (username && password && branch) {
+                    loginContainer.style.display = 'none';
+                    dashboardContainer.style.display = 'flex';
                 }
-                
-                // انتظار تأكيد حالة المصادقة
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        isFirebaseReady = true;
-                        document.getElementById('loader').remove();
-                        document.getElementById('send-message').disabled = false;
-                        loadChatHistory(); // تحميل المحادثة الحالية
-                    } else {
-                        // في حالة عدم تسجيل الدخول، يبقى userId null (أو نستخدم ID عشوائي، لكن نفضل الـ uid للـ Firestore)
-                        // في هذه البيئة، onAuthStateChanged يتم تنفيذه بعد signIn.
-                        console.error("Auth state change did not return a user.");
-                    }
-                });
-
-            } catch (error) {
-                console.error("فشل في تهيئة Firebase:", error);
-                const loader = document.getElementById('loader');
-                loader.innerHTML = `<p class="text-red-500">مشكلة في الاتصال بقاعدة البيانات: ${error.message}</p>`;
-            }
-        }
-        
-        /** تحميل سجل المحادثة الحالية من Firestore */
-        function loadChatHistory() {
-            if (!isFirebaseReady || !userId) return;
-
-            if (unsubscribeSnapshot) {
-                unsubscribeSnapshot(); // إيقاف الاستماع للمحادثة السابقة
-            }
-            
-            chatHistory = []; // تصفير سجل سياق Gemini
-
-            const messagesContainer = document.getElementById('messages-container');
-            messagesContainer.innerHTML = ''; // تصفير واجهة المستخدم
-
-            const path = getMessagesCollectionPath(currentChatId);
-            // استخدم query(collection(db, path)) بدون orderBy لتجنب أخطاء الفهرسة
-            const q = query(collection(db, path)); 
-
-            // بدء الاستماع للتحديثات في الوقت الفعلي
-            unsubscribeSnapshot = onSnapshot(q, async (snapshot) => {
-                const messages = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    // التأكد من وجود البيانات الأساسية
-                    if (data.text && data.role && data.timestamp) {
-                       messages.push({ ...data, id: doc.id });
-                    }
-                });
-                
-                // فرز الرسائل محلياً حسب الوقت (للتغلب على مشكلة orderBy)
-                messages.sort((a, b) => a.timestamp.seconds - b.timestamp.seconds);
-
-                // تحديث واجهة المستخدم وسجل السياق
-                messagesContainer.innerHTML = ''; 
-                chatHistory = [];
-
-                if (messages.length === 0) {
-                    // إذا كانت المحادثة جديدة، نضع رسالة الترحيب
-                    addMessage("يا هلا بيك! أنا Eve، موديل ذكاء صناعي عام وودود، وبتكلم سوداني صافي. كيف ممكن أساعدك في بحثك، تحليلك، ولا أي شغلة إبداعية الليلة؟", false, false);
-                } else {
-                    messages.forEach(msg => {
-                        addMessage(msg.text, msg.role === 'user', false); // false = لا تحفظ في Firestore مرة أخرى
-                        // إضافة الرسالة إلى سجل سياق Gemini
-                        chatHistory.push({ role: msg.role === 'user' ? 'user' : 'model', parts: [{ text: msg.text }] });
-                    });
-                }
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }, (error) => {
-                console.error("خطأ في استماع Firestore:", error);
-                alert("يا خسارة، ما قدرت أحمل المحادثة دي. حاول ابدأ محادثة جديدة.");
             });
-        }
-        
-        /** حفظ رسالة جديدة في Firestore */
-        async function saveMessage(role, text) {
-            if (!isFirebaseReady || !userId) return;
 
-            const path = getMessagesCollectionPath(currentChatId);
-            try {
-                await addDoc(collection(db, path), {
-                    role: role,
-                    text: text,
-                    timestamp: serverTimestamp() // لتحديد وقت الحفظ
+            // التنقل بين الصفحات
+            menuItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // إزالة النشاط من جميع العناصر
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    
+                    // إضافة النشاط للعنصر الحالي
+                    this.classList.add('active');
+                    
+                    // إخفاء جميع المحتويات
+                    pageContents.forEach(content => content.style.display = 'none');
+                    
+                    // عرض المحتوى المطلوب
+                    const pageId = this.getAttribute('data-page') + 'Page';
+                    document.getElementById(pageId).style.display = 'block';
                 });
-            } catch (error) {
-                console.error("فشل في حفظ الرسالة:", error);
-                // لا نعرض alert هنا، نعتمد على log الرسالة فقط لتجنب مقاطعة المستخدم
-            }
-        }
-
-        // ******************************************************
-        // 3. وظيفة محادثة جديدة
-        // ******************************************************
-
-        function startNewChat() {
-            if (isProcessing) {
-                alert("اصبر شوية يا زول، Eve لسه بترد!");
-                return;
-            }
-            // توليد ID محادثة جديد
-            currentChatId = crypto.randomUUID();
-            localStorage.setItem('currentChatId', currentChatId);
-            
-            // إعادة تحميل سجل الدردشة (سيتم تصفير الواجهة وتحميل رسالة الترحيب الافتراضية)
-            loadChatHistory();
-        }
-
-        // ******************************************************
-        // 4. وظائف LLM و TTS
-        // ******************************************************
-
-        // الدوال المساعدة لتحويل الصوت (PCM to WAV)
-        function base64ToArrayBuffer(base64) {
-            const binaryString = atob(base64);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            return bytes.buffer;
-        }
-
-        function pcmToWav(pcm16, sampleRate) {
-            const buffer = new ArrayBuffer(44 + pcm16.length * 2);
-            const view = new DataView(buffer);
-
-            /* WAVE header */
-            writeString(view, 0, 'RIFF');
-            view.setUint32(4, 36 + pcm16.length * 2, true);
-            writeString(view, 8, 'WAVE');
-            writeString(view, 12, 'fmt ');
-            view.setUint32(16, 16, true);
-            view.setUint16(20, 1, true);
-            view.setUint16(22, 1, true);
-            view.setUint32(24, sampleRate, true);
-            view.setUint32(28, sampleRate * 2, true);
-            view.setUint16(32, 2, true);
-            view.setUint16(34, 16, true);
-
-            /* data sub-chunk */
-            writeString(view, 36, 'data');
-            view.setUint32(40, pcm16.length * 2, true);
-
-            let offset = 44;
-            for (let i = 0; i < pcm16.length; i++, offset += 2) {
-                view.setInt16(offset, pcm16[i], true);
-            }
-
-            return new Blob([view], { type: 'audio/wav' });
-        }
-
-        function writeString(view, offset, string) {
-            for (let i = 0; i < string.length; i++) {
-                view.setUint8(offset + i, string.charCodeAt(i));
-            }
-        }
-        
-        async function speakText(text) {
-            let cleanText = text.replace(/<(strong|a) [^>]*>|<\/(strong|a)>|\[|\]|\(|\)/g, '');
-            cleanText = cleanText.replace(/\n\nالمصادر:[\s\S]*/, '').trim(); 
-
-            const speakButton = event.target.closest('button');
-            if (!speakButton) return;
-            const originalIcon = speakButton.innerHTML;
-            
-            speakButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            speakButton.disabled = true;
-
-            const payload = {
-                contents: [{
-                    parts: [{ text: `اقرأ بصوت عربي واضح ومريح: ${cleanText}` }]
-                }],
-                generationConfig: {
-                    responseModalities: ["AUDIO"],
-                    speechConfig: {
-                        voiceConfig: {
-                            prebuiltVoiceConfig: { voiceName: "Kore" }
-                        }
-                    }
-                },
-                model: "gemini-2.5-flash-preview-tts"
-            };
-
-            try {
-                const response = await fetch(ttsApiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                if (!response.ok) throw new Error(`TTS API failed with status: ${response.status}`);
-
-                const result = await response.json();
-                const part = result?.candidates?.[0]?.content?.parts?.[0];
-                const audioData = part?.inlineData?.data;
-                const mimeType = part?.inlineData?.mimeType;
-
-                if (audioData && mimeType && mimeType.startsWith("audio/")) {
-                    const rateMatch = mimeType.match(/rate=(\d+)/);
-                    const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
-                    
-                    const pcmData = base64ToArrayBuffer(audioData);
-                    const pcm16 = new Int16Array(pcmData);
-                    const wavBlob = pcmToWav(pcm16, sampleRate);
-                    const audioUrl = URL.createObjectURL(wavBlob);
-
-                    const audio = new Audio(audioUrl);
-                    audio.play();
-                    
-                    audio.onended = () => { URL.revokeObjectURL(audioUrl); };
-                } else {
-                    console.error("TTS response did not contain valid audio data:", result);
-                    alert("عفواً، ما قدرت أتكلم (في مشكلة فنية).");
-                }
-            } catch (error) {
-                console.error("Error calling TTS API:", error);
-                alert(`يا خسارة، واجهت مشكلة في توليد الصوت: ${error.message}`);
-            } finally {
-                speakButton.innerHTML = originalIcon;
-                speakButton.disabled = false;
-            }
-        }
-        
-        async function summarizeText(text, summaryButton) {
-            let cleanText = text.replace(/\n\nالمصادر:[\s\S]*/, '').trim(); 
-            
-            const originalIcon = summaryButton.innerHTML;
-            summaryButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            summaryButton.disabled = true;
-            
-            const summarySystemInstruction = `أنت مساعد تلخيص فوري. مهمتك هي قراءة النص المُعطى وتلخيصه في **جملة واحدة** فقط تكون شاملة ومفهومة. لا تُضف أي مقدمات أو ختام أو تحية. يجب أن تكون الجملة مباشرة باللغة العربية.`;
-            
-            const payload = {
-                contents: [{ parts: [{ text: `لخص هذا النص في جملة واحدة: "${cleanText}"` }] }],
-                config: {
-                    systemInstruction: { parts: [{ text: summarySystemInstruction }] }
-                }
-            };
-            
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
-                const result = await response.json();
-                const summary = result.candidates?.[0]?.content?.parts?.[0]?.text || "عفواً، ما قدرت ألخص الكلام ده.";
-                
-                alert(`ملخص Eve (في جملة واحدة):\n\n${summary}`);
-                
-            } catch (error) {
-                console.error("Error calling summarization API:", error);
-                alert(`يا خسارة، في مشكلة فنية وأنا بلخص: ${error.message}`);
-            } finally {
-                summaryButton.innerHTML = originalIcon;
-                summaryButton.disabled = false;
-            }
-        }
-
-        async function processQuestionWithLLM(question) {
-            
-            if (isProcessing) return "الرجاء الانتظار حتى تنتهي Eve من الرد السابق.";
-            isProcessing = true;
-
-            // إضافة سؤال المستخدم إلى سجل سياق Gemini (سيتم حفظه في Firestore لاحقاً)
-            chatHistory.push({ role: "user", parts: [{ text: question }] });
-            
-            const systemInstruction = `أنت مساعد ذكي عام وودود، واسمك هو **Eve**.
-التعليمات الأهم: يجب أن يكون جميع حديثك **حصرياً باللهجة السودانية (السوداني)**.
-1. تحدث بأسلوب ودود ولطيف ومبسط (زي ناس البلد).
-2. يمكنك الإجابة على أي سؤال عام، المساعدة في الكتابة، التحليل، أو التخطيط، لكن بلهجة سودانية أصيلة.
-3. استخدم أداة البحث (Google Search) للحصول على معلومات حديثة وموثوقة عند الحاجة.
-4. حافظ على الردود موجزة ومباشرة قدر الإمكان، إلا إذا طلب المستخدم تفصيلاً.
-5. استعمل تعابير سودانية دارجة ومفهومة في الردود.
-`;
-
-            const payload = {
-                contents: chatHistory,
-                tools: [{ "google_search": {} }],
-                config: {
-                    systemInstruction: { parts: [{ text: systemInstruction }] }
-                }
-            };
-
-            try {
-                const MAX_RETRIES = 5;
-                let attempt = 0;
-                let response;
-
-                while (attempt < MAX_RETRIES) {
-                    try {
-                        response = await fetch(apiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-
-                        if (response.status !== 429 && response.ok) { 
-                            break; 
-                        } else if (response.status === 429) {
-                            const delay = Math.pow(2, attempt) * 1000;
-                            await new Promise(resolve => setTimeout(resolve, delay));
-                        } else {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                    } catch (error) {
-                        if (attempt === MAX_RETRIES - 1) throw error; 
-                        const delay = Math.pow(2, attempt) * 1000;
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                    }
-                    attempt++;
-                }
-                
-                if (!response || !response.ok) throw new Error("Failed to get a response after multiple retries.");
-
-
-                const result = await response.json();
-                const candidate = result.candidates?.[0];
-
-                if (candidate?.content?.parts?.[0]?.text) {
-                    const responseText = candidate.content.parts[0].text;
-                    
-                    // إضافة رد النموذج إلى سجل السياق
-                    chatHistory.push({ role: "model", parts: [{ text: responseText }] });
-                    
-                    let sources = [];
-                    const groundingMetadata = candidate.groundingMetadata;
-                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
-                        sources = groundingMetadata.groundingAttributions
-                            .map(attribution => ({
-                                uri: attribution.web?.uri,
-                                title: attribution.web?.title,
-                            }))
-                            .filter(source => source.uri && source.title);
-                    }
-                    
-                    let finalAnswer = responseText;
-                    if (sources.length > 0) {
-                        finalAnswer += "\n\n**المصادر (جبناها ليك من النت):**\n";
-                        sources.forEach((source, index) => {
-                            finalAnswer += `- [${source.title}](${source.uri})\n`;
-                        });
-                    }
-                    
-                    isProcessing = false;
-                    return finalAnswer;
-
-                } else {
-                    isProcessing = false;
-                    return "عفواً، ما قدرت ألقى ليك رد. الظاهر النت ضعيف ولا السؤال ما واضح لي.";
-                }
-
-            } catch (error) {
-                isProcessing = false;
-                console.error("Error calling LLM API:", error);
-                return `عفواً، واجهت مشكلة تقنية أثناء التواصل مع مساعد Eve: ${error.message}`;
-            }
-        }
-        
-        // ******************************************************
-        // 5. تحديث الواجهة والوظائف المساعدة
-        // ******************************************************
-
-        /** إضافة رسالة لواجهة المستخدم */
-        function addMessage(text, isUser = false, saveToDb = true) {
-            const messagesContainer = document.getElementById('messages-container');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
-            
-            let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
-            // روابط المصادر يجب أن تظهر بلون فاتح داخل صندوق الرسالة الداكن
-            formattedText = formattedText.replace(/- \[(.*?)\]\((.*?)\)/g, (match, title, url) => {
-                return `- <a href="${url}" target="_blank" class="text-secondary hover:text-yellow-200 underline">${title}</a>`;
             });
-            
-            messageDiv.innerHTML = formattedText;
-            
-            if (!isUser) {
-                const toolsDiv = document.createElement('div');
-                toolsDiv.className = 'ai-message-tools';
+
+            // تبديل الشريط الجانبي
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+            });
+
+            // فتح المساعد الذكي
+            aiAssistant.addEventListener('click', function() {
+                aiAssistantModal.style.display = 'flex';
+            });
+
+            // إغلاق المساعد الذكي
+            closeAIModal.addEventListener('click', function() {
+                aiAssistantModal.style.display = 'none';
+            });
+
+            // نسخ الإعدادات
+            function copySettings() {
+                // محاكاة نسخ الإعدادات
+                alert('تم نسخ إعداداتك بنجاح! سيتم تنزيل ملف الإعدادات.');
                 
-                const summarizeButton = document.createElement('button');
-                summarizeButton.innerHTML = '✨ <i class="fas fa-compress-alt" title="لخص الكلام ده"></i>';
-                summarizeButton.onclick = (e) => {
-                    const rawText = messageDiv.innerText.replace(/\n\nالمصادر:[\s\S]*/, '').trim(); 
-                    summarizeText(rawText, e.currentTarget);
+                // محاكاة إنشاء ملف وتنزيله
+                const settings = {
+                    companyName: document.getElementById('companyName').value,
+                    defaultBranch: document.getElementById('defaultBranch').value,
+                    barcodeScanner: document.getElementById('barcodeScannerSetting').value,
+                    lowStockAlert: document.getElementById('lowStockAlert').value
                 };
-                toolsDiv.appendChild(summarizeButton);
-
-                const speakButton = document.createElement('button');
-                speakButton.innerHTML = '✨ <i class="fas fa-volume-up" title="قول الكلام ده"></i>';
-                speakButton.onclick = (e) => {
-                     const rawText = messageDiv.innerText.replace(/\n\nالمصادر:[\s\S]*/, '').trim(); 
-                     speakText(rawText);
-                };
-                toolsDiv.appendChild(speakButton);
                 
-                messageDiv.appendChild(toolsDiv);
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(settings, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "shahrazad_settings.json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
             }
-            
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-            if (saveToDb) {
-                saveMessage(isUser ? 'user' : 'model', text);
-            }
-        }
+            copySettingsBtn.addEventListener('click', copySettings);
+            copySettingsBtn2.addEventListener('click', copySettings);
 
-        function showTypingIndicator() {
-            const messagesContainer = document.getElementById('messages-container');
-            const indicatorDiv = document.createElement('div');
-            indicatorDiv.className = 'typing-indicator ai-message';
-            indicatorDiv.innerHTML = '<span></span><span></span><span></span> Eve قاعدة تفكر...';
-            messagesContainer.appendChild(indicatorDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            return indicatorDiv;
-        }
+            // محاكاة ماسح الباركود
+            barcodeScanner.addEventListener('click', function() {
+                alert('جارٍ تشغيل ماسح الباركود...');
+                // في التطبيق الحقيقي، سيتم هنا تفعيل الكاميرا لقراءة الباركود
+            });
 
-        // ******************************************************
-        // 6. معالجة الأحداث
-        // ******************************************************
+            // إضافة صنف جديد
+            addProductBtn.addEventListener('click', function() {
+                alert('فتح نموذج إضافة صنف جديد');
+                // في التطبيق الحقيقي، سيتم هنا فتح نموذج لإضافة صنف جديد
+            });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const chatInput = document.getElementById('chat-input');
-            const sendMessage = document.getElementById('send-message');
-            const newChatBtn = document.getElementById('new-chat-btn');
-            
-            newChatBtn.addEventListener('click', startNewChat);
-
-            const handleSendMessage = async () => {
-                const question = chatInput.value.trim();
-                if (!question || isProcessing || !isFirebaseReady) return;
-
-                // 1. إضافة رسالة المستخدم للواجهة وحفظها في Firestore
-                addMessage(question, true, true);
-                chatInput.value = '';
-
-                const typingIndicator = showTypingIndicator();
-                
-                try {
-                    // 2. معالجة السؤال بواسطة LLM
-                    const answer = await processQuestionWithLLM(question);
-                    typingIndicator.remove();
-                    
-                    // 3. إضافة رد Eve للواجهة وحفظه في Firestore (ملاحظة: onSnapshot سيتولى العرض الفعلي بعد الحفظ)
-                    // بما أننا نستخدم onSnapshot، فالعرض يجب أن يحدث عبر المستمع.
-                    // لكن في هذه الحالة، للحفاظ على سرعة الاستجابة، سنعتمد على addMessage مباشرة، والـ Firestore سيقوم بالتأكد من التزامن لاحقاً
-                    // لحل مشكلة السباق، نحفظ الرسالة أولاً ثم نعتمد على onSnapshot. لكن لتجنب التعقيد، سنعتمد على onSnapshot فقط للعرض، وسنقوم بحفظ الرسالتين متتاليتين.
-                    
-                    // الرسالة تم حفظها مسبقاً في `saveMessage` داخل `addMessage` للـ `user`.
-                    
-                    // نحتاج الآن فقط لحفظ رد الموديل، حيث سيقوم onSnapshot بعرضها
-                    await saveMessage('model', answer); 
-
-                } catch (error) {
-                    typingIndicator.remove();
-                    // استخدام addMessage(..., false, true) لحفظ رسالة الخطأ في Firestore أيضاً
-                    addMessage("عفواً، حصلت مشكلة غير متوقعة. راجع وحدة التحكم (Console) عشان تعرف التفاصيل.", false, true);
-                    console.error("Critical error in chat process:", error);
-                }
-            };
-            
-            sendMessage.addEventListener('click', handleSendMessage);
-            chatInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    handleSendMessage();
+            // إغلاق المودال عند النقر خارج المحتوى
+            window.addEventListener('click', function(e) {
+                if (e.target === aiAssistantModal) {
+                    aiAssistantModal.style.display = 'none';
                 }
             });
-            
-            // بدء التهيئة
-            initializeFirebase();
         });
     </script>
 </body>
