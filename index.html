@@ -3,801 +3,1761 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHAHRAZAD ELECTRIC - نظام المبيعات</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>SHAHRAZAD ELECTRIC | نظام إدارة المبيعات المتقدم</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
     <style>
-        /* الأنماط الأساسية من النظام */
-        :root {
-            --primary: #1a56db;
-            --primary-dark: #1e429f;
-            --secondary: #7e3af2;
-            --success: #0e9f6e;
-            --warning: #f59e0b;
-            --danger: #e02424;
-            --light: #f3f4f6;
-            --dark: #1f2937;
-            --gray: #6b7280;
-            --gray-light: #e5e7eb;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #f9fafb;
-            color: var(--dark);
-            direction: rtl;
-        }
-
-        /* تصميم المساعد الذكي السوداني العائم */
-        .sudanese-assistant {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            z-index: 1000;
-        }
-
-        .sudanese-assistant-btn {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #8B4513, #D2691E);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 20px rgba(139, 69, 19, 0.3);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            transition: all 0.3s ease;
-            animation: sudanesePulse 2s infinite;
-            position: relative;
-        }
-
-        .sudanese-assistant-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 25px rgba(139, 69, 19, 0.5);
-        }
-
-        @keyframes sudanesePulse {
-            0% {
-                box-shadow: 0 4px 20px rgba(139, 69, 19, 0.4);
+        /* Custom styles for SHAHRAZAD ELECTRIC identity */
+        body { font-family: 'Cairo', sans-serif; background-color: #f4f7fa; }
+        /* Brand color (Strong blue) */
+        .text-shahrazad { color: #004d99; } 
+        .bg-shahrazad { background-color: #004d99; }
+        /* Advanced gradient background */
+        .gradient-bg { background: linear-gradient(135deg, #004d99 0%, #002d5b 100%); }
+        /* Soft-edged cards with high shadow */
+        .card { background-color: white; border-radius: 12px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12); }
+        /* Chat box style for the smart assistant */
+        #chat-body { height: 300px; overflow-y: auto; display: flex; flex-direction: column-reverse; }
+        .chat-message-user { background-color: #dbeafe; border-bottom-right-radius: 0; }
+        .chat-message-ai { background-color: #e0f2f1; color: #004d99; border-bottom-left-radius: 0; }
+        
+        /* Styles for printing the invoice */
+        @media print {
+            body * {
+                visibility: hidden;
             }
-            50% {
-                box-shadow: 0 4px 30px rgba(210, 105, 30, 0.8);
+            .print-area, .print-area * {
+                visibility: visible;
             }
-            100% {
-                box-shadow: 0 4px 20px rgba(139, 69, 19, 0.4);
+            .print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            /* Hide print-only buttons */
+            .print-controls {
+                display: none !important;
             }
         }
-
-        .sudanese-assistant-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: var(--danger);
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: bounce 1s infinite alternate;
-        }
-
-        .sudanese-chat-container {
-            position: fixed;
-            bottom: 120px;
-            left: 30px;
-            width: 420px;
-            height: 600px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            z-index: 1001;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            border: 2px solid #8B4513;
-        }
-
-        .sudanese-chat-container.active {
-            display: flex;
-            animation: slideUp 0.3s ease;
-        }
-
-        .sudanese-chat-header {
-            background: linear-gradient(135deg, #8B4513, #D2691E);
-            color: white;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .sudanese-chat-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: bold;
-        }
-
-        .sudanese-chat-title i {
-            font-size: 20px;
-        }
-
-        .sudanese-chat-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s;
-        }
-
-        .sudanese-chat-body {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background: #fdf6e3;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .sudanese-message {
-            max-width: 85%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            line-height: 1.4;
-            position: relative;
-            animation: messageSlide 0.3s ease;
-        }
-
-        .sudanese-message.bot {
-            background: white;
-            border: 2px solid #D2691E;
-            border-bottom-right-radius: 4px;
-            align-self: flex-start;
-        }
-
-        .sudanese-message.user {
-            background: #8B4513;
-            color: white;
-            border-bottom-left-radius: 4px;
-            align-self: flex-end;
-        }
-
-        .sudanese-message-time {
-            font-size: 11px;
-            opacity: 0.7;
-            margin-top: 5px;
-            text-align: right;
-        }
-
-        .sudanese-word-explanation {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin-top: 8px;
-            font-size: 12px;
-        }
-
-        .sudanese-chat-footer {
-            padding: 20px;
-            border-top: 2px solid #D2691E;
-            background: white;
-        }
-
-        .sudanese-chat-input-container {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .sudanese-chat-input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #D2691E;
-            border-radius: 25px;
-            outline: none;
-            transition: border 0.3s;
-            background: #fdf6e3;
-        }
-
-        .sudanese-chat-input:focus {
-            border-color: #8B4513;
-            background: white;
-        }
-
-        .sudanese-chat-send {
-            background: #8B4513;
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s;
-        }
-
-        .sudanese-chat-send:hover {
-            background: #654321;
-        }
-
-        .sudanese-quick-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 15px;
-        }
-
-        .sudanese-quick-action {
-            background: #fdf6e3;
-            border: 1px solid #D2691E;
-            border-radius: 15px;
-            padding: 8px 12px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: #8B4513;
-        }
-
-        .sudanese-quick-action:hover {
-            background: #8B4513;
-            color: white;
-            border-color: #8B4513;
-        }
-
-        .sudanese-typing-indicator {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 12px 16px;
-            background: white;
-            border: 2px solid #D2691E;
-            border-radius: 18px;
-            border-bottom-right-radius: 4px;
-            align-self: flex-start;
-            max-width: 80px;
-        }
-
-        .sudanese-typing-dot {
-            width: 8px;
-            height: 8px;
-            background: #8B4513;
-            border-radius: 50%;
-            animation: typing 1.4s infinite ease-in-out;
-        }
-
-        .word-meaning-popup {
-            position: absolute;
-            background: #8B4513;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            z-index: 1002;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            max-width: 200px;
-            display: none;
-        }
-
-        /* تصميم متجاوب */
-        @media (max-width: 768px) {
-            .sudanese-chat-container {
-                width: calc(100vw - 60px);
-                left: 30px;
-                height: 60vh;
-            }
-
-            .sudanese-assistant {
-                bottom: 20px;
-                left: 20px;
-            }
-
-            .sudanese-assistant-btn {
-                width: 60px;
-                height: 60px;
-                font-size: 20px;
-            }
-        }
-
-        /* الأنماط الأساسية للنظام */
-        .login-container {
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .login-left {
-            flex: 1;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            padding: 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .dashboard-container {
-            display: none;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .sidebar {
-            width: 260px;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            z-index: 10;
-        }
-
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* ... باقي الأنماط الأساسية للنظام */
+        /* Scrollbar styling for a cleaner look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #004d99; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #002d5b; }
     </style>
 </head>
-<body>
-    <!-- المساعد الذكي السوداني العائم -->
-    <div class="sudanese-assistant">
-        <button class="sudanese-assistant-btn" id="sudaneseAssistantBtn">
-            <i class="fas fa-hands-helping"></i>
-            <div class="sudanese-assistant-badge" id="sudaneseNotificationBadge">3</div>
-        </button>
-        <div class="sudanese-chat-container" id="sudaneseChatContainer">
-            <div class="sudanese-chat-header">
-                <div class="sudanese-chat-title">
-                    <i class="fas fa-hands-helping"></i>
-                    <span>المساعد السوداني</span>
-                </div>
-                <button class="sudanese-chat-close" id="sudaneseChatClose">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="sudanese-chat-body" id="sudaneseChatBody">
-                <!-- الرسائل ستضاف هنا ديناميكياً -->
-            </div>
-            <div class="sudanese-chat-footer">
-                <div class="sudanese-chat-input-container">
-                    <input type="text" class="sudanese-chat-input" id="sudaneseChatInput" placeholder="اكتب رسالتك باللهجة السودانية...">
-                    <button class="sudanese-chat-send" id="sudaneseChatSend">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-                <div class="sudanese-quick-actions" id="sudaneseQuickActions">
-                    <!-- الإجراءات السريعة ستضاف هنا -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- شاشة تسجيل الدخول -->
-    <div class="login-container" id="loginContainer">
-        <div class="login-left">
-            <div class="login-left-content">
-                <h1>SHAHRAZAD ELECTRIC</h1>
-                <p>نظام إدارة المبيعات والمخازن المتكامل مع المساعد الذكي السوداني</p>
-                <div class="features-list">
-                    <div class="feature-item">
-                        <i class="fas fa-robot"></i>
-                        <span>مساعد ذكي سوداني</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-language"></i>
-                        <span>فهم اللهجة السودانية</span>
-                    </div>
-                    <!-- باقي الميزات -->
-                </div>
-            </div>
-        </div>
-        <div class="login-right">
-            <!-- نموذج تسجيل الدخول -->
-        </div>
-    </div>
-
-    <!-- لوحة التحكم -->
-    <div class="dashboard-container" id="dashboardContainer">
-        <!-- محتوى لوحة التحكم -->
-    </div>
-
-    <!-- تضمين ملف المساعد السوداني -->
-    <script src="assistant.js"></script>
-
+<body class="antialiased">
+    
     <script>
-        // كود JavaScript للتحكم في النظام والمساعد السوداني
-        document.addEventListener('DOMContentLoaded', function() {
-            // عناصر DOM للمساعد السوداني
-            const sudaneseAssistantBtn = document.getElementById('sudaneseAssistantBtn');
-            const sudaneseChatContainer = document.getElementById('sudaneseChatContainer');
-            const sudaneseChatClose = document.getElementById('sudaneseChatClose');
-            const sudaneseChatBody = document.getElementById('sudaneseChatBody');
-            const sudaneseChatInput = document.getElementById('sudaneseChatInput');
-            const sudaneseChatSend = document.getElementById('sudaneseChatSend');
-            const sudaneseQuickActions = document.getElementById('sudaneseQuickActions');
-            const sudaneseNotificationBadge = document.getElementById('sudaneseNotificationBadge');
-
-            // إنشاء مثيل المساعد السوداني
-            const sudaneseAssistant = new SudaneseArabicAssistant();
-
-            // بيانات المحادثة
-            let conversationHistory = [];
-            let unreadMessages = 3;
-
-            // رسائل الترحيب الأولية باللهجة السودانية
-            const welcomeMessages = [
-                {
-                    type: 'bot',
-                    text: 'السلام عليكم ورحمة الله وبركاته! 🌸',
-                    time: getCurrentTime()
-                },
-                {
-                    type: 'bot',
-                    text: 'أهلًا وسهلًا في نظام SHAHRAZAD ELECTRIC! 🎉',
-                    time: getCurrentTime()
-                },
-                {
-                    type: 'bot',
-                    text: 'أنا المساعد السوداني، بقدر أساعدك في:',
-                    time: getCurrentTime()
-                },
-                {
-                    type: 'bot',
-                    text: '• المخزون والبضاعة<br>• الفواتير والمبيعات<br>• العملاء والزبائن<br>• التقارير والإحصائيات<br>• وأي حاجة تانية!',
-                    time: getCurrentTime()
-                },
-                {
-                    type: 'bot',
-                    text: 'تقدر تكلمني باللهجة السودانية عادي! 🗣️',
-                    time: getCurrentTime()
-                }
-            ];
-
-            // الإجراءات السريعة باللهجة السودانية
-            const quickActions = [
-                { text: 'عايز أعرف المخزون', action: 'check_inventory' },
-                { text: 'ودي أعمل فاتورة جديدة', action: 'new_invoice' },
-                { text: 'شنو أحسن المبيعات', action: 'top_sales' },
-                { text: 'قديه عدد العملاء', action: 'customer_count' },
-                { text: 'عندي مشكلة في النظام', action: 'system_issue' },
-                { text: 'ودي أزود صنف جديد', action: 'add_product' }
-            ];
-
-            // تهيئة المحادثة السودانية
-            function initSudaneseChat() {
-                // إضافة رسائل الترحيب
-                welcomeMessages.forEach(msg => {
-                    addMessageToSudaneseChat(msg.type, msg.text, msg.time);
-                });
-
-                // إضافة الإجراءات السريعة
-                renderSudaneseQuickActions();
-                
-                // إخفاء الإشعارات بعد فتح المحادثة
-                unreadMessages = 0;
-                updateSudaneseNotificationBadge();
-            }
-
-            // إضافة رسالة إلى المحادثة السودانية
-            function addMessageToSudaneseChat(type, text, time = null) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `sudanese-message ${type}`;
-                
-                if (!time) {
-                    time = getCurrentTime();
-                }
-                
-                messageDiv.innerHTML = `
-                    <div>${text}</div>
-                    <div class="sudanese-message-time">${time}</div>
-                `;
-                
-                sudaneseChatBody.appendChild(messageDiv);
-                scrollSudaneseToBottom();
-                
-                // حفظ في السجل
-                conversationHistory.push({ type, text, time });
-            }
-
-            // إضافة رسالة مع شرح الكلمات السودانية
-            function addMessageWithExplanation(type, text, explanation, time = null) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `sudanese-message ${type}`;
-                
-                if (!time) {
-                    time = getCurrentTime();
-                }
-                
-                messageDiv.innerHTML = `
-                    <div>${text}</div>
-                    <div class="sudanese-word-explanation">${explanation}</div>
-                    <div class="sudanese-message-time">${time}</div>
-                `;
-                
-                sudaneseChatBody.appendChild(messageDiv);
-                scrollSudaneseToBottom();
-            }
-
-            // معالجة الرسائل باللهجة السودانية
-            function handleSudaneseMessage(message) {
-                if (!message.trim()) return;
-                
-                // إضافة رسالة المستخدم
-                addMessageToSudaneseChat('user', message);
-                
-                // معالجة الرسالة باستخدام المساعد السوداني
-                const response = sudaneseAssistant.processMessage(message);
-                
-                // محاكاة وقت المعالجة
-                showSudaneseTypingIndicator();
-                
-                setTimeout(() => {
-                    hideSudaneseTypingIndicator();
-                    
-                    // عرض الرد مع الشرح
-                    if (response.explanation && response.explanation.includes('شرح الجملة')) {
-                        addMessageWithExplanation('bot', response.response, response.explanation);
-                    } else {
-                        addMessageToSudaneseChat('bot', response.response);
+        // Custom Tailwind Configuration (Optional, but useful for branding)
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        shahrazad: '#004d99', // Primary brand color
+                        'shahrazad-light': '#0066cc',
                     }
-                    
-                    // إذا كانت هناك كلمات سودانية، إضافة تفاعل خاص
-                    if (response.words && response.words.some(word => word.isSudanese)) {
-                        addSudaneseWordsHighlight(response.words);
-                    }
-                }, 1000 + Math.random() * 1000);
-                
-                // مسح حقل الإدخال
-                sudaneseChatInput.value = '';
-            }
-
-            // إضافة تمييز للكلمات السودانية
-            function addSudaneseWordsHighlight(words) {
-                const sudaneseWords = words.filter(word => word.isSudanese);
-                if (sudaneseWords.length > 0) {
-                    const explanation = sudaneseWords.map(word => 
-                        `"${word.word}" ➝ ${word.meaning}`
-                    ).join('<br>');
-                    
-                    const highlightMsg = `📚 الكلمات السودانية في رسالتك:<br><br>${explanation}`;
-                    addMessageToSudaneseChat('bot', highlightMsg);
-                }
-            }
-
-            // عرض مؤشر الكتابة
-            function showSudaneseTypingIndicator() {
-                const typingDiv = document.createElement('div');
-                typingDiv.className = 'sudanese-typing-indicator';
-                typingDiv.id = 'sudaneseTypingIndicator';
-                typingDiv.innerHTML = `
-                    <div class="sudanese-typing-dot"></div>
-                    <div class="sudanese-typing-dot"></div>
-                    <div class="sudanese-typing-dot"></div>
-                `;
-                
-                sudaneseChatBody.appendChild(typingDiv);
-                scrollSudaneseToBottom();
-            }
-
-            // إخفاء مؤشر الكتابة
-            function hideSudaneseTypingIndicator() {
-                const typingIndicator = document.getElementById('sudaneseTypingIndicator');
-                if (typingIndicator) {
-                    typingIndicator.remove();
-                }
-            }
-
-            // التمرير إلى الأسفل
-            function scrollSudaneseToBottom() {
-                sudaneseChatBody.scrollTop = sudaneseChatBody.scrollHeight;
-            }
-
-            // الحصول على الوقت الحالي
-            function getCurrentTime() {
-                const now = new Date();
-                return now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
-            }
-
-            // عرض الإجراءات السريعة السودانية
-            function renderSudaneseQuickActions() {
-                sudaneseQuickActions.innerHTML = '';
-                
-                quickActions.forEach(action => {
-                    const actionBtn = document.createElement('button');
-                    actionBtn.className = 'sudanese-quick-action';
-                    actionBtn.textContent = action.text;
-                    actionBtn.addEventListener('click', () => {
-                        handleSudaneseQuickAction(action.action);
-                    });
-                    sudaneseQuickActions.appendChild(actionBtn);
-                });
-            }
-
-            // معالجة الإجراءات السريعة السودانية
-            function handleSudaneseQuickAction(action) {
-                let message = '';
-                
-                switch(action) {
-                    case 'check_inventory':
-                        message = 'عايز أعرف المخزون الموجود';
-                        break;
-                    case 'new_invoice':
-                        message = 'ودي أعمل فاتورة جديدة';
-                        break;
-                    case 'top_sales':
-                        message = 'شنو أحسن الأصناف مبيعاً';
-                        break;
-                    case 'customer_count':
-                        message = 'قديه عدد العملاء الموجودين';
-                        break;
-                    case 'system_issue':
-                        message = 'عندي مشكلة في النظام';
-                        break;
-                    case 'add_product':
-                        message = 'عايز أزود صنف جديد في المخزون';
-                        break;
-                }
-                
-                handleSudaneseMessage(message);
-            }
-
-            // تحديث شارة الإشعارات السودانية
-            function updateSudaneseNotificationBadge() {
-                if (unreadMessages > 0) {
-                    sudaneseNotificationBadge.textContent = unreadMessages;
-                    sudaneseNotificationBadge.style.display = 'flex';
-                } else {
-                    sudaneseNotificationBadge.style.display = 'none';
-                }
-            }
-
-            // إضافة رسائل ترحيب تلقائية
-            function addSudaneseWelcomeMessages() {
-                if (!sudaneseChatContainer.classList.contains('active')) {
-                    unreadMessages++;
-                    updateSudaneseNotificationBadge();
-                }
-            }
-
-            // الأحداث للمساعد السوداني
-            sudaneseAssistantBtn.addEventListener('click', function() {
-                sudaneseChatContainer.classList.toggle('active');
-                if (sudaneseChatContainer.classList.contains('active')) {
-                    initSudaneseChat();
-                    unreadMessages = 0;
-                    updateSudaneseNotificationBadge();
-                }
-            });
-
-            sudaneseChatClose.addEventListener('click', function() {
-                sudaneseChatContainer.classList.remove('active');
-            });
-
-            sudaneseChatSend.addEventListener('click', function() {
-                handleSudaneseMessage(sudaneseChatInput.value);
-            });
-
-            sudaneseChatInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleSudaneseMessage(sudaneseChatInput.value);
-                }
-            });
-
-            // إضافة رسائل ترحيب تلقائية كل 30 ثانية إذا كانت النافذة مغلقة
-            setInterval(addSudaneseWelcomeMessages, 30000);
-
-            // تهيئة أولية
-            updateSudaneseNotificationBadge();
-
-            // دمج المساعد السوداني مع النظام الرئيسي
-            integrateSudaneseAssistant();
-
-            // دمج المساعد مع النظام الرئيسي
-            function integrateSudaneseAssistant() {
-                // جعل المساعد متاحاً globally
-                window.sudaneseAssistant = sudaneseAssistant;
-                
-                // إضافة أوامر صوتية (محاكاة)
-                setupVoiceCommands();
-                
-                // ربط مع أحداث النظام
-                setupSystemIntegration();
-            }
-
-            // إعداد الأوامر الصوتية
-            function setupVoiceCommands() {
-                // يمكن إضافة أوامر صوتية هنا في المستقبل
-                console.log('🎤 الأوامر الصوتية جاهزة للتطوير');
-            }
-
-            // إعداد التكامل مع النظام
-            function setupSystemIntegration() {
-                // ربط المساعد مع أحداث النظام
-                document.addEventListener('inventoryLow', function(e) {
-                    const message = `⚠️ تنبيه: الصنف ${e.detail.product} مخزونه منخفض. المخزون الحالي: ${e.detail.stock}`;
-                    addMessageToSudaneseChat('bot', message);
-                    unreadMessages++;
-                    updateSudaneseNotificationBadge();
-                });
-
-                document.addEventListener('newSale', function(e) {
-                    const message = `💰 مبيعات جديدة: تم بيع ${e.detail.amount} ر.س`;
-                    addMessageToSudaneseChat('bot', message);
-                });
-
-                // إضافة اختصار لوحة المفاتيح للمساعد
-                document.addEventListener('keydown', function(e) {
-                    if (e.ctrlKey && e.key === 'm') {
-                        e.preventDefault();
-                        sudaneseChatContainer.classList.toggle('active');
-                        if (sudaneseChatContainer.classList.contains('active')) {
-                            initSudaneseChat();
-                        }
-                    }
-                });
-            }
-
-            // وظائف مساعدة للوصول من النظام
-            window.getSudaneseTranslation = function(text) {
-                return sudaneseAssistant.translateSudaneseText(text);
-            };
-
-            window.analyzeSudaneseText = function(text) {
-                return sudaneseAssistant.processMessage(text);
-            };
-
-            // تهيئة النظام الرئيسي
-            initMainSystem();
-        });
-
-        // تهيئة النظام الرئيسي
-        function initMainSystem() {
-            // كود تهيئة النظام الأساسي
-            console.log('🚀 نظام SHAHRAZAD ELECTRIC مع المساعد السوداني جاهز');
-            
-            // محاكاة تسجيل الدخول التلقائي للعرض
-            setTimeout(() => {
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('dashboardContainer').style.display = 'flex';
-            }, 2000);
-        }
-
-        // وظائف عامة للنظام
-        function displayChatMessage(message, sender) {
-            // هذه الدالة يمكن استخدامها من قبل النظام لعرض الرسائل
-            if (sender === 'system') {
-                addMessageToSudaneseChat('bot', `🔔 ${message}`);
+                },
             }
         }
     </script>
+    
+    <script type="module">
+        
+        // --- 1. Firebase Configuration ---
+        const defaultFirebaseConfig = {
+            apiKey: "AIzaSyBtc-pniRx5Mda5UW_kNqS0Zyi8zcKvdlU",
+            authDomain: "shahrazad-electric.firebaseapp.com",
+            projectId: "shahrazad-electric",
+            storageBucket: "shahrazad-electric.firebasestorage.app",
+            messagingSenderId: "582314926345",
+            appId: "1:582314926345:web:39c2979beadd8b47a133d8",
+            measurementId: "G-3RH0BKKW16"
+        };
+        
+        // Fetch global variables from the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-shahrazad-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const firestoreConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : defaultFirebaseConfig;
+
+        // --- 2. Firebase Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        // **ملاحظة:** تم إزالة signInAnonymously من القائمة لمنع استخدامه
+        import { getAuth, signInWithCustomToken, onAuthStateChanged, signOut, updatePassword, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        // تم استيراد enablePersistence هنا لتمكين وضع عدم الاتصال
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, query, where, addDoc, updateDoc, deleteDoc, writeBatch, getDocs, enablePersistence, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // --- 3. Initialization ---
+        const app = initializeApp(firestoreConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        setLogLevel('Debug'); // Enable debug logs
+
+        // --- 4. Global State (App) ---
+        window.App = {
+            db,
+            auth,
+            appId,
+            userId: null,
+            userName: '',
+            userRole: 'staff',
+            view: 'loading',
+            data: { products: [], customers: [], invoices: [], users: [], alerts: [], warehouses: [] },
+            draftInvoice: { items: [], subTotal: 0, totalDiscount: 0, grandTotal: 0, customerId: null, invoiceNumber: 0 }, 
+            currentInvoiceForView: null,
+            isOnline: navigator.onLine,
+            lowStockThreshold: 10,
+            
+            getCollectionPath(collectionName) {
+                return `artifacts/${this.appId}/public/data/${collectionName}`;
+            },
+        };
+
+        // ====================================================================
+        //                      UTILITY CLASS & HELPERS
+        // ====================================================================
+        class Assistant {
+            constructor(name = "المساعد الرقمي") {
+                this.name = name;
+            }
+
+            calculateSum(a, b) {
+                if (typeof a !== 'number' || typeof b !== 'number') {
+                    return NaN;
+                }
+                return a + b;
+            }
+
+            generateGreeting(userName) {
+                if (!userName || typeof userName !== 'string') {
+                    userName = "صديقنا العزيز";
+                }
+                return `أهلاً بك يا ${userName}! ${this.name} في خدمتك.`;
+            }
+
+            formatCurrentDate() {
+                const now = new Date();
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                return now.toLocaleDateString('ar-EG', options);
+            }
+            
+            formatTimestamp(timestamp) {
+                if (!timestamp) return 'غير محدد';
+                const date = (timestamp.toDate && typeof timestamp.toDate === 'function') ? timestamp.toDate() : new Date(timestamp);
+                const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                return date.toLocaleDateString('ar-EG', options);
+            }
+            
+            formatCurrency(amount) {
+                return new Intl.NumberFormat('ar-EG', {
+                    style: 'currency',
+                    currency: 'EGP', // الجنيه المصري، يمكنك تغييرها حسب الحاجة
+                    minimumFractionDigits: 2,
+                }).format(amount);
+            }
+        }
+        
+        const myAssistant = new Assistant("مساعد واجهة المستخدم");
+        
+        function renderKPICard(title, value, icon, bgColor) {
+            return `
+                <div class="card p-5 flex items-center ${bgColor} text-white shadow-lg">
+                    <div class="p-3 rounded-full bg-white bg-opacity-20 ml-4">
+                        <i data-lucide="${icon}" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm opacity-80">${title}</p>
+                        <p class="text-3xl font-bold">${value}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ====================================================================
+        //                      GLOBAL ALERT SYSTEM IMPLEMENTATION
+        // ====================================================================
+        
+        window.alertUser = (message, type = 'info', duration = 3000) => {
+            const alertBox = document.getElementById('global-alert');
+            if (!alertBox) return;
+
+            if (window.alertTimeout) {
+                clearTimeout(window.alertTimeout);
+            }
+
+            let bgColorClass = 'bg-blue-500'; 
+            let icon = 'info';
+
+            switch (type) {
+                case 'success':
+                    bgColorClass = 'bg-green-500';
+                    icon = 'check-circle';
+                    break;
+                case 'error':
+                    bgColorClass = 'bg-red-600';
+                    icon = 'x-octagon';
+                    break;
+                case 'warning':
+                    bgColorClass = 'bg-yellow-600'; 
+                    icon = 'alert-triangle';
+                    break;
+            }
+            
+            alertBox.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-xl text-white transition-all duration-300 transform translate-y-0 opacity-100 ${bgColorClass} flex items-center`;
+            alertBox.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 ml-3"></i><span>${message}</span>`;
+            lucide.createIcons();
+            
+            window.alertTimeout = setTimeout(() => {
+                alertBox.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-xl text-white transition-all duration-300 transform -translate-y-20 opacity-0`;
+            }, duration);
+        };
+
+        // ====================================================================
+        //          Network Status & Offline Sync Unit
+        // ====================================================================
+
+        function updateNetworkStatus(isOnline) {
+            App.isOnline = isOnline;
+            const statusElement = document.getElementById('network-status-indicator');
+            if (statusElement) {
+                if (isOnline) {
+                    statusElement.innerHTML = `<i data-lucide="cloud-lightning" class="w-4 h-4 ml-2"></i> متصل بالإنترنت`;
+                    statusElement.className = 'flex items-center text-sm font-semibold text-green-600';
+                    alertUser("✅ **تم الاتصال بالإنترنت بنجاح.** جاري مزامنة البيانات وتحديث السجلات المعلقة...", "success", 4000);
+                } else {
+                    statusElement.innerHTML = `<i data-lucide="wifi-off" class="w-4 h-4 ml-2"></i> وضع عدم الاتصال`;
+                    statusElement.className = 'flex items-center text-sm font-semibold text-red-600';
+                    alertUser("⚠️ **تم فقدان الاتصال بالإنترنت.** تعمل في وضع عدم الاتصال (Offline). سيتم مزامنة البيانات لاحقاً.", "warning", 8000);
+                }
+                lucide.createIcons();
+            }
+            render();
+        }
+        
+        function setupNetworkMonitor() {
+            window.addEventListener('online', () => updateNetworkStatus(true));
+            window.addEventListener('offline', () => updateNetworkStatus(false));
+            updateNetworkStatus(navigator.onLine);
+        }
+        
+        async function setupOfflinePersistence() {
+            try {
+                await enablePersistence(db);
+                console.log("Firestore persistence enabled. Data will be cached locally.");
+            } catch (err) {
+                if (err.code === 'failed-precondition') {
+                    console.warn("Offline persistence failed: Multiple tabs open or unsupported browser. Using online mode.");
+                } else if (err.code === 'unimplemented') {
+                    console.error("Offline persistence failed: Browser lacks necessary features. Using online mode.");
+                }
+            }
+        }
+        
+        // ====================================================================
+        //                      Auth and Role Management Unit
+        // ====================================================================
+        
+        async function authenticateUser() {
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(App.auth, initialAuthToken);
+                } 
+                // **ملاحظة:** تم إزالة signInAnonymously() هنا. سيتم تحويل المستخدم إلى صفحة الدخول في المستمع إذا لم يكن هناك توكن.
+            } catch (error) {
+                console.error("Critical Firebase authentication error:", error);
+                alertUser("خطأ حاسم في المصادقة. فشل تسجيل الدخول التلقائي.", "error", 10000);
+                App.view = 'auth_error';
+                render();
+            }
+        }
+
+        function setupAuthStateListener() {
+            onAuthStateChanged(App.auth, async (user) => {
+                if (user) {
+                    App.userId = user.uid;
+                    App.userName = user.displayName || user.email.split('@')[0] || 'المستخدم';
+
+                    const userDocRef = doc(App.db, App.getCollectionPath('users'), user.uid);
+                    const userDoc = await getDoc(userDocRef);
+                    
+                    if (userDoc.exists()) {
+                        App.userRole = userDoc.data().role || 'staff';
+                    } else {
+                        // Logic to assign 'admin' to the FIRST user in Firestore
+                        const usersCollectionRef = collection(App.db, App.getCollectionPath('users'));
+                        const usersSnapshot = await getDocs(usersCollectionRef);
+
+                        // If collection is empty, this user is the Admin.
+                        if (usersSnapshot.size === 0) {
+                            App.userRole = 'admin';
+                            alertUser("تهانينا! أنت أول مستخدم وتم تعيين دور 'المدير الأساسي' لك تلقائياً.", "success");
+                        } else {
+                            App.userRole = 'staff';
+                        }
+                        
+                        // Save the new user record with assigned role
+                        await setDoc(userDocRef, { 
+                            uid: user.uid, 
+                            role: App.userRole, 
+                            createdAt: new Date().toISOString(), 
+                            email: user.email || 'N/A',
+                            name: App.userName 
+                        }, { merge: true });
+                    }
+
+                    setupFirestoreListeners();
+                    setupNetworkMonitor(); // Start monitoring network after auth
+                    // Direct routing to dashboard
+                    if (App.view === 'loading' || App.view === 'login') {
+                        App.view = 'dashboard'; 
+                    }
+                } else {
+                    // إذا لم يكن هناك مستخدم، اذهب إلى صفحة تسجيل الدخول
+                    App.userId = null;
+                    if (App.view !== 'auth_error') {
+                         App.view = 'login'; 
+                    }
+                }
+                render();
+            });
+        }
+        
+        window.handleLogin = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const email = form.querySelector('#login-email').value;
+            const password = form.querySelector('#login-password').value;
+            try {
+                await signInWithEmailAndPassword(App.auth, email, password);
+                alertUser("تم تسجيل الدخول بنجاح!", "success");
+            } catch (error) {
+                console.error("Login failed:", error);
+                alertUser(`فشل الدخول: ${error.message.split('(')[0]}`, "error", 5000);
+            }
+        };
+        
+        window.handleLogout = () => { 
+            signOut(App.auth).then(() => { 
+                App.view = 'login'; // Go to login after successful sign out
+                alertUser("تم تسجيل الخروج بنجاح.", "success"); 
+                render();
+            }).catch(console.error); 
+        };
+        window.changeView = (viewName, data = null) => { 
+            App.view = viewName; 
+            if (viewName === 'invoice_details' && data) {
+                App.currentInvoiceForView = data;
+            }
+            render(); 
+        };
+
+
+        // ====================================================================
+        //              FIRESTORE DATA LISTENERS
+        // ====================================================================
+
+        function setupFirestoreListeners() {
+            // Setup listeners for all required collections
+            setupCollectionListener('products');
+            setupCollectionListener('customers');
+            setupCollectionListener('invoices');
+            setupCollectionListener('users');
+            setupCollectionListener('alerts');
+        }
+
+        function setupCollectionListener(collectionName) {
+            const collectionRef = collection(App.db, App.getCollectionPath(collectionName));
+            
+            onSnapshot(collectionRef, (snapshot) => {
+                const dataList = snapshot.docs.map(doc => ({ 
+                    id: doc.id, 
+                    ...doc.data(), 
+                    // Convert Firestore Timestamps to JS Date/String for consistency
+                    createdAt: doc.data().createdAt ? myAssistant.formatTimestamp(doc.data().createdAt) : 'N/A'
+                }));
+                // Ensure data is stored under the correct key
+                App.data[collectionName] = dataList;
+                console.log(`[Firestore] ${collectionName} updated. Count: ${dataList.length}`);
+                
+                // Trigger render after data is fully loaded, but only once for initial load
+                if (App.view === 'loading') {
+                    App.view = 'dashboard';
+                }
+                render();
+            }, (error) => {
+                console.error(`Error listening to ${collectionName}:`, error);
+                // Handle permission denied or network issues gracefully
+                alertUser(`خطأ في جلب بيانات ${collectionName}. يرجى التحقق من اتصالك وصلاحياتك.`, "error", 7000);
+            });
+        }
+
+
+        // ====================================================================
+        //              INVENTORY MANAGEMENT LOGIC (Products, Stock)
+        // ====================================================================
+
+        function findProductById(productId) {
+            return App.data.products.find(p => p.id === productId);
+        }
+        
+        // --- Low Stock Alert Logic ---
+
+        // Checks inventory and generates/removes alerts
+        async function checkLowStockAlerts() {
+            const products = App.data.products || [];
+            const lowStockProducts = products.filter(p => (p.warehouse_stock || 0) <= App.lowStockThreshold);
+            const batch = writeBatch(App.db);
+            const alertsCollectionRef = collection(App.db, App.getCollectionPath('alerts'));
+
+            // 1. Clear old low stock alerts that are no longer low
+            const existingLowStockAlerts = App.data.alerts.filter(a => a.type === 'low_stock');
+            existingLowStockAlerts.forEach(alert => {
+                const productStillLow = lowStockProducts.find(p => p.id === alert.productId);
+                if (!productStillLow) {
+                    // Stock recovered, delete the alert
+                    batch.delete(doc(App.db, App.getCollectionPath('alerts'), alert.id));
+                }
+            });
+
+            // 2. Add or update alerts for currently low stock products
+            lowStockProducts.forEach(product => {
+                const existingAlert = existingLowStockAlerts.find(a => a.productId === product.id);
+                const message = `انخفاض المخزون: ${product.name} (المخزن: ${product.warehouse_stock || 0}). يرجى طلب المزيد.`;
+                const alertData = {
+                    productId: product.id,
+                    type: 'low_stock',
+                    message: message,
+                    priority: 'high',
+                    warehouseStock: product.warehouse_stock || 0,
+                    // Use serverTimestamp for first creation, but keep existing doc ID
+                    createdAt: existingAlert ? existingAlert.createdAt : serverTimestamp() 
+                };
+
+                if (existingAlert) {
+                    // Update existing alert (to update stock level in message)
+                    const alertRef = doc(App.db, App.getCollectionPath('alerts'), existingAlert.id);
+                    batch.update(alertRef, alertData);
+                } else {
+                    // Add new alert
+                    batch.set(doc(alertsCollectionRef), alertData); 
+                }
+            });
+
+            try {
+                await batch.commit();
+            } catch (e) {
+                console.error("Failed to commit low stock batch update:", e);
+            }
+        }
+        
+        // --- Stock Update Handlers ---
+
+        async function handleUpdateStock(productId, stockField, quantityChange, logMessage, secondaryStockField = null) {
+            if (App.userRole !== 'admin' && App.userRole !== 'staff') {
+                alertUser("عذراً، لا تملك الصلاحية اللازمة لتعديل المخزون.", "error");
+                return false;
+            }
+
+            const productRef = doc(App.db, App.getCollectionPath('products'), productId);
+            const product = findProductById(productId);
+
+            if (!product) {
+                alertUser("المنتج غير موجود.", "error");
+                return false;
+            }
+
+            let currentStock = product[stockField] || 0;
+            let newStock = currentStock + quantityChange;
+
+            if (newStock < 0) {
+                alertUser(`فشل العملية: الكمية المطلوبة غير متوفرة في ${stockField === 'warehouse_stock' ? 'المخزن' : 'العرض'}. الكمية المتوفرة: ${currentStock}`, "error");
+                return false;
+            }
+
+            const updateData = {
+                [stockField]: newStock,
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Handle secondary stock movement (e.g., from warehouse to display)
+            if (secondaryStockField) {
+                let secondaryCurrentStock = product[secondaryStockField] || 0;
+                let secondaryNewStock = secondaryCurrentStock - quantityChange;
+                
+                if (secondaryNewStock < 0) {
+                    alertUser(`فشل العملية: الكمية المطلوبة للنقل غير متوفرة في ${secondaryStockField === 'warehouse_stock' ? 'المخزن' : 'العرض'}. الكمية المتوفرة: ${secondaryCurrentStock}`, "error");
+                    return false;
+                }
+                
+                updateData[secondaryStockField] = secondaryNewStock;
+            }
+
+            try {
+                await updateDoc(productRef, updateData);
+                alertUser(logMessage, "success");
+                return true;
+            } catch (e) {
+                console.error("Stock update failed:", e);
+                alertUser("حدث خطأ أثناء تحديث المخزون.", "error");
+                return false;
+            }
+        }
+
+        window.handleAddToWarehouse = async (e) => {
+            e.preventDefault();
+            const form = document.getElementById('add-to-warehouse-form');
+            const productId = form.querySelector('#warehouse-product-id').value;
+            const quantity = parseInt(form.querySelector('#warehouse-quantity').value);
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            if (!productId || quantity <= 0 || isNaN(quantity)) {
+                alertUser("يرجى اختيار منتج وإدخال كمية صحيحة.", "warning");
+                return;
+            }
+            submitBtn.disabled = true;
+            
+            const product = findProductById(productId);
+            const success = await handleUpdateStock(productId, 'warehouse_stock', quantity, 
+                `✅ تم إضافة ${quantity} وحدة من ${product.name} إلى المخزن بنجاح.`
+            );
+            if (success) form.reset();
+            submitBtn.disabled = false;
+        }
+
+        window.handleMoveToDisplay = async (e) => {
+            e.preventDefault();
+            const form = document.getElementById('move-to-display-form');
+            const productId = form.querySelector('#move-product-id').value;
+            const quantity = parseInt(form.querySelector('#move-quantity').value);
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            if (!productId || quantity <= 0 || isNaN(quantity)) {
+                alertUser("يرجى اختيار منتج وإدخال كمية صحيحة.", "warning");
+                return;
+            }
+            submitBtn.disabled = true;
+
+            const product = findProductById(productId);
+            // Moving FROM warehouse_stock (decr) TO display_stock (incr)
+            const success = await handleUpdateStock(productId, 'display_stock', quantity, 
+                `✅ تم نقل ${quantity} وحدة من ${product.name} إلى العرض بنجاح.`,
+                'warehouse_stock' // Secondary field to decrement
+            );
+            if (success) form.reset();
+            submitBtn.disabled = false;
+        }
+
+        // --- CRUD Handlers for Products/Customers ---
+
+        window.handleAddProduct = async (e) => {
+            e.preventDefault();
+            if (App.userRole !== 'admin') {
+                alertUser("عذراً، المدير فقط يمكنه إضافة أصناف جديدة.", "error");
+                return;
+            }
+            const form = document.getElementById('add-product-form');
+            const data = {
+                name: form.querySelector('#product-name').value,
+                sku: form.querySelector('#product-sku').value,
+                unit_price: parseFloat(form.querySelector('#product-price').value),
+                purchase_price: parseFloat(form.querySelector('#product-purchase-price').value),
+                warehouse_stock: parseInt(form.querySelector('#product-warehouse-stock').value) || 0,
+                display_stock: 0,
+                category: form.querySelector('#product-category').value,
+                notes: form.querySelector('#product-notes').value,
+                // New field for Coil Voltage
+                coil_voltage: form.querySelector('#product-coil-voltage').value || 'N/A', 
+                createdAt: serverTimestamp(),
+            };
+            try {
+                await addDoc(collection(App.db, App.getCollectionPath('products')), data);
+                alertUser("✅ تم إضافة الصنف بنجاح!", "success");
+                form.reset();
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                alertUser("حدث خطأ أثناء إضافة الصنف.", "error");
+            }
+        };
+
+        window.handleAddCustomer = async (e) => {
+            e.preventDefault();
+            const form = document.getElementById('add-customer-form');
+            const data = {
+                name: form.querySelector('#customer-name').value,
+                phone: form.querySelector('#customer-phone').value,
+                address: form.querySelector('#customer-address').value,
+                email: form.querySelector('#customer-email').value,
+                createdAt: serverTimestamp(),
+            };
+            try {
+                await addDoc(collection(App.db, App.getCollectionPath('customers')), data);
+                alertUser("✅ تم إضافة العميل بنجاح!", "success");
+                form.reset();
+                App.view = 'customers';
+                render();
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                alertUser("حدث خطأ أثناء إضافة العميل.", "error");
+            }
+        };
+
+        // --- User Role Management ---
+        window.handleUpdateUserRole = async (userId, newRole) => {
+            if (App.userRole !== 'admin' || userId === App.userId) {
+                alertUser("لا يمكن تغيير صلاحيتك الخاصة أو لا تملك الصلاحية للقيام بذلك.", "error");
+                return;
+            }
+            
+            const userRef = doc(App.db, App.getCollectionPath('users'), userId);
+            try {
+                await updateDoc(userRef, { role: newRole });
+                alertUser(`✅ تم تحديث صلاحيات المستخدم إلى: ${newRole}`, "success");
+            } catch (e) {
+                console.error("Failed to update user role:", e);
+                alertUser("فشل تحديث الصلاحيات.", "error");
+            }
+        };
+
+
+        // ====================================================================
+        //                      INVOICE CREATION LOGIC
+        // ====================================================================
+        
+        // --- Draft Invoice Handlers ---
+
+        window.handleCustomerSelection = (customerId) => {
+            App.draftInvoice.customerId = customerId;
+            // Force re-render of NewInvoiceView to update header
+            render(); 
+        };
+
+        window.handleAddItemToDraft = (productId, quantity, unitPrice, discount) => {
+            const product = findProductById(productId);
+            if (!product) {
+                alertUser("الصنف المحدد غير موجود.", "error");
+                return;
+            }
+            if ((product.display_stock || 0) < quantity) {
+                 alertUser(`فشل العملية: الكمية المطلوبة غير متوفرة في مخزون العرض. المتوفر: ${product.display_stock || 0}`, "error");
+                 return;
+            }
+
+            const itemIndex = App.draftInvoice.items.findIndex(item => item.id === productId);
+            const lineTotal = quantity * unitPrice;
+            const lineDiscountAmount = lineTotal * (discount / 100);
+            const finalLineTotal = lineTotal - lineDiscountAmount;
+
+            const newItem = {
+                id: productId,
+                name: product.name,
+                sku: product.sku,
+                quantity: quantity,
+                unitPrice: unitPrice,
+                discount: discount,
+                lineTotal: finalLineTotal,
+                warehouse_stock: product.warehouse_stock || 0, // for reference only
+                display_stock: product.display_stock || 0 // for reference only
+            };
+
+            if (itemIndex > -1) {
+                // Update existing item
+                App.draftInvoice.items[itemIndex] = newItem;
+            } else {
+                // Add new item
+                App.draftInvoice.items.push(newItem);
+            }
+
+            calculateDraftTotals();
+            alertUser("تم إضافة/تحديث الصنف في الفاتورة.", "success");
+            render();
+        };
+
+        window.handleRemoveItemFromDraft = (productId) => {
+            App.draftInvoice.items = App.draftInvoice.items.filter(item => item.id !== productId);
+            calculateDraftTotals();
+            alertUser("تم حذف الصنف من الفاتورة.", "warning");
+            render();
+        };
+
+        function calculateDraftTotals() {
+            let subTotal = 0;
+            let totalDiscount = 0;
+            
+            App.draftInvoice.items.forEach(item => {
+                const itemSubTotal = item.quantity * item.unitPrice;
+                const itemDiscount = itemSubTotal * (item.discount / 100);
+                subTotal += itemSubTotal;
+                totalDiscount += itemDiscount;
+            });
+
+            App.draftInvoice.subTotal = subTotal;
+            App.draftInvoice.totalDiscount = totalDiscount;
+            App.draftInvoice.grandTotal = subTotal - totalDiscount;
+        }
+
+        window.handleFinalDiscountChange = (e) => {
+            const discountPercentage = parseFloat(e.target.value) || 0;
+            // Apply the discount to the Grand Total after item discounts
+            const subTotalAfterItemDiscounts = App.draftInvoice.subTotal - App.draftInvoice.totalDiscount;
+            const finalDiscountAmount = subTotalAfterItemDiscounts * (discountPercentage / 100);
+
+            App.draftInvoice.finalDiscountPercentage = discountPercentage;
+            App.draftInvoice.finalDiscountAmount = finalDiscountAmount;
+            App.draftInvoice.grandTotal = subTotalAfterItemDiscounts - finalDiscountAmount;
+            
+            // Re-render to show updated totals
+            render();
+        }
+
+        // --- Finalize and Commit Invoice ---
+
+        window.handleSaveInvoice = async () => {
+            if (!App.draftInvoice.customerId) {
+                alertUser("يجب اختيار عميل قبل حفظ الفاتورة.", "error");
+                return;
+            }
+            if (App.draftInvoice.items.length === 0) {
+                alertUser("الفاتورة فارغة، يرجى إضافة أصناف.", "error");
+                return;
+            }
+            
+            const customer = App.data.customers.find(c => c.id === App.draftInvoice.customerId);
+            const nextInvoiceNumber = (App.data.invoices.length > 0) 
+                ? Math.max(...App.data.invoices.map(i => i.invoiceNumber || 0)) + 1 
+                : 1;
+
+            const invoiceData = {
+                invoiceNumber: nextInvoiceNumber,
+                customerId: App.draftInvoice.customerId,
+                customerName: customer.name,
+                customerPhone: customer.phone,
+                items: App.draftInvoice.items.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    sku: item.sku,
+                    quantity: item.quantity,
+                    unitPrice: item.unitPrice,
+                    discount: item.discount,
+                    lineTotal: item.lineTotal,
+                })),
+                subTotal: App.draftInvoice.subTotal,
+                totalDiscount: (App.draftInvoice.totalDiscount || 0) + (App.draftInvoice.finalDiscountAmount || 0),
+                grandTotal: App.draftInvoice.grandTotal,
+                status: 'paid', // Assuming paid on creation
+                issuedBy: App.userName,
+                createdAt: serverTimestamp(),
+            };
+
+            const batch = writeBatch(App.db);
+            const invoiceRef = doc(collection(App.db, App.getCollectionPath('invoices')));
+            batch.set(invoiceRef, invoiceData);
+
+            // Update product stock (decrement display_stock for each item)
+            for (const item of App.draftInvoice.items) {
+                const productRef = doc(App.db, App.getCollectionPath('products'), item.id);
+                const currentProduct = findProductById(item.id);
+                if (currentProduct) {
+                    const newDisplayStock = (currentProduct.display_stock || 0) - item.quantity;
+                    batch.update(productRef, {
+                        display_stock: newDisplayStock,
+                        updatedAt: new Date().toISOString()
+                    });
+                }
+            }
+
+            try {
+                await batch.commit();
+                alertUser(`✅ تم حفظ الفاتورة رقم ${nextInvoiceNumber} بنجاح!`, "success", 5000);
+                
+                // Reset draft and navigate to invoice details
+                App.draftInvoice = { items: [], subTotal: 0, totalDiscount: 0, grandTotal: 0, customerId: null, invoiceNumber: 0 };
+                App.currentInvoiceForView = { id: invoiceRef.id, ...invoiceData, createdAt: myAssistant.formatTimestamp(new Date()) };
+                App.view = 'invoice_details';
+                render();
+            } catch (e) {
+                console.error("Error saving invoice and updating stock: ", e);
+                alertUser("حدث خطأ حاسم أثناء حفظ الفاتورة وتحديث المخزون.", "error", 7000);
+            }
+        };
+
+
+        // ====================================================================
+        //                              VIEWS (UI)
+        // ====================================================================
+
+        // --- Layout ---
+        const MainLayout = () => `
+            <div id="loading-spinner" class="fixed inset-0 bg-white bg-opacity-70 z-50 flex items-center justify-center ${App.view !== 'loading' ? 'hidden' : ''}">
+                <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-shahrazad"></div>
+                <p class="mr-4 text-xl font-semibold text-shahrazad">جاري التحميل...</p>
+            </div>
+            ${App.view === 'loading' ? '' : `
+                ${App.view === 'login' || App.view === 'auth_error' ? App.views[App.view]() : `
+                    <div class="flex h-screen bg-gray-100">
+                        ${Sidebar()}
+                        <div class="flex-1 flex flex-col overflow-hidden">
+                            ${Header()}
+                            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6 print-area">
+                                ${App.views[App.view]()}
+                            </main>
+                        </div>
+                    </div>
+                `}
+            `}
+        `;
+
+        // --- Sidebar (Menu) ---
+        const Sidebar = () => {
+            const navItems = [
+                { name: 'لوحة القيادة', icon: 'layout-dashboard', view: 'dashboard', roles: ['admin', 'staff'] },
+                { name: 'إدارة المبيعات', icon: 'receipt-text', view: 'invoices', roles: ['admin', 'staff'] },
+                { name: 'فاتورة جديدة', icon: 'shopping-cart', view: 'new_invoice', roles: ['admin', 'staff'] },
+                { name: 'الأصناف والمخزون', icon: 'box', view: 'products', roles: ['admin', 'staff'] },
+                { name: 'العملاء', icon: 'users', view: 'customers', roles: ['admin', 'staff'] },
+                { name: 'التنبيهات', icon: 'alert-triangle', view: 'alerts', roles: ['admin', 'staff'] },
+                { name: 'إعدادات المستخدمين', icon: 'settings', view: 'general_settings', roles: ['admin'] },
+            ];
+
+            const renderNavItem = (item) => {
+                if (!item.roles.includes(App.userRole)) return '';
+                const isActive = App.view === item.view;
+                return `
+                    <a onclick="changeView('${item.view}')" class="flex items-center p-3 rounded-lg transition duration-200 cursor-pointer ${isActive ? 'bg-shahrazad text-white shadow-md' : 'text-gray-600 hover:bg-gray-200 hover:text-shahrazad'}">
+                        <i data-lucide="${item.icon}" class="w-5 h-5 ml-3"></i>
+                        <span class="font-medium">${item.name}</span>
+                        ${item.view === 'alerts' && App.data.alerts.length > 0 ? `<span class="mr-auto bg-red-500 text-white text-xs font-bold py-1 px-2 rounded-full">${App.data.alerts.length}</span>` : ''}
+                    </a>
+                `;
+            };
+
+            return `
+                <aside class="flex flex-col w-64 bg-white border-l border-gray-200 shadow-xl no-print">
+                    <div class="flex items-center justify-center h-20 border-b border-gray-200 p-4">
+                        <span class="text-3xl font-black text-shahrazad">SHAHRAZAD<span class="text-gray-400">.MS</span></span>
+                    </div>
+                    <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                        ${navItems.map(renderNavItem).join('')}
+                    </nav>
+                    <div class="p-4 border-t border-gray-200">
+                        <div id="network-status-indicator" class="mb-3"></div>
+                        <button onclick="handleLogout()" class="w-full flex items-center justify-center p-3 text-red-600 bg-red-100 rounded-lg hover:bg-red-200 transition duration-200 font-medium">
+                            <i data-lucide="log-out" class="w-5 h-5 ml-2"></i> تسجيل الخروج
+                        </button>
+                    </div>
+                </aside>
+            `;
+        };
+
+        // --- Header ---
+        const Header = () => `
+            <header class="flex items-center justify-between h-20 bg-white border-b border-gray-200 px-6 shadow-sm no-print">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-800">${App.views[App.view].title || 'الواجهة الرئيسية'}</h1>
+                </div>
+                <div class="flex items-center">
+                    <div class="ml-4">
+                        <p class="text-sm font-semibold text-gray-800">${App.userName}</p>
+                        <p class="text-xs text-gray-500 text-left">(${App.userRole === 'admin' ? 'المدير' : 'موظف مبيعات'})</p>
+                    </div>
+                    <i data-lucide="user-circle-2" class="w-8 h-8 text-shahrazad"></i>
+                </div>
+            </header>
+        `;
+
+        // ====================================================================
+        //                      SPECIFIC VIEWS
+        // ====================================================================
+
+        // --- Login View ---
+        const LoginView = () => {
+            LoginView.title = 'تسجيل الدخول'; // Static title property for the view
+            return `
+                <div class="flex items-center justify-center h-screen bg-gray-100">
+                    <div class="card p-10 w-full max-w-md">
+                        <div class="text-center mb-8">
+                            <i data-lucide="zap" class="w-10 h-10 text-shahrazad mx-auto mb-2"></i>
+                            <h2 class="text-3xl font-black text-shahrazad">SHAHRAZAD ELECTRIC</h2>
+                            <p class="text-gray-500 mt-1">نظام إدارة المبيعات المتقدم</p>
+                        </div>
+                        <form onsubmit="handleLogin(event)">
+                            <div class="mb-4">
+                                <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
+                                <input type="email" id="login-email" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad" placeholder="name@example.com">
+                            </div>
+                            <div class="mb-6">
+                                <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">كلمة المرور</label>
+                                <input type="password" id="login-password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad" placeholder="*******">
+                            </div>
+                            <button type="submit" class="w-full bg-shahrazad text-white p-3 rounded-lg hover:bg-opacity-90 transition duration-150 font-semibold flex items-center justify-center">
+                                <i data-lucide="log-in" class="w-5 h-5 ml-2"></i> تسجيل الدخول
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        };
+
+        // --- Auth Error View ---
+        const AuthErrorView = () => {
+            AuthErrorView.title = 'خطأ حاسم';
+            return `
+                <div class="flex items-center justify-center h-screen bg-red-50">
+                    <div class="card p-10 w-full max-w-md text-center border-2 border-red-500">
+                        <i data-lucide="lock" class="w-12 h-12 text-red-600 mx-auto mb-4"></i>
+                        <h2 class="text-2xl font-bold text-red-700 mb-4">خطأ في مصادقة Firebase</h2>
+                        <p class="text-gray-600 mb-6">حدث خطأ حاسم أثناء محاولة المصادقة على Firebase. هذا قد يشير إلى:
+                            <ul class="list-disc list-inside text-right mt-3 mx-4 text-sm text-gray-700 space-y-1">
+                                <li>مشكلة في اتصال الإنترنت.</li>
+                                <li>مشكلة في إعدادات مفتاح API Key (مثل `auth/admin-restricted-operation`).</li>
+                                <li>أن عملية التسجيل التلقائي غير مسموح بها.</li>
+                            </ul>
+                        </p>
+                        <p class="text-red-600 font-semibold mt-6">يرجى مراجعة سجلات الـ Console والـ API Key في Firebase.</p>
+                        <button onclick="window.location.reload()" class="mt-4 bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 transition duration-150 font-semibold">
+                            إعادة المحاولة
+                        </button>
+                    </div>
+                </div>
+            `;
+        };
+
+        // --- Loading View (Empty, handled by MainLayout spinner) ---
+        const LoadingView = () => '';
+
+        // --- Dashboard View ---
+        const DashboardView = () => {
+            DashboardView.title = 'لوحة القيادة الرئيسية';
+            const totalProducts = App.data.products.length;
+            const totalInvoices = App.data.invoices.length;
+            const totalCustomers = App.data.customers.length;
+            const lowStockCount = App.data.products.filter(p => (p.warehouse_stock || 0) <= App.lowStockThreshold).length;
+
+            const salesTotal = App.data.invoices.reduce((sum, invoice) => sum + (invoice.grandTotal || 0), 0);
+            
+            // Render KPI Cards
+            const renderKPIs = (totalProducts, totalInvoices, totalCustomers, lowStockCount, salesTotal) => `
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+                    ${renderKPICard('إجمالي الأصناف', totalProducts, 'box', 'bg-shahrazad')}
+                    ${renderKPICard('إجمالي الفواتير', totalInvoices, 'receipt', 'bg-green-500')}
+                    ${renderKPICard('إجمالي العملاء', totalCustomers, 'users', 'bg-purple-500')}
+                    ${renderKPICard('أصناف منخفضة', lowStockCount, 'alert-triangle', 'bg-red-500')}
+                    ${renderKPICard('إجمالي المبيعات', myAssistant.formatCurrency(salesTotal), 'dollar-sign', 'bg-yellow-600')}
+                </div>
+            `;
+
+            // Render Recent Activities (Invoices)
+            const renderRecentInvoices = (invoices) => {
+                const recentInvoices = invoices.slice(0, 5); // Take top 5
+                return `
+                    <div class="card p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-semibold text-gray-700">آخر 5 فواتير</h3>
+                            <button onclick="changeView('invoices')" class="text-shahrazad hover:text-shahrazad-light font-medium flex items-center">
+                                عرض الكل <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">رقم الفاتورة</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">العميل</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التاريخ</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${recentInvoices.map(i => `
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-shahrazad">#${i.invoiceNumber}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${i.customerName}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">${myAssistant.formatCurrency(i.grandTotal)}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${i.createdAt}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button onclick="changeView('invoice_details', ${JSON.stringify(i).replace(/"/g, '&quot;')})" class="text-blue-600 hover:text-blue-900">
+                                                    عرض
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        ${recentInvoices.length === 0 ? '<p class="text-center py-8 text-gray-500">لا توجد فواتير حديثة لعرضها.</p>' : ''}
+                    </div>
+                `;
+            };
+
+            return `
+                <div class="max-w-7xl mx-auto">
+                    ${renderKPIs(totalProducts, totalInvoices, totalCustomers, lowStockCount, salesTotal)}
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                        <div class="xl:col-span-2">
+                            ${renderRecentInvoices(App.data.invoices.sort((a, b) => (b.invoiceNumber || 0) - (a.invoiceNumber || 0)))}
+                        </div>
+                        <div class="card p-6">
+                            <h3 class="text-xl font-semibold text-gray-700 mb-4">ملخص المخزون</h3>
+                            <div class="space-y-4">
+                                ${App.data.products.slice(0, 10).map(p => `
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="text-gray-600 truncate ml-2">${p.name}</span>
+                                        <span class="font-semibold ${p.warehouse_stock <= App.lowStockThreshold ? 'text-red-500' : 'text-green-600'}">${p.warehouse_stock || 0}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="h-2 rounded-full ${p.warehouse_stock <= App.lowStockThreshold ? 'bg-red-500' : 'bg-shahrazad'}" style="width: ${Math.min(100, ((p.warehouse_stock || 0) / 100) * 100)}%"></div>
+                                    </div>
+                                `).join('')}
+                                ${App.data.products.length > 10 ? '<p class="text-center text-sm text-gray-500 mt-4">... والمزيد</p>' : ''}
+                                ${App.data.products.length === 0 ? '<p class="text-center py-4 text-gray-500">لا توجد أصناف لعرضها.</p>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        // --- Products View ---
+        const ProductsView = () => {
+            ProductsView.title = 'الأصناف والمخزون';
+            const allProducts = App.data.products;
+
+            const renderProductList = (products) => `
+                <div class="card p-6 mb-6">
+                    <h3 class="text-2xl font-semibold text-gray-700 mb-4">قائمة الأصناف (${products.length} صنف)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم / الكود</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">جهد الملف</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">سعر البيع</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">مخزون العرض</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المخزن</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الفئة</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${products.map(p => `
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            ${p.name} <br> <span class="text-xs text-gray-500">${p.sku}</span>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${p.coil_voltage || 'غير محدد'}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-green-600">${myAssistant.formatCurrency(p.unit_price)}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm ${p.display_stock <= App.lowStockThreshold ? 'text-red-500 font-semibold' : 'text-gray-700'}">${p.display_stock || 0}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm ${p.warehouse_stock <= App.lowStockThreshold ? 'text-red-500 font-semibold' : 'text-gray-700'}">${p.warehouse_stock || 0}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${p.category}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    ${products.length === 0 ? '<p class="text-center py-8 text-gray-500">لا توجد أصناف مسجلة بعد.</p>' : ''}
+                </div>
+            `;
+
+            const renderStockMovementForms = () => `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="warehouse" class="w-5 h-5 ml-2 text-shahrazad"></i> إضافة كمية للمخزن</h3>
+                        <form id="add-to-warehouse-form" onsubmit="handleAddToWarehouse(event)">
+                            <div class="mb-4">
+                                <label for="warehouse-product-id" class="block text-sm font-medium text-gray-700 mb-1">اختر الصنف</label>
+                                <select id="warehouse-product-id" required class="w-full p-3 border border-gray-300 rounded-lg">
+                                    <option value="">-- يرجى الاختيار --</option>
+                                    ${allProducts.map(p => `<option value="${p.id}">${p.name} (${p.sku}) - المخزن: ${p.warehouse_stock || 0}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label for="warehouse-quantity" class="block text-sm font-medium text-gray-700 mb-1">الكمية المضافة</label>
+                                <input type="number" id="warehouse-quantity" required min="1" class="w-full p-3 border border-gray-300 rounded-lg">
+                            </div>
+                            <button type="submit" class="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition duration-150 font-semibold flex items-center justify-center">
+                                <i data-lucide="plus" class="w-5 h-5 ml-2"></i> تأكيد الإضافة للمخزن
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="move" class="w-5 h-5 ml-2 text-shahrazad"></i> نقل من المخزن للعرض</h3>
+                        <form id="move-to-display-form" onsubmit="handleMoveToDisplay(event)">
+                            <div class="mb-4">
+                                <label for="move-product-id" class="block text-sm font-medium text-gray-700 mb-1">اختر الصنف</label>
+                                <select id="move-product-id" required class="w-full p-3 border border-gray-300 rounded-lg">
+                                    <option value="">-- يرجى الاختيار --</option>
+                                    ${allProducts.map(p => `<option value="${p.id}">${p.name} (${p.sku}) - المخزن: ${p.warehouse_stock || 0}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label for="move-quantity" class="block text-sm font-medium text-gray-700 mb-1">الكمية المراد نقلها</label>
+                                <input type="number" id="move-quantity" required min="1" class="w-full p-3 border border-gray-300 rounded-lg">
+                            </div>
+                            <button type="submit" class="w-full bg-purple-500 text-white p-3 rounded-lg hover:bg-purple-600 transition duration-150 font-semibold flex items-center justify-center">
+                                <i data-lucide="corner-down-right" class="w-5 h-5 ml-2"></i> تأكيد النقل للعرض
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            const renderAddProductForm = () => `
+                <div class="card p-6 mt-6 ${App.userRole === 'admin' ? '' : 'hidden'}">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="plus-square" class="w-5 h-5 ml-2 text-shahrazad"></i> إضافة صنف جديد (للمدير فقط)</h3>
+                    <form id="add-product-form" onsubmit="handleAddProduct(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="col-span-1">
+                            <label for="product-name" class="block text-sm font-medium text-gray-700 mb-1">اسم الصنف</label>
+                            <input type="text" id="product-name" required class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <div class="col-span-1">
+                            <label for="product-sku" class="block text-sm font-medium text-gray-700 mb-1">كود الصنف (SKU)</label>
+                            <input type="text" id="product-sku" required class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <div class="col-span-1">
+                            <label for="product-price" class="block text-sm font-medium text-gray-700 mb-1">سعر البيع (جنيه)</label>
+                            <input type="number" id="product-price" required min="0.01" step="0.01" class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                         <div class="col-span-1">
+                            <label for="product-purchase-price" class="block text-sm font-medium text-gray-700 mb-1">سعر الشراء (جنيه)</label>
+                            <input type="number" id="product-purchase-price" required min="0.01" step="0.01" class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <div class="col-span-1">
+                            <label for="product-warehouse-stock" class="block text-sm font-medium text-gray-700 mb-1">الكمية الأولية في المخزن</label>
+                            <input type="number" id="product-warehouse-stock" required min="0" class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <div class="col-span-1">
+                            <label for="product-category" class="block text-sm font-medium text-gray-700 mb-1">الفئة</label>
+                            <input type="text" id="product-category" class="w-full p-3 border border-gray-300 rounded-lg" value="كهرباء">
+                        </div>
+                        <div class="col-span-1">
+                            <label for="product-coil-voltage" class="block text-sm font-medium text-gray-700 mb-1">جهد الملف (Coil Voltage)</label>
+                            <input type="text" id="product-coil-voltage" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="مثال: 12V DC, 220V AC">
+                        </div>
+                        <div class="col-span-2">
+                            <label for="product-notes" class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
+                            <textarea id="product-notes" class="w-full p-3 border border-gray-300 rounded-lg" rows="2"></textarea>
+                        </div>
+                        <div class="col-span-2">
+                            <button type="submit" class="w-full bg-shahrazad text-white p-3 rounded-lg hover:bg-shahrazad-light transition duration-150 font-semibold">
+                                <i data-lucide="save" class="w-5 h-5 ml-2 inline-block"></i> حفظ الصنف الجديد
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            return `
+                <div class="max-w-7xl mx-auto">
+                    ${renderProductList(allProducts)}
+                    ${renderStockMovementForms()}
+                    ${renderAddProductForm()}
+                </div>
+            `;
+        };
+
+        // --- Customers View ---
+        const CustomersView = () => {
+            CustomersView.title = 'إدارة العملاء';
+            const allCustomers = App.data.customers;
+
+            const renderCustomerList = (customers) => `
+                <div class="card p-6 mb-6">
+                    <h3 class="text-2xl font-semibold text-gray-700 mb-4">قائمة العملاء (${customers.length} عميل)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">رقم الهاتف</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">البريد الإلكتروني</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">العنوان</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاريخ الإضافة</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${customers.map(c => `
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-shahrazad">${c.name}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${c.phone}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${c.email || 'N/A'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${c.address}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${c.createdAt}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    ${customers.length === 0 ? '<p class="text-center py-8 text-gray-500">لا توجد عملاء مسجلين بعد.</p>' : ''}
+                </div>
+            `;
+
+            const renderAddCustomerForm = () => `
+                <div class="card p-6 mt-6">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="user-plus" class="w-5 h-5 ml-2 text-shahrazad"></i> إضافة عميل جديد</h3>
+                    <form id="add-customer-form" onsubmit="handleAddCustomer(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="col-span-1">
+                            <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-1">اسم العميل</label>
+                            <input type="text" id="customer-name" required class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <div class="col-span-1">
+                            <label for="customer-phone" class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
+                            <input type="tel" id="customer-phone" required class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <div class="col-span-1">
+                            <label for="customer-email" class="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني (اختياري)</label>
+                            <input type="email" id="customer-email" class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <div class="col-span-1">
+                            <label for="customer-address" class="block text-sm font-medium text-gray-700 mb-1">العنوان</label>
+                            <input type="text" id="customer-address" required class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <div class="col-span-2">
+                            <button type="submit" class="w-full bg-shahrazad text-white p-3 rounded-lg hover:bg-shahrazad-light transition duration-150 font-semibold">
+                                <i data-lucide="save" class="w-5 h-5 ml-2 inline-block"></i> حفظ العميل الجديد
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            return `
+                <div class="max-w-7xl mx-auto">
+                    ${renderCustomerList(allCustomers)}
+                    ${renderAddCustomerForm()}
+                </div>
+            `;
+        };
+        
+        // --- Invoices View (Sales History) ---
+        const InvoicesView = () => {
+            InvoicesView.title = 'سجل المبيعات والفواتير';
+            const allInvoices = App.data.invoices.sort((a, b) => (b.invoiceNumber || 0) - (a.invoiceNumber || 0));
+
+            return `
+                <div class="max-w-7xl mx-auto">
+                    <div class="card p-6 mb-6">
+                        <h3 class="text-2xl font-semibold text-gray-700 mb-4">قائمة الفواتير الصادرة (${allInvoices.length} فاتورة)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">رقم الفاتورة</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">العميل</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي (شامل)</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الحالة</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاريخ الإصدار</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${allInvoices.map(i => `
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-shahrazad">#${i.invoiceNumber}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${i.customerName}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">${myAssistant.formatCurrency(i.grandTotal)}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                    مدفوعة
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${i.createdAt}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button onclick="changeView('invoice_details', ${JSON.stringify(i).replace(/"/g, '&quot;')})" class="text-blue-600 hover:text-blue-900 flex items-center">
+                                                    عرض / طباعة <i data-lucide="printer" class="w-4 h-4 mr-1"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        ${allInvoices.length === 0 ? '<p class="text-center py-8 text-gray-500">لا توجد فواتير مسجلة بعد.</p>' : ''}
+                    </div>
+                </div>
+            `;
+        };
+
+        // --- New Invoice View ---
+        const NewInvoiceView = () => {
+            NewInvoiceView.title = 'إنشاء فاتورة جديدة';
+            const customers = App.data.customers;
+            const products = App.data.products.filter(p => (p.display_stock || 0) > 0); // Only available in display stock
+            const selectedCustomer = customers.find(c => c.id === App.draftInvoice.customerId);
+            const draft = App.draftInvoice;
+
+            const renderCustomerSelector = () => `
+                <div class="card p-4 mb-4 bg-blue-50 border-blue-200 border-2">
+                    <h4 class="text-lg font-semibold text-blue-800 mb-2 flex items-center">
+                        <i data-lucide="user-check" class="w-5 h-5 ml-2"></i> اختيار العميل
+                    </h4>
+                    ${selectedCustomer ? `
+                        <p class="text-gray-700 font-bold text-xl">${selectedCustomer.name}</p>
+                        <p class="text-sm text-gray-600">هاتف: ${selectedCustomer.phone}</p>
+                        <button onclick="handleCustomerSelection(null)" class="mt-2 text-red-500 hover:text-red-700 text-sm">
+                            تغيير العميل
+                        </button>
+                    ` : `
+                        <select onchange="handleCustomerSelection(this.value)" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                            <option value="">-- اختر عميلاً أو أضف عميلاً جديداً --</option>
+                            ${customers.map(c => `<option value="${c.id}">${c.name} (${c.phone})</option>`).join('')}
+                        </select>
+                        <button onclick="changeView('customers')" class="mt-3 text-shahrazad hover:text-shahrazad-light text-sm font-medium">
+                            + إضافة عميل جديد
+                        </button>
+                    `}
+                </div>
+            `;
+
+            const renderAddItemForm = () => `
+                <div class="card p-6 mb-6">
+                    <h4 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="plus-circle" class="w-5 h-5 ml-2"></i> إضافة صنف للفاتورة</h4>
+                    <form onsubmit="event.preventDefault(); handleAddItemToDraft(
+                        document.getElementById('item-product-id').value,
+                        parseInt(document.getElementById('item-quantity').value),
+                        parseFloat(document.getElementById('item-price').value),
+                        parseFloat(document.getElementById('item-discount').value)
+                    )" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div class="col-span-full md:col-span-2">
+                            <label for="item-product-id" class="block text-sm font-medium text-gray-700 mb-1">اختر الصنف (المتوفر في العرض فقط)</label>
+                            <select id="item-product-id" required class="w-full p-3 border border-gray-300 rounded-lg"
+                                onchange="
+                                    const product = findProductById(this.value);
+                                    if(product) {
+                                        document.getElementById('item-price').value = product.unit_price;
+                                        document.getElementById('item-max-qty').textContent = product.display_stock || 0;
+                                        document.getElementById('item-quantity').setAttribute('max', product.display_stock || 0);
+                                    }
+                                ">
+                                <option value="">-- يرجى الاختيار --</option>
+                                ${products.map(p => `<option value="${p.id}">${p.name} (${p.sku}) - العرض: ${p.display_stock || 0}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="item-quantity" class="block text-sm font-medium text-gray-700 mb-1">الكمية (<span id="item-max-qty" class="text-red-500">0</span> متوفر)</label>
+                            <input type="number" id="item-quantity" required min="1" max="0" class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label for="item-price" class="block text-sm font-medium text-gray-700 mb-1">سعر الوحدة</label>
+                            <input type="number" id="item-price" required min="0.01" step="0.01" class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label for="item-discount" class="block text-sm font-medium text-gray-700 mb-1">الخصم (%)</label>
+                            <input type="number" id="item-discount" value="0" min="0" max="100" class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <div class="col-span-full md:col-span-1 flex items-end">
+                            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-150 font-semibold flex items-center justify-center">
+                                <i data-lucide="save" class="w-5 h-5 ml-2"></i> إضافة / تحديث
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            const renderDraftTable = () => `
+                <div class="card p-6 mb-6">
+                    <h4 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="list-ordered" class="w-5 h-5 ml-2"></i> أصناف الفاتورة المسودة (${draft.items.length})</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الصنف</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">سعر الوحدة</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الكمية</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الخصم (%)</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${draft.items.map(item => `
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${item.name} (${item.sku})</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${myAssistant.formatCurrency(item.unitPrice)}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${item.quantity}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-red-500">${item.discount}%</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-green-600">${myAssistant.formatCurrency(item.lineTotal)}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                            <button onclick="handleRemoveItemFromDraft('${item.id}')" class="text-red-600 hover:text-red-900 flex items-center">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    ${draft.items.length === 0 ? '<p class="text-center py-8 text-gray-500">يرجى إضافة أصناف للفاتورة.</p>' : ''}
+                </div>
+            `;
+
+            const renderTotalsSummary = () => `
+                <div class="card p-6 sticky bottom-0 bg-white shadow-2xl border-t-4 border-shahrazad">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                        <div>
+                            <p class="text-sm text-gray-500">الإجمالي الفرعي</p>
+                            <p class="text-lg font-bold text-gray-800">${myAssistant.formatCurrency(draft.subTotal)}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">خصم الأصناف</p>
+                            <p class="text-lg font-bold text-red-500">${myAssistant.formatCurrency(draft.totalDiscount)}</p>
+                        </div>
+                        <div>
+                            <label for="final-discount" class="block text-sm font-medium text-gray-700 mb-1">خصم إجمالي إضافي (%)</label>
+                            <input type="number" id="final-discount" value="${draft.finalDiscountPercentage || 0}" min="0" max="100" oninput="handleFinalDiscountChange(event)" class="w-full p-2 border border-gray-300 rounded-lg">
+                            <p class="text-xs text-gray-500 mt-1">المبلغ: ${myAssistant.formatCurrency(draft.finalDiscountAmount || 0)}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">الإجمالي النهائي</p>
+                            <p class="text-2xl font-black text-green-600">${myAssistant.formatCurrency(draft.grandTotal)}</p>
+                        </div>
+                        <div class="col-span-full md:col-span-4">
+                            <button onclick="handleSaveInvoice()" class="w-full bg-shahrazad text-white p-3 rounded-lg hover:bg-shahrazad-light transition duration-150 font-black text-xl flex items-center justify-center" ${draft.items.length === 0 || !selectedCustomer ? 'disabled' : ''}>
+                                <i data-lucide="credit-card" class="w-6 h-6 ml-2"></i> حفظ الفاتورة وإصدارها
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return `
+                <div class="max-w-7xl mx-auto">
+                    ${renderCustomerSelector()}
+                    ${renderAddItemForm()}
+                    ${renderDraftTable()}
+                    ${renderTotalsSummary()}
+                </div>
+            `;
+        };
+        
+        // --- Print Invoice View ---
+        const PrintInvoiceView = () => {
+            PrintInvoiceView.title = 'عرض وتفاصيل الفاتورة';
+            const invoice = App.currentInvoiceForView;
+
+            if (!invoice) {
+                return `<div class="card p-10 text-center text-red-600 font-bold">خطأ: لم يتم تحديد فاتورة للعرض.</div>`;
+            }
+
+            const renderInvoiceHeader = () => `
+                <div class="flex justify-between items-start border-b pb-4 mb-4">
+                    <div>
+                        <h1 class="text-4xl font-black text-shahrazad">فاتورة بيع</h1>
+                        <p class="text-xl font-bold text-gray-700 mt-2">رقم: #${invoice.invoiceNumber}</p>
+                        <p class="text-sm text-gray-500 mt-1">تاريخ الإصدار: ${invoice.createdAt}</p>
+                    </div>
+                    <div class="text-left">
+                        <h2 class="text-2xl font-bold text-gray-800">شركة شهرازاد للكهرباء</h2>
+                        <p class="text-sm text-gray-600">العنوان: [عنوان الشركة]</p>
+                        <p class="text-sm text-gray-600">هاتف: [رقم الهاتف]</p>
+                        <p class="text-sm text-gray-600">المُصدر: ${invoice.issuedBy}</p>
+                    </div>
+                </div>
+            `;
+
+            const renderCustomerInfo = () => `
+                <div class="mb-6 p-4 border rounded-lg bg-gray-50">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">معلومات العميل</h3>
+                    <div class="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                        <div>
+                            <span class="font-medium text-gray-800">الاسم:</span> ${invoice.customerName}
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-800">الهاتف:</span> ${invoice.customerPhone}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const renderInvoiceItems = () => `
+                <div class="mb-6">
+                    <div class="overflow-x-auto border rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الصنف (كود)</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">سعر الوحدة</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الكمية</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الخصم (%)</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي الفرعي</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${invoice.items.map(item => `
+                                    <tr>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${item.name} <span class="text-xs text-gray-500">(${item.sku})</span></td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${myAssistant.formatCurrency(item.unitPrice)}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${item.quantity}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-red-500">${item.discount}%</td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-800">${myAssistant.formatCurrency(item.lineTotal)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            const renderInvoiceTotals = () => `
+                <div class="flex justify-end">
+                    <div class="w-full md:w-1/3 p-4 border rounded-lg bg-white shadow-md">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-600">الإجمالي الفرعي:</span>
+                            <span class="font-medium text-gray-800">${myAssistant.formatCurrency(invoice.subTotal)}</span>
+                        </div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-600">إجمالي الخصم:</span>
+                            <span class="font-medium text-red-500">- ${myAssistant.formatCurrency(invoice.totalDiscount)}</span>
+                        </div>
+                        <div class="flex justify-between pt-3 border-t-2 border-dashed border-gray-300">
+                            <span class="text-xl font-bold text-shahrazad">الإجمالي النهائي:</span>
+                            <span class="text-2xl font-black text-green-600">${myAssistant.formatCurrency(invoice.grandTotal)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const renderPrintControls = () => `
+                <div class="no-print mt-6 flex justify-center space-x-4">
+                    <button onclick="window.print()" class="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-150 font-semibold flex items-center">
+                        <i data-lucide="printer" class="w-5 h-5 ml-2"></i> طباعة الفاتورة
+                    </button>
+                    <button onclick="changeView('invoices')" class="bg-gray-400 text-white p-3 rounded-lg hover:bg-gray-500 transition duration-150 font-semibold flex items-center">
+                        <i data-lucide="x" class="w-5 h-5 ml-2"></i> إغلاق
+                    </button>
+                </div>
+            `;
+
+            return `
+                <div class="max-w-4xl mx-auto">
+                    <div class="card p-8 print-area">
+                        ${renderInvoiceHeader()}
+                        ${renderCustomerInfo()}
+                        ${renderInvoiceItems()}
+                        ${renderInvoiceTotals()}
+                    </div>
+                    ${renderPrintControls()}
+                </div>
+            `;
+        };
+        
+        // --- Alerts View ---
+        const AlertsView = () => {
+            AlertsView.title = 'تنبيهات المخزون والعمليات';
+            const allAlerts = App.data.alerts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); // Sort by newest
+
+            const renderAlert = (alert) => {
+                let icon = 'info';
+                let color = 'bg-blue-100 text-blue-800 border-blue-300';
+                
+                switch (alert.type) {
+                    case 'low_stock':
+                        icon = 'alert-triangle';
+                        color = 'bg-red-100 text-red-800 border-red-300';
+                        break;
+                    case 'error':
+                        icon = 'x-octagon';
+                        color = 'bg-red-100 text-red-800 border-red-300';
+                        break;
+                    case 'critical':
+                        icon = 'zap';
+                        color = 'bg-red-200 text-red-900 border-red-500 font-bold';
+                        break;
+                }
+
+                // In a real app, you would have a function to dismiss/resolve the alert
+                const dismissAlert = (alertId) => {
+                    if(App.userRole !== 'admin') {
+                         alertUser("لا تملك صلاحية لحذف التنبيهات.", "error");
+                         return;
+                    }
+                    const alertRef = doc(App.db, App.getCollectionPath('alerts'), alertId);
+                    deleteDoc(alertRef)
+                        .then(() => alertUser("تم حذف التنبيه بنجاح.", "success"))
+                        .catch(e => console.error("Error deleting alert:", e));
+                };
+
+                return `
+                    <div class="flex justify-between items-start p-4 border-r-4 rounded-lg shadow-sm ${color}">
+                        <div class="flex items-start">
+                            <i data-lucide="${icon}" class="w-5 h-5 mt-1 ml-3 flex-shrink-0"></i>
+                            <div>
+                                <p class="text-sm font-semibold">${alert.message}</p>
+                                <p class="text-xs text-gray-500 mt-1">تاريخ الإنشاء: ${alert.createdAt}</p>
+                            </div>
+                        </div>
+                        <button onclick="window.confirm('هل أنت متأكد من حذف هذا التنبيه؟') && dismissAlert('${alert.id}')" 
+                                class="text-gray-500 hover:text-gray-900 transition duration-150 ${App.userRole !== 'admin' ? 'cursor-not-allowed opacity-50' : ''}" 
+                                ${App.userRole !== 'admin' ? 'disabled' : ''}>
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+            };
+
+            return `
+                <div class="max-w-4xl mx-auto">
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-semibold text-gray-700 mb-4">التنبيهات الحالية (${allAlerts.length})</h3>
+                        <div class="space-y-4">
+                            ${allAlerts.length > 0 ? allAlerts.map(renderAlert).join('') : `
+                                <div class="p-8 text-center bg-green-50 rounded-lg">
+                                    <i data-lucide="check-circle" class="w-8 h-8 text-green-600 mx-auto mb-2"></i>
+                                    <p class="text-lg font-medium text-green-700">لا توجد تنبيهات حالية. كل شيء على ما يرام!</p>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+        
+        // --- General Settings View (Admin Role Management) ---
+        const GeneralSettingsView = () => {
+            GeneralSettingsView.title = 'إعدادات النظام وإدارة المستخدمين';
+
+            if (App.userRole !== 'admin') {
+                return `<div class="card p-10 text-center text-red-600 font-bold">عذراً، هذه الصفحة مخصصة للمدير فقط.</div>`;
+            }
+
+            const allUsers = App.data.users;
+
+            const renderUserTable = (users) => `
+                <div class="card p-6 mb-6">
+                    <h3 class="text-2xl font-semibold text-gray-700 mb-4">إدارة صلاحيات المستخدمين (${users.length})</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم / البريد</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الصلاحية الحالية</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تغيير الصلاحية إلى</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${users.map(u => `
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            ${u.name || u.email} <br> <span class="text-xs text-gray-500">${u.email}</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold ${u.role === 'admin' ? 'text-shahrazad' : 'text-green-600'}">
+                                            ${u.role === 'admin' ? 'مدير' : 'موظف مبيعات'}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <select 
+                                                id="role-select-${u.id}" 
+                                                onchange="handleUpdateUserRole('${u.id}', this.value)"
+                                                class="p-2 border rounded-lg ${u.id === App.userId ? 'bg-gray-100 cursor-not-allowed' : ''}"
+                                                ${u.id === App.userId ? 'disabled' : ''}>
+                                                <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>مدير</option>
+                                                <option value="staff" ${u.role === 'staff' ? 'selected' : ''}>موظف مبيعات</option>
+                                            </select>
+                                            ${u.id === App.userId ? '<p class="text-xs text-red-500 mt-1">لا يمكن تغيير صلاحيتك الخاصة</p>' : ''}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            // Placeholder for System Settings
+            const renderSystemSettings = () => `
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">إعدادات النظام العامة</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-3 border rounded-lg">
+                            <label for="low-stock-threshold" class="text-gray-700">حد تنبيه انخفاض المخزون</label>
+                            <div class="flex items-center">
+                                <input type="number" id="low-stock-threshold" value="${App.lowStockThreshold}" 
+                                    onchange="App.lowStockThreshold = parseInt(this.value); alertUser('تم تحديث حد التنبيه إلى ' + this.value, 'info'); checkLowStockAlerts();"
+                                    min="1" class="w-20 p-2 border rounded-lg text-center ml-2">
+                                <span class="text-sm text-gray-500">وحدة</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return `
+                <div class="max-w-7xl mx-auto">
+                    ${renderUserTable(allUsers)}
+                    ${renderSystemSettings()}
+                </div>
+            `;
+        };
+        
+        // --- User Settings View (Can be simple or removed if not needed) ---
+        const UserSettingsView = () => {
+             UserSettingsView.title = 'إعدادات حسابي';
+             // For now, this is kept simple and can be expanded later
+             return `<div class="card p-10 text-center">
+                 <h3 class="text-2xl font-semibold text-gray-700 mb-4">إعدادات الحساب الشخصي</h3>
+                 <p>البريد الإلكتروني: ${App.auth.currentUser.email}</p>
+                 <p>الصلاحية: ${App.userRole === 'admin' ? 'مدير' : 'موظف مبيعات'}</p>
+                 <p class="mt-4 text-gray-500">يمكنك إضافة خيار تغيير كلمة المرور هنا لاحقاً.</p>
+             </div>`;
+        }
+
+        // ====================================================================
+        //                      App Initialization
+        // ====================================================================
+
+        App.views = {
+            loading: LoadingView,
+            auth_error: AuthErrorView,
+            login: LoginView,
+            dashboard: DashboardView,
+            products: ProductsView,
+            invoices: InvoicesView,
+            new_invoice: NewInvoiceView, 
+            invoice_details: PrintInvoiceView, 
+            customers: CustomersView,
+            alerts: AlertsView,
+            general_settings: GeneralSettingsView,
+            user_settings: UserSettingsView,
+        };
+
+        function render() {
+            const appRoot = document.getElementById('app-root');
+            if (appRoot) {
+                appRoot.innerHTML = MainLayout();
+                // Check if the current view is dashboard or alerts to run stock checks
+                if (['dashboard', 'alerts', 'products', 'new_invoice'].includes(App.view)) {
+                    checkLowStockAlerts();
+                }
+                lucide.createIcons();
+            }
+        }
+
+        // --- Start Application ---
+
+        // 1. Setup global container
+        const appContainer = document.createElement('div');
+        appContainer.id = 'app-root';
+        document.body.appendChild(appContainer);
+
+        // 2. Start Persistence Setup, then Auth Process (NEW ORDER)
+        setupOfflinePersistence().then(() => {
+            authenticateUser().then(() => { setupAuthStateListener(); });
+        });
+    </script>
+    
+    <div id="global-alert" class="fixed top-4 right-4 z-50 p-4 rounded-lg shadow-xl text-white transition-all duration-300 transform -translate-y-20 opacity-0">
+        </div>
+    
 </body>
 </html>
