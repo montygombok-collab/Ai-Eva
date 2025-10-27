@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SHAHRAZAD ELECTRIC | نظام إدارة المبيعات المتقدم</title>
     
+    <link rel="icon" href="/favicon.ico" type="image/x-icon"> 
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
     <script src="https://cdn.tailwindcss.com"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
@@ -921,14 +924,12 @@
                         <p class="text-gray-600 mb-6">حدث خطأ حاسم أثناء محاولة المصادقة على Firebase. هذا قد يشير إلى:
                             <ul class="list-disc list-inside text-right mt-3 mx-4 text-sm text-gray-700 space-y-1">
                                 <li>مشكلة في اتصال الإنترنت.</li>
-                                <li>مشكلة في إعدادات مفتاح API Key (مثل `auth/admin-restricted-operation`).</li>
+                                <li>مشكلة في إعدادات مفتاح API Key (مثل \`auth/admin-restricted-operation\`).</li>
                                 <li>أن عملية التسجيل التلقائي غير مسموح بها.</li>
                             </ul>
                         </p>
                         <p class="text-red-600 font-semibold mt-6">يرجى مراجعة سجلات الـ Console والـ API Key في Firebase.</p>
-                        <button onclick="window.location.reload()" class="mt-4 bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 transition duration-150 font-semibold">
-                            إعادة المحاولة
-                        </button>
+                        <button onclick="window.location.reload()" class="mt-4 bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 transition duration-150 font-semibold"> إعادة المحاولة </button>
                     </div>
                 </div>
             `;
@@ -939,14 +940,14 @@
 
         // --- Dashboard View ---
         const DashboardView = () => {
-            DashboardView.title = 'لوحة القيادة الرئيسية';
+            DashboardView.title = 'لوحة القيادة الرئيسية'; 
+
             const totalProducts = App.data.products.length;
             const totalInvoices = App.data.invoices.length;
             const totalCustomers = App.data.customers.length;
             const lowStockCount = App.data.products.filter(p => (p.warehouse_stock || 0) <= App.lowStockThreshold).length;
-
             const salesTotal = App.data.invoices.reduce((sum, invoice) => sum + (invoice.grandTotal || 0), 0);
-            
+
             // Render KPI Cards
             const renderKPIs = (totalProducts, totalInvoices, totalCustomers, lowStockCount, salesTotal) => `
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
@@ -988,9 +989,7 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">${myAssistant.formatCurrency(i.grandTotal)}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${i.createdAt}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <button onclick="changeView('invoice_details', ${JSON.stringify(i).replace(/"/g, '&quot;')})" class="text-blue-600 hover:text-blue-900">
-                                                    عرض
-                                                </button>
+                                                <button onclick="changeView('invoice_details', ${JSON.stringify(i).replace(/"/g, '&quot;')})" class="text-blue-600 hover:text-blue-900"> عرض </button>
                                             </td>
                                         </tr>
                                     `).join('')}
@@ -1005,10 +1004,12 @@
             return `
                 <div class="max-w-7xl mx-auto">
                     ${renderKPIs(totalProducts, totalInvoices, totalCustomers, lowStockCount, salesTotal)}
+
                     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                         <div class="xl:col-span-2">
                             ${renderRecentInvoices(App.data.invoices.sort((a, b) => (b.invoiceNumber || 0) - (a.invoiceNumber || 0)))}
                         </div>
+
                         <div class="card p-6">
                             <h3 class="text-xl font-semibold text-gray-700 mb-4">ملخص المخزون</h3>
                             <div class="space-y-4">
@@ -1033,6 +1034,7 @@
         // --- Products View ---
         const ProductsView = () => {
             ProductsView.title = 'الأصناف والمخزون';
+
             const allProducts = App.data.products;
 
             const renderProductList = (products) => `
@@ -1042,223 +1044,162 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead>
                                 <tr class="bg-gray-50">
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم / الكود</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">جهد الملف</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">سعر البيع</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">مخزون العرض</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المخزن</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الفئة</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم/الكود</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">سعر البيع</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">سعر الشراء</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المخزن</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">العرض</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المصاحبة</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ملاحظات</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 ${products.map(p => `
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            ${p.name} <br> <span class="text-xs text-gray-500">${p.sku}</span>
+                                    <tr class="hover:bg-gray-50 ${p.warehouse_stock <= App.lowStockThreshold ? 'bg-red-50 bg-opacity-50' : ''}">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <p class="text-sm font-medium text-gray-900">${p.name}</p>
+                                            <p class="text-xs text-gray-500">(${p.sku})</p>
                                         </td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${p.coil_voltage || 'غير محدد'}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-green-600">${myAssistant.formatCurrency(p.unit_price)}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm ${p.display_stock <= App.lowStockThreshold ? 'text-red-500 font-semibold' : 'text-gray-700'}">${p.display_stock || 0}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm ${p.warehouse_stock <= App.lowStockThreshold ? 'text-red-500 font-semibold' : 'text-gray-700'}">${p.warehouse_stock || 0}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${p.category}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-semibold">${myAssistant.formatCurrency(p.unit_price)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">${myAssistant.formatCurrency(p.purchase_price)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800 ${p.warehouse_stock <= App.lowStockThreshold ? 'text-red-600' : 'text-gray-800'}">${p.warehouse_stock || 0}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${p.display_stock || 0}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.coil_voltage || 'N/A'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">${p.notes || 'لا يوجد'}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
                         </table>
                     </div>
-                    ${products.length === 0 ? '<p class="text-center py-8 text-gray-500">لا توجد أصناف مسجلة بعد.</p>' : ''}
+                    ${products.length === 0 ? '<p class="text-center py-8 text-gray-500">لا توجد أصناف مسجلة حتى الآن.</p>' : ''}
                 </div>
             `;
-
+            
             const renderStockMovementForms = () => `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="card p-6">
-                        <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="warehouse" class="w-5 h-5 ml-2 text-shahrazad"></i> إضافة كمية للمخزن</h3>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="package-plus" class="w-5 h-5 ml-2 text-shahrazad"></i> إضافة كمية إلى المخزن</h3>
                         <form id="add-to-warehouse-form" onsubmit="handleAddToWarehouse(event)">
                             <div class="mb-4">
                                 <label for="warehouse-product-id" class="block text-sm font-medium text-gray-700 mb-1">اختر الصنف</label>
-                                <select id="warehouse-product-id" required class="w-full p-3 border border-gray-300 rounded-lg">
-                                    <option value="">-- يرجى الاختيار --</option>
-                                    ${allProducts.map(p => `<option value="${p.id}">${p.name} (${p.sku}) - المخزن: ${p.warehouse_stock || 0}</option>`).join('')}
+                                <select id="warehouse-product-id" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                                    <option value="">-- اختر الصنف --</option>
+                                    ${allProducts.map(p => `<option value="${p.id}">${p.name} (${p.sku}) - المتوفر: ${p.warehouse_stock || 0}</option>`).join('')}
                                 </select>
                             </div>
-                            <div class="mb-4">
+                            <div class="mb-6">
                                 <label for="warehouse-quantity" class="block text-sm font-medium text-gray-700 mb-1">الكمية المضافة</label>
-                                <input type="number" id="warehouse-quantity" required min="1" class="w-full p-3 border border-gray-300 rounded-lg">
+                                <input type="number" id="warehouse-quantity" min="1" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad" placeholder="أدخل الكمية">
                             </div>
-                            <button type="submit" class="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition duration-150 font-semibold flex items-center justify-center">
-                                <i data-lucide="plus" class="w-5 h-5 ml-2"></i> تأكيد الإضافة للمخزن
+                            <button type="submit" class="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition duration-150 font-semibold">
+                                <i data-lucide="save" class="w-5 h-5 ml-2"></i> حفظ الإضافة للمخزن
                             </button>
                         </form>
                     </div>
 
                     <div class="card p-6">
-                        <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="move" class="w-5 h-5 ml-2 text-shahrazad"></i> نقل من المخزن للعرض</h3>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="package-search" class="w-5 h-5 ml-2 text-shahrazad"></i> نقل من المخزن إلى العرض</h3>
                         <form id="move-to-display-form" onsubmit="handleMoveToDisplay(event)">
                             <div class="mb-4">
                                 <label for="move-product-id" class="block text-sm font-medium text-gray-700 mb-1">اختر الصنف</label>
-                                <select id="move-product-id" required class="w-full p-3 border border-gray-300 rounded-lg">
-                                    <option value="">-- يرجى الاختيار --</option>
-                                    ${allProducts.map(p => `<option value="${p.id}">${p.name} (${p.sku}) - المخزن: ${p.warehouse_stock || 0}</option>`).join('')}
+                                <select id="move-product-id" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                                    <option value="">-- اختر الصنف --</option>
+                                    ${allProducts.map(p => `<option value="${p.id}">${p.name} (${p.sku}) - مخزن: ${p.warehouse_stock || 0} - عرض: ${p.display_stock || 0}</option>`).join('')}
                                 </select>
                             </div>
-                            <div class="mb-4">
+                            <div class="mb-6">
                                 <label for="move-quantity" class="block text-sm font-medium text-gray-700 mb-1">الكمية المراد نقلها</label>
-                                <input type="number" id="move-quantity" required min="1" class="w-full p-3 border border-gray-300 rounded-lg">
+                                <input type="number" id="move-quantity" min="1" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad" placeholder="أدخل الكمية">
                             </div>
-                            <button type="submit" class="w-full bg-purple-500 text-white p-3 rounded-lg hover:bg-purple-600 transition duration-150 font-semibold flex items-center justify-center">
-                                <i data-lucide="corner-down-right" class="w-5 h-5 ml-2"></i> تأكيد النقل للعرض
+                            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-150 font-semibold">
+                                <i data-lucide="send" class="w-5 h-5 ml-2"></i> نقل إلى العرض
                             </button>
                         </form>
                     </div>
                 </div>
             `;
-
-            const renderAddProductForm = () => `
-                <div class="card p-6 mt-6 ${App.userRole === 'admin' ? '' : 'hidden'}">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="plus-square" class="w-5 h-5 ml-2 text-shahrazad"></i> إضافة صنف جديد (للمدير فقط)</h3>
-                    <form id="add-product-form" onsubmit="handleAddProduct(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="col-span-1">
-                            <label for="product-name" class="block text-sm font-medium text-gray-700 mb-1">اسم الصنف</label>
-                            <input type="text" id="product-name" required class="w-full p-3 border border-gray-300 rounded-lg">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="product-sku" class="block text-sm font-medium text-gray-700 mb-1">كود الصنف (SKU)</label>
-                            <input type="text" id="product-sku" required class="w-full p-3 border border-gray-300 rounded-lg">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="product-price" class="block text-sm font-medium text-gray-700 mb-1">سعر البيع (جنيه)</label>
-                            <input type="number" id="product-price" required min="0.01" step="0.01" class="w-full p-3 border border-gray-300 rounded-lg">
-                        </div>
-                         <div class="col-span-1">
-                            <label for="product-purchase-price" class="block text-sm font-medium text-gray-700 mb-1">سعر الشراء (جنيه)</label>
-                            <input type="number" id="product-purchase-price" required min="0.01" step="0.01" class="w-full p-3 border border-gray-300 rounded-lg">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="product-warehouse-stock" class="block text-sm font-medium text-gray-700 mb-1">الكمية الأولية في المخزن</label>
-                            <input type="number" id="product-warehouse-stock" required min="0" class="w-full p-3 border border-gray-300 rounded-lg">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="product-category" class="block text-sm font-medium text-gray-700 mb-1">الفئة</label>
-                            <input type="text" id="product-category" class="w-full p-3 border border-gray-300 rounded-lg" value="كهرباء">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="product-coil-voltage" class="block text-sm font-medium text-gray-700 mb-1">جهد الملف (Coil Voltage)</label>
-                            <input type="text" id="product-coil-voltage" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="مثال: 12V DC, 220V AC">
-                        </div>
-                        <div class="col-span-2">
-                            <label for="product-notes" class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
-                            <textarea id="product-notes" class="w-full p-3 border border-gray-300 rounded-lg" rows="2"></textarea>
-                        </div>
-                        <div class="col-span-2">
-                            <button type="submit" class="w-full bg-shahrazad text-white p-3 rounded-lg hover:bg-shahrazad-light transition duration-150 font-semibold">
-                                <i data-lucide="save" class="w-5 h-5 ml-2 inline-block"></i> حفظ الصنف الجديد
+            
+            const renderAddProductForm = () => {
+                if (App.userRole !== 'admin') return '';
+                return `
+                    <div class="card p-6 mt-6">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="plus-circle" class="w-5 h-5 ml-2 text-red-500"></i> إضافة صنف جديد (للمدير فقط)</h3>
+                        <form id="add-product-form" onsubmit="handleAddProduct(event)">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="product-name" class="block text-sm font-medium text-gray-700 mb-1">اسم الصنف</label>
+                                    <input type="text" id="product-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                                </div>
+                                <div>
+                                    <label for="product-sku" class="block text-sm font-medium text-gray-700 mb-1">كود الصنف (SKU)</label>
+                                    <input type="text" id="product-sku" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                                </div>
+                                <div>
+                                    <label for="product-category" class="block text-sm font-medium text-gray-700 mb-1">الفئة/النوع</label>
+                                    <input type="text" id="product-category" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                                </div>
+                                <div>
+                                    <label for="product-price" class="block text-sm font-medium text-gray-700 mb-1">سعر البيع للوحدة (EGP)</label>
+                                    <input type="number" step="0.01" id="product-price" min="0" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                                </div>
+                                <div>
+                                    <label for="product-purchase-price" class="block text-sm font-medium text-gray-700 mb-1">سعر الشراء للوحدة (EGP)</label>
+                                    <input type="number" step="0.01" id="product-purchase-price" min="0" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                                </div>
+                                <div>
+                                    <label for="product-warehouse-stock" class="block text-sm font-medium text-gray-700 mb-1">مخزون البداية (المخزن)</label>
+                                    <input type="number" id="product-warehouse-stock" min="0" value="0" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                                </div>
+                                <div class="col-span-1 md:col-span-3">
+                                    <label for="product-coil-voltage" class="block text-sm font-medium text-gray-700 mb-1">مواصفات إضافية (مثل: Coil Voltage)</label>
+                                    <input type="text" id="product-coil-voltage" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad" placeholder="مثال: 24V DC">
+                                </div>
+                                <div class="col-span-1 md:col-span-3">
+                                    <label for="product-notes" class="block text-sm font-medium text-gray-700 mb-1">ملاحظات إضافية</label>
+                                    <textarea id="product-notes" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad"></textarea>
+                                </div>
+                            </div>
+                            <button type="submit" class="mt-4 w-full bg-shahrazad text-white p-3 rounded-lg hover:bg-opacity-90 transition duration-150 font-semibold">
+                                <i data-lucide="plus" class="w-5 h-5 ml-2"></i> حفظ الصنف الجديد
                             </button>
-                        </div>
-                    </form>
-                </div>
-            `;
+                        </form>
+                    </div>
+                `;
+            };
 
             return `
                 <div class="max-w-7xl mx-auto">
-                    ${renderProductList(allProducts)}
                     ${renderStockMovementForms()}
+                    ${renderProductList(allProducts)}
                     ${renderAddProductForm()}
                 </div>
             `;
         };
-
-        // --- Customers View ---
-        const CustomersView = () => {
-            CustomersView.title = 'إدارة العملاء';
-            const allCustomers = App.data.customers;
-
-            const renderCustomerList = (customers) => `
-                <div class="card p-6 mb-6">
-                    <h3 class="text-2xl font-semibold text-gray-700 mb-4">قائمة العملاء (${customers.length} عميل)</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
-                                <tr class="bg-gray-50">
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">رقم الهاتف</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">البريد الإلكتروني</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">العنوان</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاريخ الإضافة</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                ${customers.map(c => `
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-shahrazad">${c.name}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${c.phone}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${c.email || 'N/A'}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${c.address}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${c.createdAt}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                    ${customers.length === 0 ? '<p class="text-center py-8 text-gray-500">لا توجد عملاء مسجلين بعد.</p>' : ''}
-                </div>
-            `;
-
-            const renderAddCustomerForm = () => `
-                <div class="card p-6 mt-6">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="user-plus" class="w-5 h-5 ml-2 text-shahrazad"></i> إضافة عميل جديد</h3>
-                    <form id="add-customer-form" onsubmit="handleAddCustomer(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="col-span-1">
-                            <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-1">اسم العميل</label>
-                            <input type="text" id="customer-name" required class="w-full p-3 border border-gray-300 rounded-lg">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="customer-phone" class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
-                            <input type="tel" id="customer-phone" required class="w-full p-3 border border-gray-300 rounded-lg">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="customer-email" class="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني (اختياري)</label>
-                            <input type="email" id="customer-email" class="w-full p-3 border border-gray-300 rounded-lg">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="customer-address" class="block text-sm font-medium text-gray-700 mb-1">العنوان</label>
-                            <input type="text" id="customer-address" required class="w-full p-3 border border-gray-300 rounded-lg">
-                        </div>
-                        <div class="col-span-2">
-                            <button type="submit" class="w-full bg-shahrazad text-white p-3 rounded-lg hover:bg-shahrazad-light transition duration-150 font-semibold">
-                                <i data-lucide="save" class="w-5 h-5 ml-2 inline-block"></i> حفظ العميل الجديد
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            `;
-
-            return `
-                <div class="max-w-7xl mx-auto">
-                    ${renderCustomerList(allCustomers)}
-                    ${renderAddCustomerForm()}
-                </div>
-            `;
-        };
         
-        // --- Invoices View (Sales History) ---
+        // --- Invoices View ---
         const InvoicesView = () => {
-            InvoicesView.title = 'سجل المبيعات والفواتير';
+            InvoicesView.title = 'إدارة المبيعات والفواتير';
             const allInvoices = App.data.invoices.sort((a, b) => (b.invoiceNumber || 0) - (a.invoiceNumber || 0));
 
             return `
                 <div class="max-w-7xl mx-auto">
-                    <div class="card p-6 mb-6">
-                        <h3 class="text-2xl font-semibold text-gray-700 mb-4">قائمة الفواتير الصادرة (${allInvoices.length} فاتورة)</h3>
+                    <div class="card p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-2xl font-semibold text-gray-700">جميع الفواتير (${allInvoices.length})</h3>
+                            <button onclick="changeView('new_invoice')" class="bg-shahrazad text-white p-2 rounded-lg hover:bg-opacity-90 transition duration-150 font-semibold flex items-center">
+                                <i data-lucide="file-plus" class="w-5 h-5 ml-2"></i> فاتورة جديدة
+                            </button>
+                        </div>
+
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead>
                                     <tr class="bg-gray-50">
                                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">رقم الفاتورة</th>
                                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">العميل</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي (شامل)</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي</th>
                                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الحالة</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاريخ الإصدار</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التاريخ</th>
                                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجراء</th>
                                     </tr>
                                 </thead>
@@ -1267,404 +1208,450 @@
                                         <tr class="hover:bg-gray-50">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-shahrazad">#${i.invoiceNumber}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${i.customerName}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">${myAssistant.formatCurrency(i.grandTotal)}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">${myAssistant.formatCurrency(i.grandTotal)}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                    مدفوعة
+                                                    ${i.status === 'paid' ? 'مدفوعة' : 'معلقة'}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${i.createdAt}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <button onclick="changeView('invoice_details', ${JSON.stringify(i).replace(/"/g, '&quot;')})" class="text-blue-600 hover:text-blue-900 flex items-center">
-                                                    عرض / طباعة <i data-lucide="printer" class="w-4 h-4 mr-1"></i>
-                                                </button>
+                                                <button onclick="changeView('invoice_details', ${JSON.stringify(i).replace(/"/g, '&quot;')})" class="text-blue-600 hover:text-blue-900"> عرض </button>
                                             </td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
                             </table>
                         </div>
-                        ${allInvoices.length === 0 ? '<p class="text-center py-8 text-gray-500">لا توجد فواتير مسجلة بعد.</p>' : ''}
+                        ${allInvoices.length === 0 ? '<p class="text-center py-8 text-gray-500">لم يتم إنشاء أي فواتير بعد.</p>' : ''}
                     </div>
-                </div>
-            `;
-        };
-
-        // --- New Invoice View ---
-        const NewInvoiceView = () => {
-            NewInvoiceView.title = 'إنشاء فاتورة جديدة';
-            const customers = App.data.customers;
-            const products = App.data.products.filter(p => (p.display_stock || 0) > 0); // Only available in display stock
-            const selectedCustomer = customers.find(c => c.id === App.draftInvoice.customerId);
-            const draft = App.draftInvoice;
-
-            const renderCustomerSelector = () => `
-                <div class="card p-4 mb-4 bg-blue-50 border-blue-200 border-2">
-                    <h4 class="text-lg font-semibold text-blue-800 mb-2 flex items-center">
-                        <i data-lucide="user-check" class="w-5 h-5 ml-2"></i> اختيار العميل
-                    </h4>
-                    ${selectedCustomer ? `
-                        <p class="text-gray-700 font-bold text-xl">${selectedCustomer.name}</p>
-                        <p class="text-sm text-gray-600">هاتف: ${selectedCustomer.phone}</p>
-                        <button onclick="handleCustomerSelection(null)" class="mt-2 text-red-500 hover:text-red-700 text-sm">
-                            تغيير العميل
-                        </button>
-                    ` : `
-                        <select onchange="handleCustomerSelection(this.value)" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
-                            <option value="">-- اختر عميلاً أو أضف عميلاً جديداً --</option>
-                            ${customers.map(c => `<option value="${c.id}">${c.name} (${c.phone})</option>`).join('')}
-                        </select>
-                        <button onclick="changeView('customers')" class="mt-3 text-shahrazad hover:text-shahrazad-light text-sm font-medium">
-                            + إضافة عميل جديد
-                        </button>
-                    `}
-                </div>
-            `;
-
-            const renderAddItemForm = () => `
-                <div class="card p-6 mb-6">
-                    <h4 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="plus-circle" class="w-5 h-5 ml-2"></i> إضافة صنف للفاتورة</h4>
-                    <form onsubmit="event.preventDefault(); handleAddItemToDraft(
-                        document.getElementById('item-product-id').value,
-                        parseInt(document.getElementById('item-quantity').value),
-                        parseFloat(document.getElementById('item-price').value),
-                        parseFloat(document.getElementById('item-discount').value)
-                    )" class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <div class="col-span-full md:col-span-2">
-                            <label for="item-product-id" class="block text-sm font-medium text-gray-700 mb-1">اختر الصنف (المتوفر في العرض فقط)</label>
-                            <select id="item-product-id" required class="w-full p-3 border border-gray-300 rounded-lg"
-                                onchange="
-                                    const product = findProductById(this.value);
-                                    if(product) {
-                                        document.getElementById('item-price').value = product.unit_price;
-                                        document.getElementById('item-max-qty').textContent = product.display_stock || 0;
-                                        document.getElementById('item-quantity').setAttribute('max', product.display_stock || 0);
-                                    }
-                                ">
-                                <option value="">-- يرجى الاختيار --</option>
-                                ${products.map(p => `<option value="${p.id}">${p.name} (${p.sku}) - العرض: ${p.display_stock || 0}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div>
-                            <label for="item-quantity" class="block text-sm font-medium text-gray-700 mb-1">الكمية (<span id="item-max-qty" class="text-red-500">0</span> متوفر)</label>
-                            <input type="number" id="item-quantity" required min="1" max="0" class="w-full p-3 border border-gray-300 rounded-lg">
-                        </div>
-                        <div>
-                            <label for="item-price" class="block text-sm font-medium text-gray-700 mb-1">سعر الوحدة</label>
-                            <input type="number" id="item-price" required min="0.01" step="0.01" class="w-full p-3 border border-gray-300 rounded-lg">
-                        </div>
-                        <div>
-                            <label for="item-discount" class="block text-sm font-medium text-gray-700 mb-1">الخصم (%)</label>
-                            <input type="number" id="item-discount" value="0" min="0" max="100" class="w-full p-3 border border-gray-300 rounded-lg">
-                        </div>
-                        <div class="col-span-full md:col-span-1 flex items-end">
-                            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-150 font-semibold flex items-center justify-center">
-                                <i data-lucide="save" class="w-5 h-5 ml-2"></i> إضافة / تحديث
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            `;
-
-            const renderDraftTable = () => `
-                <div class="card p-6 mb-6">
-                    <h4 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="list-ordered" class="w-5 h-5 ml-2"></i> أصناف الفاتورة المسودة (${draft.items.length})</h4>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
-                                <tr class="bg-gray-50">
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الصنف</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">سعر الوحدة</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الكمية</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الخصم (%)</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجراء</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                ${draft.items.map(item => `
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${item.name} (${item.sku})</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${myAssistant.formatCurrency(item.unitPrice)}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${item.quantity}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-red-500">${item.discount}%</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-green-600">${myAssistant.formatCurrency(item.lineTotal)}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm">
-                                            <button onclick="handleRemoveItemFromDraft('${item.id}')" class="text-red-600 hover:text-red-900 flex items-center">
-                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                    ${draft.items.length === 0 ? '<p class="text-center py-8 text-gray-500">يرجى إضافة أصناف للفاتورة.</p>' : ''}
-                </div>
-            `;
-
-            const renderTotalsSummary = () => `
-                <div class="card p-6 sticky bottom-0 bg-white shadow-2xl border-t-4 border-shahrazad">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-                        <div>
-                            <p class="text-sm text-gray-500">الإجمالي الفرعي</p>
-                            <p class="text-lg font-bold text-gray-800">${myAssistant.formatCurrency(draft.subTotal)}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">خصم الأصناف</p>
-                            <p class="text-lg font-bold text-red-500">${myAssistant.formatCurrency(draft.totalDiscount)}</p>
-                        </div>
-                        <div>
-                            <label for="final-discount" class="block text-sm font-medium text-gray-700 mb-1">خصم إجمالي إضافي (%)</label>
-                            <input type="number" id="final-discount" value="${draft.finalDiscountPercentage || 0}" min="0" max="100" oninput="handleFinalDiscountChange(event)" class="w-full p-2 border border-gray-300 rounded-lg">
-                            <p class="text-xs text-gray-500 mt-1">المبلغ: ${myAssistant.formatCurrency(draft.finalDiscountAmount || 0)}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">الإجمالي النهائي</p>
-                            <p class="text-2xl font-black text-green-600">${myAssistant.formatCurrency(draft.grandTotal)}</p>
-                        </div>
-                        <div class="col-span-full md:col-span-4">
-                            <button onclick="handleSaveInvoice()" class="w-full bg-shahrazad text-white p-3 rounded-lg hover:bg-shahrazad-light transition duration-150 font-black text-xl flex items-center justify-center" ${draft.items.length === 0 || !selectedCustomer ? 'disabled' : ''}>
-                                <i data-lucide="credit-card" class="w-6 h-6 ml-2"></i> حفظ الفاتورة وإصدارها
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            return `
-                <div class="max-w-7xl mx-auto">
-                    ${renderCustomerSelector()}
-                    ${renderAddItemForm()}
-                    ${renderDraftTable()}
-                    ${renderTotalsSummary()}
                 </div>
             `;
         };
         
-        // --- Print Invoice View ---
-        const PrintInvoiceView = () => {
-            PrintInvoiceView.title = 'عرض وتفاصيل الفاتورة';
-            const invoice = App.currentInvoiceForView;
+        // --- New Invoice View ---
+        const NewInvoiceView = () => {
+            NewInvoiceView.title = 'إنشاء فاتورة جديدة';
 
-            if (!invoice) {
-                return `<div class="card p-10 text-center text-red-600 font-bold">خطأ: لم يتم تحديد فاتورة للعرض.</div>`;
-            }
-
-            const renderInvoiceHeader = () => `
-                <div class="flex justify-between items-start border-b pb-4 mb-4">
-                    <div>
-                        <h1 class="text-4xl font-black text-shahrazad">فاتورة بيع</h1>
-                        <p class="text-xl font-bold text-gray-700 mt-2">رقم: #${invoice.invoiceNumber}</p>
-                        <p class="text-sm text-gray-500 mt-1">تاريخ الإصدار: ${invoice.createdAt}</p>
-                    </div>
-                    <div class="text-left">
-                        <h2 class="text-2xl font-bold text-gray-800">شركة شهرازاد للكهرباء</h2>
-                        <p class="text-sm text-gray-600">العنوان: [عنوان الشركة]</p>
-                        <p class="text-sm text-gray-600">هاتف: [رقم الهاتف]</p>
-                        <p class="text-sm text-gray-600">المُصدر: ${invoice.issuedBy}</p>
-                    </div>
-                </div>
-            `;
-
-            const renderCustomerInfo = () => `
-                <div class="mb-6 p-4 border rounded-lg bg-gray-50">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">معلومات العميل</h3>
-                    <div class="grid grid-cols-2 gap-4 text-sm text-gray-600">
+            const selectedCustomer = App.data.customers.find(c => c.id === App.draftInvoice.customerId);
+            
+            const renderCustomerSelector = () => `
+                <div class="card p-5 mb-6 flex items-center justify-between bg-white border-l-4 border-shahrazad shadow-lg">
+                    <div class="flex items-center">
+                        <i data-lucide="user-plus" class="w-6 h-6 ml-3 text-shahrazad"></i>
                         <div>
-                            <span class="font-medium text-gray-800">الاسم:</span> ${invoice.customerName}
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-800">الهاتف:</span> ${invoice.customerPhone}
+                            <p class="text-lg font-semibold text-gray-700">
+                                ${selectedCustomer ? `العميل المحدد: ${selectedCustomer.name}` : 'يرجى اختيار العميل'}
+                            </p>
+                            ${selectedCustomer ? `<p class="text-sm text-gray-500">الهاتف: ${selectedCustomer.phone || 'غير محدد'} | البريد: ${selectedCustomer.email || 'غير محدد'}</p>` : ''}
                         </div>
                     </div>
-                </div>
-            `;
-
-            const renderInvoiceItems = () => `
-                <div class="mb-6">
-                    <div class="overflow-x-auto border rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
-                                <tr class="bg-gray-100">
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الصنف (كود)</th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">سعر الوحدة</th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الكمية</th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الخصم (%)</th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي الفرعي</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                ${invoice.items.map(item => `
-                                    <tr>
-                                        <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${item.name} <span class="text-xs text-gray-500">(${item.sku})</span></td>
-                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${myAssistant.formatCurrency(item.unitPrice)}</td>
-                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${item.quantity}</td>
-                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-red-500">${item.discount}%</td>
-                                        <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-800">${myAssistant.formatCurrency(item.lineTotal)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-
-            const renderInvoiceTotals = () => `
-                <div class="flex justify-end">
-                    <div class="w-full md:w-1/3 p-4 border rounded-lg bg-white shadow-md">
-                        <div class="flex justify-between mb-2">
-                            <span class="text-gray-600">الإجمالي الفرعي:</span>
-                            <span class="font-medium text-gray-800">${myAssistant.formatCurrency(invoice.subTotal)}</span>
-                        </div>
-                        <div class="flex justify-between mb-2">
-                            <span class="text-gray-600">إجمالي الخصم:</span>
-                            <span class="font-medium text-red-500">- ${myAssistant.formatCurrency(invoice.totalDiscount)}</span>
-                        </div>
-                        <div class="flex justify-between pt-3 border-t-2 border-dashed border-gray-300">
-                            <span class="text-xl font-bold text-shahrazad">الإجمالي النهائي:</span>
-                            <span class="text-2xl font-black text-green-600">${myAssistant.formatCurrency(invoice.grandTotal)}</span>
-                        </div>
+                    <div class="w-1/3">
+                        <select id="customer-select" onchange="handleCustomerSelection(this.value)" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                            <option value="">-- اختر عميل --</option>
+                            ${App.data.customers.map(c => `
+                                <option value="${c.id}" ${c.id === App.draftInvoice.customerId ? 'selected' : ''}>
+                                    ${c.name} (${c.phone || 'N/A'})
+                                </option>
+                            `).join('')}
+                        </select>
+                        <button onclick="changeView('customers')" class="mt-2 text-xs text-blue-600 hover:text-blue-800">أو إضافة عميل جديد</button>
                     </div>
                 </div>
             `;
             
-            const renderPrintControls = () => `
-                <div class="no-print mt-6 flex justify-center space-x-4">
-                    <button onclick="window.print()" class="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-150 font-semibold flex items-center">
-                        <i data-lucide="printer" class="w-5 h-5 ml-2"></i> طباعة الفاتورة
-                    </button>
-                    <button onclick="changeView('invoices')" class="bg-gray-400 text-white p-3 rounded-lg hover:bg-gray-500 transition duration-150 font-semibold flex items-center">
-                        <i data-lucide="x" class="w-5 h-5 ml-2"></i> إغلاق
-                    </button>
-                </div>
-            `;
-
-            return `
-                <div class="max-w-4xl mx-auto">
-                    <div class="card p-8 print-area">
-                        ${renderInvoiceHeader()}
-                        ${renderCustomerInfo()}
-                        ${renderInvoiceItems()}
-                        ${renderInvoiceTotals()}
-                    </div>
-                    ${renderPrintControls()}
-                </div>
-            `;
-        };
-        
-        // --- Alerts View ---
-        const AlertsView = () => {
-            AlertsView.title = 'تنبيهات المخزون والعمليات';
-            const allAlerts = App.data.alerts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); // Sort by newest
-
-            const renderAlert = (alert) => {
-                let icon = 'info';
-                let color = 'bg-blue-100 text-blue-800 border-blue-300';
+            const renderAddItemForm = () => {
+                // Filter products that still have display stock > 0
+                const availableProducts = App.data.products.filter(p => (p.display_stock || 0) > 0);
                 
-                switch (alert.type) {
-                    case 'low_stock':
-                        icon = 'alert-triangle';
-                        color = 'bg-red-100 text-red-800 border-red-300';
-                        break;
-                    case 'error':
-                        icon = 'x-octagon';
-                        color = 'bg-red-100 text-red-800 border-red-300';
-                        break;
-                    case 'critical':
-                        icon = 'zap';
-                        color = 'bg-red-200 text-red-900 border-red-500 font-bold';
-                        break;
-                }
-
-                // In a real app, you would have a function to dismiss/resolve the alert
-                const dismissAlert = (alertId) => {
-                    if(App.userRole !== 'admin') {
-                         alertUser("لا تملك صلاحية لحذف التنبيهات.", "error");
-                         return;
-                    }
-                    const alertRef = doc(App.db, App.getCollectionPath('alerts'), alertId);
-                    deleteDoc(alertRef)
-                        .then(() => alertUser("تم حذف التنبيه بنجاح.", "success"))
-                        .catch(e => console.error("Error deleting alert:", e));
-                };
-
                 return `
-                    <div class="flex justify-between items-start p-4 border-r-4 rounded-lg shadow-sm ${color}">
-                        <div class="flex items-start">
-                            <i data-lucide="${icon}" class="w-5 h-5 mt-1 ml-3 flex-shrink-0"></i>
-                            <div>
-                                <p class="text-sm font-semibold">${alert.message}</p>
-                                <p class="text-xs text-gray-500 mt-1">تاريخ الإنشاء: ${alert.createdAt}</p>
+                    <div class="card p-6 mb-6">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="package-search" class="w-5 h-5 ml-2 text-shahrazad"></i> إضافة صنف للفاتورة</h3>
+                        <form id="add-item-form" onsubmit="event.preventDefault(); handleAddItemToDraft(
+                            document.getElementById('item-product-id').value,
+                            parseInt(document.getElementById('item-quantity').value),
+                            parseFloat(document.getElementById('item-unit-price').value),
+                            parseFloat(document.getElementById('item-discount').value)
+                        ); this.reset();" class="grid grid-cols-5 gap-4">
+                            <div class="col-span-2">
+                                <label for="item-product-id" class="block text-sm font-medium text-gray-700 mb-1">الصنف</label>
+                                <select id="item-product-id" required 
+                                    onchange="
+                                        const product = App.data.products.find(p => p.id === this.value);
+                                        if(product) {
+                                            document.getElementById('item-unit-price').value = product.unit_price || 0;
+                                            document.getElementById('item-quantity').max = product.display_stock || 0;
+                                        }
+                                    "
+                                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                                    <option value="">-- اختر صنف متوفر --</option>
+                                    ${availableProducts.map(p => `
+                                        <option value="${p.id}" 
+                                            data-price="${p.unit_price || 0}" 
+                                            data-stock="${p.display_stock || 0}">
+                                            ${p.name} (${p.sku}) - متوفر: ${p.display_stock || 0}
+                                        </option>
+                                    `).join('')}
+                                </select>
+                                ${availableProducts.length === 0 ? '<p class="text-xs text-red-500 mt-1">لا توجد أصناف متوفرة في مخزون العرض.</p>' : ''}
                             </div>
-                        </div>
-                        <button onclick="window.confirm('هل أنت متأكد من حذف هذا التنبيه؟') && dismissAlert('${alert.id}')" 
-                                class="text-gray-500 hover:text-gray-900 transition duration-150 ${App.userRole !== 'admin' ? 'cursor-not-allowed opacity-50' : ''}" 
-                                ${App.userRole !== 'admin' ? 'disabled' : ''}>
-                            <i data-lucide="x" class="w-4 h-4"></i>
-                        </button>
+                            <div>
+                                <label for="item-quantity" class="block text-sm font-medium text-gray-700 mb-1">الكمية</label>
+                                <input type="number" id="item-quantity" min="1" max="1" value="1" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad" placeholder="الكمية">
+                            </div>
+                            <div>
+                                <label for="item-unit-price" class="block text-sm font-medium text-gray-700 mb-1">سعر الوحدة</label>
+                                <input type="number" step="0.01" id="item-unit-price" min="0" value="0.00" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad" placeholder="السعر">
+                            </div>
+                            <div>
+                                <label for="item-discount" class="block text-sm font-medium text-gray-700 mb-1">خصم (%)</label>
+                                <input type="number" step="0.1" id="item-discount" min="0" max="100" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad" placeholder="الخصم">
+                            </div>
+                            <div class="flex items-end">
+                                <button type="submit" class="w-full bg-shahrazad text-white p-3 rounded-lg hover:bg-opacity-90 transition duration-150 font-semibold">
+                                    <i data-lucide="plus" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 `;
             };
 
+            const renderDraftItems = (items) => `
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">قائمة أصناف الفاتورة (${items.length})</h3>
+                    <div class="overflow-x-auto mb-6">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الصنف (SKU)</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">كمية</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">سعر الوحدة</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">خصم (%)</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${items.map(item => `
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <p class="text-sm font-medium text-gray-900">${item.name}</p>
+                                            <p class="text-xs text-gray-500">(${item.sku})</p>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${item.quantity}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${myAssistant.formatCurrency(item.unitPrice)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-red-500">${item.discount}%</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">${myAssistant.formatCurrency(item.lineTotal)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button onclick="handleRemoveItemFromDraft('${item.id}')" class="text-red-600 hover:text-red-900"> حذف </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    ${items.length === 0 ? '<p class="text-center py-8 text-gray-500">لم يتم إضافة أي أصناف إلى الفاتورة بعد.</p>' : ''}
+
+                    <div class="flex flex-col items-start space-y-3 pt-4 border-t border-gray-200">
+                        <div class="flex justify-between w-full text-lg">
+                            <span class="text-gray-600">الإجمالي قبل الخصومات:</span>
+                            <span class="font-semibold text-gray-800">${myAssistant.formatCurrency(App.draftInvoice.subTotal)}</span>
+                        </div>
+                        <div class="flex justify-between w-full text-lg">
+                            <span class="text-gray-600">خصم الأصناف:</span>
+                            <span class="font-semibold text-red-600">${myAssistant.formatCurrency(App.draftInvoice.totalDiscount)}</span>
+                        </div>
+                        <div class="flex justify-between w-full items-center text-lg pb-4 border-b border-gray-200">
+                            <span class="text-gray-600">خصم إضافي على الإجمالي (%):</span>
+                            <input type="number" step="0.1" id="final-discount-input" min="0" max="100" value="${App.draftInvoice.finalDiscountPercentage || 0}" oninput="handleFinalDiscountChange(event)" class="w-20 p-1 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad text-center">
+                            <span class="font-semibold text-red-600">(${myAssistant.formatCurrency(App.draftInvoice.finalDiscountAmount || 0)})</span>
+                        </div>
+                        <div class="flex justify-between w-full text-2xl font-bold text-shahrazad">
+                            <span>الإجمالي النهائي:</span>
+                            <span>${myAssistant.formatCurrency(App.draftInvoice.grandTotal)}</span>
+                        </div>
+                    </div>
+                    
+                    <button onclick="handleSaveInvoice()" ${items.length === 0 || !selectedCustomer ? 'disabled' : ''} 
+                        class="mt-6 w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition duration-150 font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center">
+                        <i data-lucide="check-circle" class="w-5 h-5 ml-2"></i> حفظ وإنهاء الفاتورة
+                    </button>
+                    ${!selectedCustomer && items.length > 0 ? '<p class="text-center text-red-500 mt-2">يجب اختيار عميل لحفظ الفاتورة.</p>' : ''}
+                </div>
+            `;
+            
             return `
                 <div class="max-w-4xl mx-auto">
-                    <div class="card p-6">
-                        <h3 class="text-2xl font-semibold text-gray-700 mb-4">التنبيهات الحالية (${allAlerts.length})</h3>
-                        <div class="space-y-4">
-                            ${allAlerts.length > 0 ? allAlerts.map(renderAlert).join('') : `
-                                <div class="p-8 text-center bg-green-50 rounded-lg">
-                                    <i data-lucide="check-circle" class="w-8 h-8 text-green-600 mx-auto mb-2"></i>
-                                    <p class="text-lg font-medium text-green-700">لا توجد تنبيهات حالية. كل شيء على ما يرام!</p>
+                    ${renderCustomerSelector()}
+                    ${renderAddItemForm()}
+                    ${renderDraftItems(App.draftInvoice.items)}
+                </div>
+            `;
+        };
+
+        // --- Invoice Details (Print View) ---
+        const PrintInvoiceView = () => {
+            if (!App.currentInvoiceForView) {
+                return `<div class="text-center p-10 card">خطأ: لم يتم تحديد فاتورة للعرض. <button onclick="changeView('invoices')" class="text-shahrazad mt-3">العودة للفواتير</button></div>`;
+            }
+            
+            PrintInvoiceView.title = `الفاتورة رقم ${App.currentInvoiceForView.invoiceNumber}`;
+            const invoice = App.currentInvoiceForView;
+            
+            // Re-calculate totals for display accuracy, although saved data should be correct
+            let totalItemDiscount = 0;
+            let subTotal = 0;
+            invoice.items.forEach(item => {
+                const itemSubTotal = item.quantity * item.unitPrice;
+                const itemDiscount = itemSubTotal * (item.discount / 100);
+                subTotal += itemSubTotal;
+                totalItemDiscount += itemDiscount;
+            });
+            
+            const totalDiscount = invoice.totalDiscount || 0;
+            const finalDiscountAmount = totalDiscount - totalItemDiscount;
+
+            return `
+                <div class="max-w-4xl mx-auto">
+                    <div class="card print-controls p-4 mb-4 flex justify-end space-x-2 no-print">
+                        <button onclick="window.print()" class="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition duration-150 font-semibold flex items-center">
+                            <i data-lucide="printer" class="w-5 h-5 ml-2"></i> طباعة الفاتورة
+                        </button>
+                        <button onclick="changeView('invoices')" class="bg-gray-500 text-white p-2 rounded-lg hover:bg-gray-600 transition duration-150 font-semibold flex items-center">
+                            <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i> العودة
+                        </button>
+                    </div>
+
+                    <div class="card p-8 print-area">
+                        <div class="flex justify-between items-start border-b-2 border-shahrazad pb-4 mb-6">
+                            <div>
+                                <h1 class="text-3xl font-black text-shahrazad">SHAHRAZAD ELECTRIC</h1>
+                                <p class="text-gray-600 mt-1">نظام إدارة المبيعات</p>
+                            </div>
+                            <div class="text-left">
+                                <h2 class="text-2xl font-bold text-gray-800">فاتورة مبيعات</h2>
+                                <p class="text-xl font-black text-shahrazad">#${invoice.invoiceNumber}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-6 mb-8 text-sm">
+                            <div class="border p-4 rounded-lg">
+                                <p class="font-bold text-gray-700 mb-1">بيانات العميل:</p>
+                                <p><span class="font-semibold ml-2">الاسم:</span> ${invoice.customerName}</p>
+                                <p><span class="font-semibold ml-2">الهاتف:</span> ${invoice.customerPhone || 'N/A'}</p>
+                                <p><span class="font-semibold ml-2">العنوان:</span> ${App.data.customers.find(c => c.id === invoice.customerId)?.address || 'N/A'}</p>
+                            </div>
+                            <div class="border p-4 rounded-lg text-left">
+                                <p class="font-bold text-gray-700 mb-1">تفاصيل الفاتورة:</p>
+                                <p><span class="font-semibold ml-2">تاريخ الإصدار:</span> ${invoice.createdAt}</p>
+                                <p><span class="font-semibold ml-2">أُصدرت بواسطة:</span> ${invoice.issuedBy}</p>
+                                <p><span class="font-semibold ml-2">الحالة:</span> <span class="text-green-600">مدفوعة</span></p>
+                            </div>
+                        </div>
+
+                        <div class="mb-8">
+                            <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/2">الوصف</th>
+                                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">كمية</th>
+                                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">سعر الوحدة</th>
+                                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">خصم</th>
+                                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${invoice.items.map(item => `
+                                        <tr>
+                                            <td class="px-4 py-3 whitespace-normal text-sm font-medium text-gray-900">${item.name} <span class="text-xs text-gray-500">(${item.sku})</span></td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${item.quantity}</td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${myAssistant.formatCurrency(item.unitPrice)}</td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-sm text-red-500">${item.discount}%</td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-800">${myAssistant.formatCurrency(item.lineTotal)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <div class="w-full max-w-sm space-y-2 text-md">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">الإجمالي قبل الخصم:</span>
+                                    <span class="font-semibold">${myAssistant.formatCurrency(subTotal)}</span>
                                 </div>
-                            `}
+                                <div class="flex justify-between border-b pb-2">
+                                    <span class="text-gray-600">إجمالي الخصومات:</span>
+                                    <span class="font-semibold text-red-600">${myAssistant.formatCurrency(totalDiscount)}</span>
+                                </div>
+                                <div class="flex justify-between text-2xl font-bold text-shahrazad pt-2">
+                                    <span>الإجمالي المستحق:</span>
+                                    <span>${myAssistant.formatCurrency(invoice.grandTotal)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-10 border-t pt-4 text-center text-xs text-gray-500">
+                            <p>شكراً لتعاملكم مع SHAHRAZAD ELECTRIC. هذه فاتورة مبيعات إلكترونية، يرجى الاحتفاظ بها.</p>
                         </div>
                     </div>
                 </div>
             `;
         };
-        
-        // --- General Settings View (Admin Role Management) ---
-        const GeneralSettingsView = () => {
-            GeneralSettingsView.title = 'إعدادات النظام وإدارة المستخدمين';
 
-            if (App.userRole !== 'admin') {
-                return `<div class="card p-10 text-center text-red-600 font-bold">عذراً، هذه الصفحة مخصصة للمدير فقط.</div>`;
-            }
-
-            const allUsers = App.data.users;
-
-            const renderUserTable = (users) => `
+        // --- Customers View ---
+        const CustomersView = () => {
+            CustomersView.title = 'إدارة بيانات العملاء';
+            const allCustomers = App.data.customers;
+            
+            const renderCustomerList = (customers) => `
                 <div class="card p-6 mb-6">
-                    <h3 class="text-2xl font-semibold text-gray-700 mb-4">إدارة صلاحيات المستخدمين (${users.length})</h3>
+                    <h3 class="text-2xl font-semibold text-gray-700 mb-4">قائمة العملاء (${customers.length})</h3>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead>
                                 <tr class="bg-gray-50">
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم / البريد</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الصلاحية الحالية</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تغيير الصلاحية إلى</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الهاتف</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">البريد الإلكتروني</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">العنوان</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاريخ التسجيل</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${customers.map(c => `
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${c.name}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${c.phone || 'N/A'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${c.email || 'N/A'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${c.address || 'N/A'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">${c.createdAt}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    ${customers.length === 0 ? '<p class="text-center py-8 text-gray-500">لا يوجد عملاء مسجلون بعد.</p>' : ''}
+                </div>
+            `;
+            
+            const renderAddCustomerForm = () => `
+                <div class="card p-6 mt-6">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="user-plus" class="w-5 h-5 ml-2 text-shahrazad"></i> إضافة عميل جديد</h3>
+                    <form id="add-customer-form" onsubmit="handleAddCustomer(event)">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-1">اسم العميل</label>
+                                <input type="text" id="customer-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                            </div>
+                            <div>
+                                <label for="customer-phone" class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
+                                <input type="tel" id="customer-phone" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                            </div>
+                            <div class="col-span-1 md:col-span-2">
+                                <label for="customer-email" class="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني (اختياري)</label>
+                                <input type="email" id="customer-email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                            </div>
+                            <div class="col-span-1 md:col-span-2">
+                                <label for="customer-address" class="block text-sm font-medium text-gray-700 mb-1">العنوان</label>
+                                <textarea id="customer-address" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad"></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="mt-4 w-full bg-shahrazad text-white p-3 rounded-lg hover:bg-opacity-90 transition duration-150 font-semibold">
+                            <i data-lucide="plus" class="w-5 h-5 ml-2"></i> حفظ العميل الجديد
+                        </button>
+                    </form>
+                </div>
+            `;
+            
+            return `
+                <div class="max-w-7xl mx-auto">
+                    ${renderAddCustomerForm()}
+                    ${renderCustomerList(allCustomers)}
+                </div>
+            `;
+        };
+
+        // --- Alerts View ---
+        const AlertsView = () => {
+            AlertsView.title = 'تنبيهات النظام';
+            const allAlerts = App.data.alerts;
+            const lowStockAlerts = allAlerts.filter(a => a.type === 'low_stock').sort((a, b) => (b.warehouseStock || 0) - (a.warehouseStock || 0));
+            
+            const renderAlerts = (alerts) => `
+                <div class="card p-6">
+                    <h3 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
+                        <i data-lucide="alert-triangle" class="w-6 h-6 ml-2 text-red-500"></i>
+                        تنبيهات المخزون (${alerts.length})
+                    </h3>
+                    <div class="space-y-4">
+                        ${alerts.map(a => `
+                            <div class="p-4 border-r-4 border-red-500 bg-red-50 rounded-lg flex items-start justify-between">
+                                <div class="flex items-start">
+                                    <i data-lucide="alert-octagon" class="w-6 h-6 ml-3 text-red-600 mt-1"></i>
+                                    <div>
+                                        <p class="text-lg font-semibold text-red-700">${a.message}</p>
+                                        <p class="text-sm text-gray-500 mt-1">
+                                            آخر تحديث: ${a.createdAt || 'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button onclick="changeView('products')" class="text-sm bg-red-100 text-red-600 p-2 rounded-lg hover:bg-red-200 transition duration-150 font-medium">
+                                    إدارة المخزون
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${alerts.length === 0 ? '<p class="text-center py-8 text-gray-500">لا توجد تنبيهات نشطة حالياً. المخزون آمن.</p>' : ''}
+                </div>
+            `;
+
+            return `
+                <div class="max-w-4xl mx-auto">
+                    ${renderAlerts(lowStockAlerts)}
+                </div>
+            `;
+        };
+
+        // --- Settings View ---
+        const GeneralSettingsView = () => {
+            GeneralSettingsView.title = 'إعدادات النظام والمستخدمين';
+
+            const allUsers = App.data.users;
+            const lowStockThreshold = App.lowStockThreshold;
+
+            const renderUserManagement = (users) => `
+                <div class="card p-6 mb-6">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">إدارة صلاحيات المستخدمين (${users.length})</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم/البريد</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الدور الحالي</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تغيير الدور إلى</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 ${users.map(u => `
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            ${u.name || u.email} <br> <span class="text-xs text-gray-500">${u.email}</span>
+                                    <tr class="hover:bg-gray-50 ${u.uid === App.userId ? 'bg-blue-50' : ''}">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <p class="text-sm font-medium text-gray-900">${u.name}</p>
+                                            <p class="text-xs text-gray-500">(${u.email})</p>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold ${u.role === 'admin' ? 'text-shahrazad' : 'text-green-600'}">
-                                            ${u.role === 'admin' ? 'مدير' : 'موظف مبيعات'}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${u.role === 'admin' ? 'text-shahrazad' : 'text-green-600'}">
+                                            ${u.role === 'admin' ? 'المدير' : 'موظف مبيعات'} ${u.uid === App.userId ? '(أنت)' : ''}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             <select 
-                                                id="role-select-${u.id}" 
                                                 onchange="handleUpdateUserRole('${u.id}', this.value)"
-                                                class="p-2 border rounded-lg ${u.id === App.userId ? 'bg-gray-100 cursor-not-allowed' : ''}"
-                                                ${u.id === App.userId ? 'disabled' : ''}>
+                                                class="p-2 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad ${u.uid === App.userId ? 'cursor-not-allowed bg-gray-100' : ''}"
+                                                ${u.uid === App.userId ? 'disabled' : ''}
+                                            >
                                                 <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>مدير</option>
                                                 <option value="staff" ${u.role === 'staff' ? 'selected' : ''}>موظف مبيعات</option>
                                             </select>
-                                            ${u.id === App.userId ? '<p class="text-xs text-red-500 mt-1">لا يمكن تغيير صلاحيتك الخاصة</p>' : ''}
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -1673,53 +1660,64 @@
                     </div>
                 </div>
             `;
-            
-            // Placeholder for System Settings
-            const renderSystemSettings = () => `
+
+            const renderSystemSettings = (threshold) => `
                 <div class="card p-6">
                     <h3 class="text-xl font-semibold text-gray-700 mb-4">إعدادات النظام العامة</h3>
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between p-3 border rounded-lg">
-                            <label for="low-stock-threshold" class="text-gray-700">حد تنبيه انخفاض المخزون</label>
-                            <div class="flex items-center">
-                                <input type="number" id="low-stock-threshold" value="${App.lowStockThreshold}" 
-                                    onchange="App.lowStockThreshold = parseInt(this.value); alertUser('تم تحديث حد التنبيه إلى ' + this.value, 'info'); checkLowStockAlerts();"
-                                    min="1" class="w-20 p-2 border rounded-lg text-center ml-2">
-                                <span class="text-sm text-gray-500">وحدة</span>
-                            </div>
+                    <div>
+                        <label for="low-stock-threshold" class="block text-sm font-medium text-gray-700 mb-1">
+                            حد تنبيه انخفاض المخزون (القيمة الحالية: ${threshold} وحدات)
+                        </label>
+                        <p class="text-xs text-gray-500 mb-3">سيتم إصدار تنبيه لكل صنف يصل مخزونه في المخزن إلى هذه القيمة أو أقل.</p>
+                        <div class="flex space-x-3 items-center">
+                            <input type="number" id="low-stock-threshold" min="1" value="${threshold}" class="w-32 p-3 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
+                            <button onclick="
+                                const newThreshold = parseInt(document.getElementById('low-stock-threshold').value);
+                                if (!isNaN(newThreshold) && newThreshold >= 1) {
+                                    App.lowStockThreshold = newThreshold;
+                                    alertUser('✅ تم تحديث حد التنبيه بنجاح إلى ' + newThreshold, 'success');
+                                    checkLowStockAlerts(); // Re-run check immediately
+                                    render();
+                                } else {
+                                    alertUser('⚠️ يرجى إدخال رقم صحيح أكبر من صفر.', 'warning');
+                                }
+                            " class="bg-shahrazad text-white p-3 rounded-lg hover:bg-opacity-90 transition duration-150 font-semibold">
+                                حفظ الحد الجديد
+                            </button>
                         </div>
                     </div>
                 </div>
             `;
 
             return `
-                <div class="max-w-7xl mx-auto">
-                    ${renderUserTable(allUsers)}
-                    ${renderSystemSettings()}
+                <div class="max-w-4xl mx-auto">
+                    ${renderUserManagement(allUsers)}
+                    ${renderSystemSettings(lowStockThreshold)}
                 </div>
             `;
         };
         
-        // --- User Settings View (Can be simple or removed if not needed) ---
+        // --- Placeholder for User-Specific Settings (e.g., Change Password)
         const UserSettingsView = () => {
              UserSettingsView.title = 'إعدادات حسابي';
-             // For now, this is kept simple and can be expanded later
-             return `<div class="card p-10 text-center">
-                 <h3 class="text-2xl font-semibold text-gray-700 mb-4">إعدادات الحساب الشخصي</h3>
-                 <p>البريد الإلكتروني: ${App.auth.currentUser.email}</p>
-                 <p>الصلاحية: ${App.userRole === 'admin' ? 'مدير' : 'موظف مبيعات'}</p>
-                 <p class="mt-4 text-gray-500">يمكنك إضافة خيار تغيير كلمة المرور هنا لاحقاً.</p>
-             </div>`;
-        }
+             // This view is mostly for user-specific actions like changing password, which is not fully implemented in this demo.
+             return `
+                 <div class="card p-6 max-w-xl mx-auto">
+                     <h3 class="text-xl font-semibold text-gray-700 mb-4">تغيير كلمة المرور</h3>
+                     <p class="text-gray-500 mb-6">يمكنك تغيير كلمة المرور الخاصة بك هنا. تتطلب هذه العملية إعادة مصادقة.</p>
+                     <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
+                       <p class="font-bold">تنبيه</p>
+                       <p class="text-sm">هذه الميزة غير مفعلة في النسخة التجريبية الحالية (تحتاج لإعادة مصادقة Firebase).</p>
+                     </div>
+                 </div>
+             `;
+        };
 
-        // ====================================================================
-        //                      App Initialization
-        // ====================================================================
-
+        // --- View Mapping ---
         App.views = {
-            loading: LoadingView,
-            auth_error: AuthErrorView,
             login: LoginView,
+            auth_error: AuthErrorView,
+            loading: LoadingView,
             dashboard: DashboardView,
             products: ProductsView,
             invoices: InvoicesView,
