@@ -93,7 +93,7 @@
             userId: null,
             userRole: 'staff',
             view: 'loading',
-            data: { products: [], customers: [], invoices: [], users: [], alerts: [], warehouses: [] },
+            data: { products: [], customers: [], invoices: [], users: [], alerts: [], warehouses: [], displayedProducts: [] },
             draftInvoice: { items: [], subTotal: 0, totalDiscount: 0, grandTotal: 0 }, // New state for invoice creation
             currentInvoiceForView: null, // New state for print view
             
@@ -344,7 +344,7 @@
             onSnapshot(collection(App.db, App.getCollectionPath('products')), (snapshot) => {
                 App.data.products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 checkLowStockAlerts();
-                if (['products', 'dashboard', 'alerts', 'invoices', 'new_invoice'].includes(App.view)) render(); 
+                if (['products', 'dashboard', 'alerts', 'invoices', 'new_invoice', 'displayed_products'].includes(App.view)) render(); 
             }, console.error);
 
             // 2. Customers
@@ -369,7 +369,13 @@
             onSnapshot(collection(App.db, App.getCollectionPath('warehouses')), (snapshot) => {
                 App.data.warehouses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 // إعادة عرض صفحات المنتجات والإعدادات التي تعتمد على المخازن
-                if (['products', 'general_settings', 'new_invoice'].includes(App.view)) render();
+                if (['products', 'general_settings', 'new_invoice', 'displayed_products'].includes(App.view)) render();
+            }, console.error);
+
+            // 6. Displayed Products
+            onSnapshot(collection(App.db, App.getCollectionPath('displayedProducts')), (snapshot) => {
+                App.data.displayedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                if (['products', 'dashboard', 'displayed_products'].includes(App.view)) render(); 
             }, console.error);
         }
         
@@ -812,7 +818,7 @@
 
         /** Data Backup and Download **/ 
         window.backupData = async () => {
-            const collectionsToBackup = ['products', 'customers', 'invoices', 'users', 'alerts', 'warehouses'];
+            const collectionsToBackup = ['products', 'customers', 'invoices', 'users', 'alerts', 'warehouses', 'displayedProducts'];
             const backup = {};
             document.getElementById('backup-btn').innerText = 'جارٍ التجهيز...';
             try {
@@ -866,6 +872,7 @@
                 <nav>
                     ${SidebarLink('dashboard', 'الرئيسية', 'home')}
                     ${SidebarLink('products', 'إدارة الأصناف والمخزون', 'box')}
+                    ${SidebarLink('displayed_products', 'البضاعة المعروضة حالياً', 'shopping-bag')}
                     ${SidebarLink('invoices', 'إدارة الفواتير', 'receipt')}
                     ${SidebarLink('customers', 'إدارة العملاء', 'users')}
                     ${SidebarLink('alerts', 'تنبيهات المخزون', 'alert-triangle')}
@@ -935,6 +942,7 @@
                 'login': 'تسجيل الدخول',
                 'dashboard': 'لوحة التحكم الرئيسية',
                 'products': 'إدارة الأصناف والمخزون',
+                'displayed_products': 'البضاعة المعروضة حالياً',
                 'invoices': 'إدارة الفواتير',
                 'new_invoice': 'إنشاء فاتورة مبيعات جديدة',
                 'invoice_details': 'معاينة الفاتورة',
@@ -1395,8 +1403,351 @@
                 alertUser(`فشل حذف الصنف: ${error.message}`, "error");
             }
         };
-        
-        // --- 6. Invoices View ---
+
+        // --- 6. Displayed Products View ---
+        const DisplayedProductsView = () => {
+            return `
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">إدارة البضاعة المعروضة حالياً (${App.data.displayedProducts.length} صنف)</h2>
+                    <div class="flex space-x-3">
+                        <button onclick="window.showAddFromWarehouseModal()" class="bg-green-600 text-white p-3 rounded-lg flex items-center hover:bg-green-700 transition duration-150">
+                            <i data-lucide="package-plus" class="w-5 h-5 ml-2"></i>
+                            إضافة من المخزن
+                        </button>
+                        <button onclick="window.showAddNewDisplayedModal()" class="bg-shahrazad text-white p-3 rounded-lg flex items-center hover:bg-blue-700 transition duration-150">
+                            <i data-lucide="plus" class="w-5 h-5 ml-2"></i>
+                            إضافة صنف جديد
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card p-6">
+                    ${renderDisplayedProductsList(App.data.displayedProducts)}
+                </div>
+                
+                ${renderAddFromWarehouseModal()}
+                ${renderAddNewDisplayedModal()}
+            `;
+        };
+
+        // Helper to render displayed products table
+        const renderDisplayedProductsList = (displayedProducts) => {
+            if (displayedProducts.length === 0) {
+                return `<p class="text-gray-500 text-center py-4">لا توجد بضاعة معروضة حالياً.</p>`;
+            }
+            return `
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">السعر (SDG)</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الكمية المعروضة</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المخزن المصدر</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            ${displayedProducts.map(p => `
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.name}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.price.toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.displayedQuantity}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.sourceWarehouse || 'مباشر'}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button onclick="window.editDisplayedProduct('${p.id}')" class="text-shahrazad hover:text-blue-700 ml-3">
+                                            <i data-lucide="square-pen" class="w-5 h-5"></i>
+                                        </button>
+                                        <button onclick="window.returnToWarehouse('${p.id}', '${p.name}')" class="text-orange-600 hover:text-orange-900 ml-3">
+                                            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                                        </button>
+                                        <button onclick="window.deleteDisplayedProduct('${p.id}', '${p.name}')" class="text-red-600 hover:text-red-900 ${App.userRole !== 'admin' ? 'hidden' : ''}">
+                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        };
+
+        // Modal for adding products from warehouse
+        const renderAddFromWarehouseModal = () => `
+            <div id="add-from-warehouse-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 justify-center items-center" onclick="if(event.target.id === 'add-from-warehouse-modal') window.hideAddFromWarehouseModal()">
+                <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg mx-auto" onclick="event.stopPropagation()">
+                    <h3 class="text-xl font-bold mb-4">إضافة بضاعة من المخزن</h3>
+                    <form id="add-from-warehouse-form" onsubmit="window.handleAddFromWarehouse(event)">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="warehouse-product-select">اختر الصنف من المخزن</label>
+                            <select id="warehouse-product-select" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                <option value="">اختر صنف...</option>
+                                ${App.data.products.map(p => `<option value="${p.id}" data-stock="${p.stock}" data-price="${p.price}" data-warehouse="${p.warehouse}">${p.name} (مخزون: ${p.stock})</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="displayed-quantity">الكمية المراد عرضها</label>
+                            <input type="number" id="displayed-quantity" min="1" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="displayed-price">سعر العرض (SDG)</label>
+                            <input type="number" id="displayed-price" step="0.01" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        
+                        <div class="flex justify-end mt-6">
+                            <button type="button" onclick="window.hideAddFromWarehouseModal()" class="bg-gray-300 text-gray-800 p-2 rounded-lg ml-4 hover:bg-gray-400">إلغاء</button>
+                            <button type="submit" id="add-from-warehouse-btn" class="bg-shahrazad text-white p-2 rounded-lg flex items-center hover:bg-blue-700 transition duration-150">
+                                <i data-lucide="package-plus" class="w-5 h-5 ml-2"></i>
+                                إضافة للعرض
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        // Modal for adding new displayed product
+        const renderAddNewDisplayedModal = () => `
+            <div id="add-new-displayed-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 justify-center items-center" onclick="if(event.target.id === 'add-new-displayed-modal') window.hideAddNewDisplayedModal()">
+                <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg mx-auto" onclick="event.stopPropagation()">
+                    <h3 class="text-xl font-bold mb-4">إضافة صنف جديد للعرض</h3>
+                    <form id="add-new-displayed-form" onsubmit="window.handleAddNewDisplayed(event)">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="new-displayed-name">اسم الصنف</label>
+                            <input type="text" id="new-displayed-name" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="new-displayed-quantity">الكمية</label>
+                            <input type="number" id="new-displayed-quantity" min="1" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="new-displayed-price">سعر الوحدة (SDG)</label>
+                            <input type="number" id="new-displayed-price" step="0.01" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        
+                        <div class="flex justify-end mt-6">
+                            <button type="button" onclick="window.hideAddNewDisplayedModal()" class="bg-gray-300 text-gray-800 p-2 rounded-lg ml-4 hover:bg-gray-400">إلغاء</button>
+                            <button type="submit" id="add-new-displayed-btn" class="bg-shahrazad text-white p-2 rounded-lg flex items-center hover:bg-blue-700 transition duration-150">
+                                <i data-lucide="plus" class="w-5 h-5 ml-2"></i>
+                                إضافة للعرض
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        // Displayed Products CRUD Logic
+        window.showAddFromWarehouseModal = () => {
+            const modal = document.getElementById('add-from-warehouse-modal');
+            const form = document.getElementById('add-from-warehouse-form');
+            form.reset();
+            modal.style.display = 'flex';
+        };
+
+        window.hideAddFromWarehouseModal = () => {
+            document.getElementById('add-from-warehouse-modal').style.display = 'none';
+        };
+
+        window.showAddNewDisplayedModal = () => {
+            const modal = document.getElementById('add-new-displayed-modal');
+            const form = document.getElementById('add-new-displayed-form');
+            form.reset();
+            modal.style.display = 'flex';
+        };
+
+        window.hideAddNewDisplayedModal = () => {
+            document.getElementById('add-new-displayed-modal').style.display = 'none';
+        };
+
+        // Handle adding product from warehouse to displayed
+        window.handleAddFromWarehouse = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const productId = form.querySelector('#warehouse-product-select').value;
+            const displayedQuantity = parseInt(form.querySelector('#displayed-quantity').value);
+            const displayedPrice = parseFloat(form.querySelector('#displayed-price').value);
+
+            const product = App.data.products.find(p => p.id === productId);
+            if (!product) {
+                alertUser("لم يتم العثور على الصنف المحدد.", "error");
+                return;
+            }
+
+            if (displayedQuantity > product.stock) {
+                alertUser(`الكمية المطلوبة (${displayedQuantity}) أكبر من المخزون المتوفر (${product.stock}).`, "error");
+                return;
+            }
+
+            const submitBtn = form.querySelector('#add-from-warehouse-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i data-lucide="loader-circle" class="w-5 h-5 ml-2 inline animate-spin"></i> جاري الإضافة...`;
+            lucide.createIcons();
+
+            try {
+                // Use batch to update both collections atomically
+                const batch = writeBatch(App.db);
+                
+                // Add to displayed products
+                const displayedRef = doc(collection(App.db, App.getCollectionPath('displayedProducts')));
+                batch.set(displayedRef, {
+                    name: product.name,
+                    price: displayedPrice,
+                    displayedQuantity: displayedQuantity,
+                    sourceWarehouse: product.warehouse,
+                    sourceProductId: productId,
+                    createdAt: new Date().toISOString(),
+                });
+                
+                // Update warehouse stock
+                const productRef = doc(App.db, App.getCollectionPath('products'), productId);
+                const newStock = product.stock - displayedQuantity;
+                batch.update(productRef, { stock: newStock });
+                
+                await batch.commit();
+                
+                alertUser(`تم إضافة ${displayedQuantity} من ${product.name} إلى البضاعة المعروضة بنجاح.`, "success");
+                window.hideAddFromWarehouseModal();
+            } catch (error) {
+                console.error("Failed to add product from warehouse:", error);
+                alertUser(`فشل إضافة الصنف: ${error.message}`, "error");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i data-lucide="package-plus" class="w-5 h-5 ml-2"></i> إضافة للعرض`;
+                lucide.createIcons();
+            }
+        };
+
+        // Handle adding new displayed product (not from warehouse)
+        window.handleAddNewDisplayed = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const name = form.querySelector('#new-displayed-name').value;
+            const displayedQuantity = parseInt(form.querySelector('#new-displayed-quantity').value);
+            const displayedPrice = parseFloat(form.querySelector('#new-displayed-price').value);
+
+            const submitBtn = form.querySelector('#add-new-displayed-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i data-lucide="loader-circle" class="w-5 h-5 ml-2 inline animate-spin"></i> جاري الإضافة...`;
+            lucide.createIcons();
+
+            try {
+                await addDoc(collection(App.db, App.getCollectionPath('displayedProducts')), {
+                    name: name,
+                    price: displayedPrice,
+                    displayedQuantity: displayedQuantity,
+                    sourceWarehouse: null, // Not from warehouse
+                    sourceProductId: null,
+                    createdAt: new Date().toISOString(),
+                });
+                
+                alertUser(`تم إضافة ${displayedQuantity} من ${name} إلى البضاعة المعروضة بنجاح.`, "success");
+                window.hideAddNewDisplayedModal();
+            } catch (error) {
+                console.error("Failed to add new displayed product:", error);
+                alertUser(`فشل إضافة الصنف: ${error.message}`, "error");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i data-lucide="plus" class="w-5 h-5 ml-2"></i> إضافة للعرض`;
+                lucide.createIcons();
+            }
+        };
+
+        // Return displayed product to warehouse
+        window.returnToWarehouse = async (id, name) => {
+            const displayedProduct = App.data.displayedProducts.find(p => p.id === id);
+            if (!displayedProduct) return;
+            
+            if (!displayedProduct.sourceProductId) {
+                alertUser("لا يمكن إرجاع هذا الصنف إلى المخزن لأنه لم يأتي منه أصلاً.", "error");
+                return;
+            }
+
+            if (!confirm(`هل تريد إرجاع ${displayedProduct.displayedQuantity} من ${name} إلى المخزن؟`)) return;
+
+            try {
+                const batch = writeBatch(App.db);
+                
+                // Remove from displayed products
+                const displayedRef = doc(App.db, App.getCollectionPath('displayedProducts'), id);
+                batch.delete(displayedRef);
+                
+                // Add back to warehouse stock
+                const productRef = doc(App.db, App.getCollectionPath('products'), displayedProduct.sourceProductId);
+                const product = App.data.products.find(p => p.id === displayedProduct.sourceProductId);
+                if (product) {
+                    const newStock = product.stock + displayedProduct.displayedQuantity;
+                    batch.update(productRef, { stock: newStock });
+                }
+                
+                await batch.commit();
+                alertUser(`تم إرجاع ${displayedProduct.displayedQuantity} من ${name} إلى المخزن بنجاح.`, "success");
+            } catch (error) {
+                console.error("Failed to return product to warehouse:", error);
+                alertUser(`فشل إرجاع الصنف: ${error.message}`, "error");
+            }
+        };
+
+        // Delete displayed product
+        window.deleteDisplayedProduct = async (id, name) => {
+            if (App.userRole !== 'admin') {
+                alertUser("عذراً، يجب أن تكون بـ **صلاحية المدير الأساسي** للحذف.", "error");
+                return;
+            }
+            
+            const displayedProduct = App.data.displayedProducts.find(p => p.id === id);
+            if (!displayedProduct) return;
+            
+            if (!confirm(`هل أنت متأكد من حذف الصنف: ${name}؟ لا يمكن التراجع عن هذا الإجراء!`)) return;
+
+            try {
+                // If it came from warehouse, we need to return it first
+                if (displayedProduct.sourceProductId) {
+                    if (!confirm(`هذا الصنف أتى من المخزن. هل تريد إرجاع ${displayedProduct.displayedQuantity} وحدة إلى المخزن قبل الحذف؟`)) {
+                        // User chose not to return to warehouse, just delete
+                        await deleteDoc(doc(App.db, App.getCollectionPath('displayedProducts'), id));
+                    } else {
+                        // Return to warehouse then delete
+                        const batch = writeBatch(App.db);
+                        
+                        // Add back to warehouse stock
+                        const productRef = doc(App.db, App.getCollectionPath('products'), displayedProduct.sourceProductId);
+                        const product = App.data.products.find(p => p.id === displayedProduct.sourceProductId);
+                        if (product) {
+                            const newStock = product.stock + displayedProduct.displayedQuantity;
+                            batch.update(productRef, { stock: newStock });
+                        }
+                        
+                        // Remove from displayed products
+                        const displayedRef = doc(App.db, App.getCollectionPath('displayedProducts'), id);
+                        batch.delete(displayedRef);
+                        
+                        await batch.commit();
+                    }
+                } else {
+                    // Just delete if it's not from warehouse
+                    await deleteDoc(doc(App.db, App.getCollectionPath('displayedProducts'), id));
+                }
+                
+                alertUser(`تم حذف الصنف **${name}** من البضاعة المعروضة بنجاح.`, "success");
+            } catch (error) {
+                console.error("Displayed product deletion failed:", error);
+                alertUser(`فشل حذف الصنف: ${error.message}`, "error");
+            }
+        };
+
+        // Edit displayed product
+        window.editDisplayedProduct = (id) => {
+            const product = App.data.displayedProducts.find(p => p.id === id);
+            if (product) {
+                // Similar to showProductModal but for displayed products
+                // Implementation depends on your specific needs
+                alertUser("ميزة التعديل قيد التطوير.", "info");
+            }
+        };
+
+        // --- 7. Invoices View ---
         const InvoicesView = () => {
             const invoices = App.data.invoices.sort((a, b) => new Date(b.date) - new Date(a.date));
             const totalRevenue = invoices.reduce((sum, inv) => sum + parseFloat(inv.grandTotal || 0), 0);
@@ -1457,7 +1808,7 @@
             `;
         };
 
-        // --- 7. New Invoice View (The main new feature) ---
+        // --- 8. New Invoice View (The main new feature) ---
         const NewInvoiceView = () => {
              const products = App.data.products.filter(p => p.stock > 0);
 
@@ -1587,7 +1938,7 @@
             `;
         };
 
-        // --- 8. Print/View Invoice Details ---
+        // --- 9. Print/View Invoice Details ---
         const PrintInvoiceView = () => {
             const inv = App.currentInvoiceForView;
             if (!inv) return `<p class="text-center text-red-500">عذراً، لم يتم العثور على بيانات الفاتورة.</p>`;
@@ -1686,7 +2037,7 @@
             `;
         };
 
-        // --- 9. Customers View ---
+        // --- 10. Customers View ---
         const CustomersView = () => {
             const customers = App.data.customers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             return `
@@ -1852,7 +2203,7 @@
             }
         };
 
-        // --- 10. Alerts View ---
+        // --- 11. Alerts View ---
         const AlertsView = () => {
             return `
                 <h2 class="text-2xl font-bold text-red-800 mb-6 flex items-center">
@@ -1868,7 +2219,7 @@
             `;
         };
 
-        // --- 11. General Settings View ---
+        // --- 12. General Settings View ---
         const GeneralSettingsView = () => {
             const warehouses = App.data.warehouses.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
@@ -2000,7 +2351,7 @@
         };
 
 
-        // --- 12. User Settings View ---
+        // --- 13. User Settings View ---
         const UserSettingsView = () => {
             const users = App.data.users.sort((a, b) => (a.role === 'admin' ? -1 : 1));
             return `
@@ -2095,6 +2446,7 @@
             login: LoginView,
             dashboard: DashboardView,
             products: ProductsView,
+            displayed_products: DisplayedProductsView,
             invoices: InvoicesView,
             new_invoice: NewInvoiceView, // Added new view
             invoice_details: PrintInvoiceView, // Added new view
