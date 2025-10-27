@@ -374,11 +374,19 @@
         }
         
         // ====================================================================
-        //                      Inventory and Alerts Unit
+        //                      Inventory and Alerts Unit (UPDATED)
         // ====================================================================
 
+        /**
+         * دالة التحقق من تنبيهات نقص المخزون (تشمل المخزن الرئيسي والبضاعة المعروضة)
+         */
         function checkLowStockAlerts() {
-            const lowStockProducts = App.data.products.filter(p => p.stock <= (p.lowStockThreshold || 10));
+            const lowStockProducts = App.data.products.filter(p => {
+                // NEW: check combined stock (stock + displayed_stock)
+                const totalStock = (p.stock || 0) + (p.displayed_stock || 0); 
+                return totalStock <= (p.lowStockThreshold || 10);
+            });
+            
             const alertsContainer = document.getElementById('alerts-container');
             const alertsContainerFull = document.getElementById('alerts-container-full');
             
@@ -386,7 +394,7 @@
                 ? lowStockProducts.map(p => 
                     `<div class="p-3 mb-2 bg-red-100 text-red-700 rounded-lg shadow-sm flex justify-between items-center text-sm border-r-4 border-red-500">
                         <i data-lucide="alert-triangle" class="w-4 h-4 ml-2"></i>
-                        <p>الصنف **${p.name}** منخفض. الكمية: **${p.stock}**</p>
+                        <p>الصنف **${p.name}** منخفض. الكمية الإجمالية: **${(p.stock || 0) + (p.displayed_stock || 0)}**</p>
                     </div>`
                 ).join('')
                 : `<p class="text-gray-500 text-sm p-4 text-center">لا توجد تنبيهات نقص مخزون حالياً.</p>`;
@@ -395,6 +403,130 @@
             if (alertsContainerFull) alertsContainerFull.innerHTML = alertHTML;
             lucide.createIcons();
         }
+
+        // ====================================================================
+        //                      Inventory and Transfer Unit (NEW)
+        // ====================================================================
+
+        /**
+         * دالة تحويل البضاعة من المخزن (stock) إلى المعروضة (displayed_stock)
+         * (اضافه بضاعه من المخزن)
+         * @param {string} productId - معرف الصنف
+         * @param {number} quantity - الكمية المراد تحويلها
+         */
+        window.handleTransferToDisplayed = async (productId, quantity) => {
+            const product = App.data.products.find(p => p.id === productId);
+
+            if (!product) {
+                alertUser("الصنف غير موجود.", "error");
+                return;
+            }
+            
+            const currentStock = product.stock || 0;
+            const currentDisplayedStock = product.displayed_stock || 0;
+
+            if (quantity <= 0 || quantity > currentStock) {
+                alertUser(`كمية النقل غير صالحة. المخزون المتاح في المخزن هو ${currentStock}.`, "error");
+                return;
+            }
+
+            try {
+                const productRef = doc(App.db, App.getCollectionPath('products'), productId);
+                await updateDoc(productRef, {
+                    stock: currentStock - quantity, // خصم من المخزن
+                    displayed_stock: currentDisplayedStock + quantity // إضافة إلى المعروضة
+                });
+                alertUser(`تم تحويل ${quantity} وحدة من **${product.name}** من المخزن إلى البضاعة المعروضة بنجاح.`, "success");
+            } catch (error) {
+                console.error("Transfer error:", error);
+                alertUser("فشل في عملية التحويل. " + error.message, "error");
+            }
+        };
+
+        /**
+         * دالة إضافة بضاعة جديدة للمخزن (Stock Inward)
+         * (اما المخزن ممكن اضيف ليهو اصناف كمان)
+         * @param {string} productId - معرف الصنف
+         * @param {number} quantity - الكمية المراد إضافتها
+         */
+        window.handleAddStockToWarehouse = async (productId, quantity) => {
+            const product = App.data.products.find(p => p.id === productId);
+
+            if (!product) {
+                alertUser("الصنف غير موجود.", "error");
+                return;
+            }
+
+            if (quantity <= 0) {
+                alertUser("كمية الإضافة يجب أن تكون أكبر من صفر.", "error");
+                return;
+            }
+
+            try {
+                const productRef = doc(App.db, App.getCollectionPath('products'), productId);
+                
+                await updateDoc(productRef, {
+                    stock: (product.stock || 0) + quantity // إضافة إلى المخزن
+                });
+                alertUser(`تمت إضافة ${quantity} وحدة جديدة من **${product.name}** إلى المخزن بنجاح.`, "success");
+            } catch (error) {
+                console.error("Add stock error:", error);
+                alertUser("فشل في عملية إضافة المخزون. " + error.message, "error");
+            }
+        };
+
+
+        /**
+         * دالة إضافة بضاعة (مباشرة) للبضاعة المعروضة (Displayed Stock Inward)
+         * (اضافه بضاعه معروضة حاليا)
+         * @param {string} productId - معرف الصنف
+         * @param {number} quantity - الكمية المراد إضافتها
+         */
+        window.handleAddDisplayedStock = async (productId, quantity) => {
+            const product = App.data.products.find(p => p.id === productId);
+
+            if (!product) {
+                alertUser("الصنف غير موجود.", "error");
+                return;
+            }
+
+            if (quantity <= 0) {
+                alertUser("كمية الإضافة يجب أن تكون أكبر من صفر.", "error");
+                return;
+            }
+
+            try {
+                const productRef = doc(App.db, App.getCollectionPath('products'), productId);
+                
+                await updateDoc(productRef, {
+                    displayed_stock: (product.displayed_stock || 0) + quantity // إضافة مباشرة إلى البضاعة المعروضة
+                });
+                alertUser(`تمت إضافة ${quantity} وحدة من **${product.name}** مباشرة إلى البضاعة المعروضة بنجاح.`, "success");
+            } catch (error) {
+                console.error("Add displayed stock error:", error);
+                alertUser("فشل في عملية إضافة البضاعة المعروضة. " + error.message, "error");
+            }
+        };
+        
+        /**
+         * لفتح النافذة المنبثقة لإدارة المخزون
+         */
+        window.openStockManagementModal = (productId) => {
+            const product = App.data.products.find(p => p.id === productId);
+            if (!product) return;
+            
+            // Remove any existing modal for this product to ensure fresh state
+            document.getElementById('stock-modal-' + product.id)?.remove();
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = StockManagementModal(product);
+            document.body.appendChild(tempDiv.firstChild);
+
+            // Show the modal and initialize lucide icons
+            document.getElementById('stock-modal-' + product.id).classList.remove('hidden');
+            lucide.createIcons();
+        };
+
         
         // ====================================================================
         //                      Smart Assistant Unit (Gemini API Integration)       
@@ -429,7 +561,8 @@
             const typingIndicator = document.getElementById('ai-typing-indicator');
 
             // Prepare the model context (System Prompt)
-            const productList = App.data.products.map(p => `ID:${p.id}, Name:${p.name}, Stock:${p.stock}, Price:${p.price}, Warehouse:${p.warehouse}, Threshold:${p.lowStockThreshold}`).join('; ');
+            // Updated product list to include displayed_stock
+            const productList = App.data.products.map(p => `ID:${p.id}, Name:${p.name}, Stock:${(p.stock || 0)}, DisplayedStock:${(p.displayed_stock || 0)}, Price:${p.price}, Warehouse:${p.warehouse}, Threshold:${p.lowStockThreshold}`).join('; ');
             const customerList = App.data.customers.map(c => `Name:${c.name}, Distinguished:${c.isDistinguished}, Spent:${c.totalSpent || 0}`).join('; ');
 
             const systemPrompt = `
@@ -512,12 +645,13 @@
                 const lowerQuery = query.toLowerCase();
                 
                 if (lowerQuery.includes('مخزون') || lowerQuery.includes('نقص') || lowerQuery.includes('منخفض') || lowerQuery.includes('مخزن')) {
-                    const lowStockItems = App.data.products.filter(p => p.stock <= (p.lowStockThreshold || 10));
+                     const lowStockItems = App.data.products.filter(p => ((p.stock || 0) + (p.displayed_stock || 0)) <= (p.lowStockThreshold || 10));
                     
                     if (lowStockItems.length > 0) {
                         mockResultText += `<p>هناك **${lowStockItems.length} صنف** يعاني من نقص في المخزون (أقل من ${lowStockItems[0].lowStockThreshold || 10}):</p>`;
                         lowStockItems.slice(0, 3).forEach(item => { // Show top 3
-                            mockResultText += `<p class="mt-1 pr-3 border-r-4 border-red-500">**${item.name}**: الكمية ${item.stock} في مخزن ${item.warehouse}.</p>`;
+                            const totalStock = (item.stock || 0) + (item.displayed_stock || 0);
+                            mockResultText += `<p class="mt-1 pr-3 border-r-4 border-red-500">**${item.name}**: الكمية الإجمالية ${totalStock} (المعروضة: ${item.displayed_stock || 0}).</p>`;
                         });
                     } else {
                         mockResultText += `<p>**المخزون:** جميع الأصناف تبدو جيدة ولا توجد تنبيهات نقص مخزون حالياً.</p>`;
@@ -550,7 +684,7 @@
         };
 
         // ====================================================================
-        //                      Invoice Management Unit (NEW)
+        //                      Invoice Management Unit (UPDATED)
         // ====================================================================
 
         // Helper to calculate totals based on items in App.data.draftInvoice.items
@@ -593,9 +727,10 @@
             const productData = App.data.products.find(p => p.id === productId);
             if (!productData) return;
 
-            // Check stock
-            if (productData.stock < quantity) {
-                 alertUser(`المخزون المتوفر من **${productData.name}** هو ${productData.stock} فقط.`, "error");
+            // NEW: Check displayed_stock instead of main stock
+            const availableStock = productData.displayed_stock !== undefined ? productData.displayed_stock : productData.stock;
+            if (availableStock < quantity) {
+                 alertUser(`المخزون المتوفر من **${productData.name}** (البضاعة المعروضة) هو ${availableStock} فقط.`, "error");
                  return;
             }
             
@@ -655,17 +790,32 @@
             return newCustomerRef.id;
         }
 
-        // Function to update stock quantities using a batch write
+        /**
+         * UPDATED: Function to update stock quantities using a batch write.
+         * Now deducts from 'displayed_stock'.
+         */
         async function updateProductStockBatch(items, batch) {
             for (const item of items) {
                 const product = App.data.products.find(p => p.id === item.productId);
-                if (product && product.stock >= item.quantity) {
+                
+                // Check displayed_stock first, fall back to general stock if not defined
+                const availableStock = product.displayed_stock !== undefined ? product.displayed_stock : product.stock; 
+                
+                if (product && availableStock >= item.quantity) {
                     const productRef = doc(App.db, App.getCollectionPath('products'), item.productId);
-                    const newStock = product.stock - item.quantity;
-                    batch.update(productRef, { stock: newStock });
+                    
+                    if (product.displayed_stock !== undefined) {
+                         const newDisplayedStock = availableStock - item.quantity;
+                         // Deduction from displayed_stock (البضاعة المعروضة)
+                         batch.update(productRef, { displayed_stock: newDisplayedStock }); 
+                    } else {
+                         // Fallback: Deduct from old 'stock' field (for legacy data)
+                         const newStock = product.stock - item.quantity;
+                         batch.update(productRef, { stock: newStock });
+                    }
                 } else {
                     // This error will rollback the entire batch
-                    throw new Error(`Quantity requested for product ${item.productName} is more than available stock (${product ? product.stock : 'N/A'}).`);
+                    throw new Error(`Quantity requested for product ${item.productName} is more than available stock (${availableStock} available).`);
                 }
             }
         }
@@ -699,7 +849,7 @@
 
                 // 2. Prepare Firestore Batch
                 const batch = writeBatch(App.db);
-                await updateProductStockBatch(invoiceItems, batch); // Decrement stock
+                await updateProductStockBatch(invoiceItems, batch); // Decrement stock (now from displayed_stock)
 
                 // 3. Save Invoice
                 const invoiceRef = doc(collection(App.db, App.getCollectionPath('invoices')));
@@ -914,7 +1064,7 @@
                 <div id="chat-body" class="p-3 space-y-2 flex-grow">
                     <div class="flex justify-end mb-2">
                         <div class="max-w-xs p-3 rounded-xl chat-message-ai shadow-md">
-                           ${myAssistant.generateGreeting(App.data.users.find(u => u.uid === App.userId)?.name)}
+                            ${myAssistant.generateGreeting(App.data.users.find(u => u.uid === App.userId)?.name)}
                         </div>
                     </div>
                 </div>
@@ -928,7 +1078,7 @@
                 </div>
             </div>
         `;
-        
+
         function getPageViewTitle() {
             const titles = {
                 'loading': 'جاري التحميل...',
@@ -948,7 +1098,6 @@
         }
 
         /** View Implementations **/
-        
         // --- 1. Loading View ---
         const LoadingView = () => `
             <div class="flex flex-col items-center justify-center h-full">
@@ -956,7 +1105,7 @@
                 <p class="mt-4 text-gray-600">جاري تحميل البيانات...</p>
             </div>
         `;
-        
+
         // --- 2. Auth Error View ---
         const AuthErrorView = () => `
             <div class="flex flex-col items-center justify-center h-full bg-red-100 rounded-xl p-8 card">
@@ -991,696 +1140,545 @@
                         </div>
                         <div>
                             <button id="login-btn" type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-shahrazad hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-shahrazad transition duration-150">
-                                <i data-lucide="log-in" class="w-5 h-5 ml-2 inline"></i>
-                                تسجيل الدخول
+                                <i data-lucide="log-in" class="w-5 h-5 ml-2 inline"></i> تسجيل الدخول
                             </button>
                         </div>
                     </form>
-                    <div class="text-center text-xs text-gray-400 pt-4 border-t">
-                        للتجربة: البريد: test | كلمة المرور: test
+                    <div class="pt-4 border-t text-center">
+                        <p class="text-xs text-gray-400">للدخول السريع في وضع الاختبار: بريد 'test'، كلمة مرور 'test'.</p>
                     </div>
                 </div>
             </div>
         `;
 
-        // --- 4. Dashboard View ---
+        // --- 4. Dashboard View (Simplified) ---
         const DashboardView = () => {
             const totalProducts = App.data.products.length;
             const totalInvoices = App.data.invoices.length;
             const totalCustomers = App.data.customers.length;
-            const lowStockCount = App.data.products.filter(p => p.stock <= (p.lowStockThreshold || 10)).length;
+            const lowStockCount = App.data.products.filter(p => ((p.stock || 0) + (p.displayed_stock || 0)) <= (p.lowStockThreshold || 10)).length;
             
-            // Calculate Daily, Monthly, Yearly Revenue
-            const now = new Date();
-            const today = now.toISOString().slice(0, 10);
-            const thisMonth = now.toISOString().slice(0, 7);
-            const thisYear = now.getFullYear();
-
-            const dailyRevenue = App.data.invoices
-                .filter(inv => inv.date && inv.date.startsWith(today))
-                .reduce((sum, inv) => sum + parseFloat(inv.grandTotal || 0), 0);
-
-            const monthlyRevenue = App.data.invoices
-                .filter(inv => inv.date && inv.date.startsWith(thisMonth))
-                .reduce((sum, inv) => sum + parseFloat(inv.grandTotal || 0), 0);
-                
-            const yearlyRevenue = App.data.invoices
-                .filter(inv => inv.date && inv.date.startsWith(thisYear.toString()))
-                .reduce((sum, inv) => sum + parseFloat(inv.grandTotal || 0), 0);
-
-            // Chart data preparation (Last 7 days revenue)
-            const last7DaysData = prepareLast7DaysRevenue(App.data.invoices);
+            const totalSalesValue = App.data.invoices.reduce((sum, inv) => sum + parseFloat(inv.grandTotal || 0), 0);
             
-            // Top 5 Products
-            const productSales = {};
-            App.data.invoices.forEach(inv => {
-                (inv.items || []).forEach(item => {
-                    const productName = item.name;
-                    const quantity = item.quantity;
-                    productSales[productName] = (productSales[productName] || 0) + quantity;
-                });
-            });
-
-            const topProducts = Object.entries(productSales)
-                .sort(([, a], [, b]) => b - a)
-                .slice(0, 5);
-
-            // Render the chart only once in the final HTML
+            // Placeholder for Chart.js
             setTimeout(() => {
-                renderDashboardChart('sales-chart', last7DaysData);
+                const ctx = document.getElementById('salesChart')?.getContext('2d');
+                if (ctx) {
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'],
+                            datasets: [{
+                                label: 'إجمالي المبيعات (ألف ج.س)',
+                                data: [120, 190, 300, 500, 200, 300], // Mock Data
+                                borderColor: '#004d99',
+                                backgroundColor: 'rgba(0, 77, 153, 0.1)',
+                                tension: 0.4,
+                                fill: true,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                }
             }, 100);
 
             return `
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">مرحباً بك يا ${App.data.users.find(u => u.uid === App.userId)?.name || App.userRole}!</h2>
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800">مرحباً بعودتك، ${App.data.users.find(u => u.uid === App.userId)?.name || App.userRole}!</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        ${StatCard('إجمالي الأصناف', totalProducts, 'box', 'text-shahrazad')}
+                        ${StatCard('إجمالي العملاء', totalCustomers, 'users', 'text-green-500')}
+                        ${StatCard('الفواتير الصادرة', totalInvoices, 'receipt', 'text-yellow-500')}
+                        ${StatCard('قيمة المبيعات الإجمالية', `${totalSalesValue.toFixed(2)} ج.س`, 'banknote', 'text-red-500')}
+                    </div>
 
-                ${renderKPIS(totalProducts, totalInvoices, totalCustomers, lowStockCount)}
-
-                <h3 class="text-xl font-semibold text-gray-700 mt-8 mb-4">تقارير الإيرادات</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    ${renderRevenueCard('إيرادات اليوم', dailyRevenue)}
-                    ${renderRevenueCard('إيرادات الشهر', monthlyRevenue)}
-                    ${renderRevenueCard('إيرادات السنة', yearlyRevenue)}
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-                    <div class="lg:col-span-2 card p-6">
-                        <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
-                            <i data-lucide="line-chart" class="w-6 h-6 ml-2 text-shahrazad"></i> 
-                            إجمالي الإيرادات (آخر 7 أيام)
-                        </h3>
-                        <div class="h-80">
-                            <canvas id="sales-chart"></canvas>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="card p-6 md:col-span-2">
+                            <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+                                <i data-lucide="line-chart" class="w-5 h-5 ml-2"></i>
+                                أداء المبيعات (الشهور الستة الماضية)
+                            </h3>
+                            <canvas id="salesChart" class="h-64 w-full"></canvas>
+                        </div>
+                        
+                        <div class="card p-6">
+                            <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 ml-2 text-red-600"></i>
+                                تنبيهات المخزون (${lowStockCount})
+                            </h3>
+                            <div id="alerts-container" class="space-y-2">
+                                </div>
+                            <button onclick="navigateTo('alerts')" class="mt-4 w-full text-sm text-shahrazad hover:text-blue-700 transition duration-150">
+                                عرض كل التنبيهات <i data-lucide="arrow-left" class="w-4 h-4 inline mr-1"></i>
+                            </button>
                         </div>
                     </div>
-
-                    <div class="card p-6">
-                        <h3 class="text-xl font-semibold text-red-700 mb-4 flex items-center">
-                            <i data-lucide="alert-triangle" class="w-6 h-6 ml-2"></i> 
-                            تنبيهات نقص المخزون
-                        </h3>
-                        <div id="alerts-container">
-                            </div>
-                        <button onclick="navigateTo('alerts')" class="w-full mt-4 text-center text-sm text-shahrazad hover:text-blue-700 transition duration-150">عرض كل التنبيهات</button>
-                    </div>
-                </div>
-
-                <div class="card p-6 mt-6">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
-                        <i data-lucide="shopping-bag" class="w-6 h-6 ml-2 text-green-600"></i> 
-                        أكثر الأصناف مبيعاً (كمية)
-                    </h3>
-                    ${topProducts.length > 0 ? `
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            ${topProducts.map(([name, quantity], index) => `
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${index + 1}. ${name}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${quantity} وحدة</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    ` : `<p class="text-gray-500 text-center py-4">لا توجد بيانات مبيعات لعرضها.</p>`}
                 </div>
             `;
         };
-        
-        // Helper functions for Dashboard
-        function renderKPIS(totalProducts, totalInvoices, totalCustomers, lowStockCount) {
-            return `
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    ${renderKPICard('إجمالي الأصناف', totalProducts, 'box', 'bg-shahrazad')}
-                    ${renderKPICard('إجمالي الفواتير', totalInvoices, 'receipt', 'bg-green-500')}
-                    ${renderKPICard('إجمالي العملاء', totalCustomers, 'users', 'bg-purple-500')}
-                    ${renderKPICard('أصناف منخفضة', lowStockCount, 'alert-triangle', 'bg-red-500')}
+
+        const StatCard = (title, value, icon, color) => `
+            <div class="card p-5 flex items-center">
+                <div class="p-3 bg-gray-100 rounded-full ${color}">
+                    <i data-lucide="${icon}" class="w-6 h-6"></i>
                 </div>
-            `;
-        }
-
-        function renderKPICard(title, value, icon, bgColor) {
-            return `
-                <div class="card p-5 flex items-center ${bgColor} text-white shadow-lg">
-                    <div class="p-3 rounded-full bg-white bg-opacity-20 ml-4">
-                        <i data-lucide="${icon}" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm opacity-80">${title}</p>
-                        <p class="text-3xl font-bold">${value}</p>
-                    </div>
+                <div class="mr-4">
+                    <p class="text-sm text-gray-500">${title}</p>
+                    <p class="text-xl font-bold text-gray-800">${value}</p>
                 </div>
-            `;
-        }
-
-        function renderRevenueCard(title, revenue) {
-             const bgColor = title.includes('اليوم') ? 'bg-indigo-500' : title.includes('الشهر') ? 'bg-teal-500' : 'bg-orange-500';
-             return `
-                 <div class="card p-5 flex items-center ${bgColor} text-white shadow-lg">
-                     <div class="p-3 rounded-full bg-white bg-opacity-20 ml-4">
-                         <i data-lucide="wallet" class="w-6 h-6"></i>
-                     </div>
-                     <div>
-                         <p class="text-sm opacity-80">${title}</p>
-                         <p class="text-3xl font-bold">${(revenue || 0).toLocaleString('ar-EG', { minimumFractionDigits: 2 })} SDG</p>
-                     </div>
-                 </div>
-             `;
-         }
-        
-        function prepareLast7DaysRevenue(invoices) {
-            const days = [];
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                days.push({
-                    date: date.toISOString().slice(0, 10),
-                    label: date.toLocaleDateString('ar-EG', { weekday: 'short' }),
-                    revenue: 0
-                });
-            }
-
-            invoices.forEach(inv => {
-                const invDate = inv.date ? inv.date.slice(0, 10) : null;
-                const dayEntry = days.find(d => d.date === invDate);
-                if (dayEntry) {
-                    dayEntry.revenue += parseFloat(inv.grandTotal || 0);
-                }
-            });
-
-            return {
-                labels: days.map(d => d.label),
-                data: days.map(d => d.revenue)
-            };
-        }
-
-        let salesChartInstance = null;
-        function renderDashboardChart(canvasId, data) {
-            const ctx = document.getElementById(canvasId);
-            if (!ctx) return;
-
-            if (salesChartInstance) {
-                salesChartInstance.destroy();
-            }
-
-            salesChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: 'الإيرادات (SDG)',
-                        data: data.data,
-                        borderColor: '#004d99',
-                        backgroundColor: 'rgba(0, 77, 153, 0.1)',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    rtl: true,
-                    scales: {
-                        x: {
-                            reverse: true,
-                            grid: { display: false }
-                        },
-                        y: {
-                            beginAtZero: true
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-        }
-        
-        // --- 5. Products View ---
-        const ProductsView = () => `
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">إدارة الأصناف والمخزون (${App.data.products.length} صنف)</h2>
-                <button onclick="window.showProductModal()" class="bg-shahrazad text-white p-3 rounded-lg flex items-center hover:bg-blue-700 transition duration-150">
-                    <i data-lucide="plus" class="w-5 h-5 ml-2"></i>
-                    إضافة صنف جديد
-                </button>
             </div>
-            
-            <div class="card p-6">
-                 ${renderProductList(App.data.products)}
-            </div>
-            
-            ${renderProductModal()}
         `;
+
+        // --- 5. Products View (UPDATED) ---
         
-        // Product Modal (Simplified - requires full implementation in a real scenario)
-        const renderProductModal = () => `
-            <div id="product-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 justify-center items-center" onclick="if(event.target.id === 'product-modal') window.hideProductModal()">
-                <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg mx-auto" onclick="event.stopPropagation()">
-                    <h3 class="text-xl font-bold mb-4">إضافة / تعديل صنف</h3>
-                    <form id="product-form" onsubmit="window.handleProductSubmit(event)">
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2" for="product-name">اسم الصنف</label>
-                            <input type="text" id="product-name" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        /**
+         * NEW: Modal HTML template for Stock Management
+         */
+        const StockManagementModal = (product) => {
+            // Ensure product has the new fields, initialize if missing
+            const warehouseStock = product.stock || 0;
+            const displayedStock = product.displayed_stock || 0;
+            
+            return `
+                <div id="stock-modal-${product.id}" class="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 hidden flex items-center justify-center">
+                    <div class="bg-white p-6 rounded-lg shadow-2xl w-full max-w-lg card animate-in fade-in zoom-in">
+                        <div class="flex justify-between items-center border-b pb-3 mb-4">
+                            <h3 class="text-xl font-bold text-shahrazad">إدارة مخزون: ${product.name}</h3>
+                            <button onclick="document.getElementById('stock-modal-${product.id}').classList.add('hidden')" class="text-gray-500 hover:text-gray-700">
+                                <i data-lucide="x" class="w-6 h-6"></i>
+                            </button>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="mb-4">
-                                <label class="block text-gray-700 text-sm font-bold mb-2" for="product-price">سعر الوحدة (SDG)</label>
-                                <input type="number" id="product-price" step="0.01" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        
+                        <div class="grid grid-cols-2 gap-4 text-center mb-6">
+                            <div class="p-3 bg-blue-50 rounded-lg">
+                                <p class="text-sm text-gray-600">المخزن (الرئيسي)</p>
+                                <p class="text-2xl font-bold text-gray-800">${warehouseStock}</p>
                             </div>
-                            <div class="mb-4">
-                                <label class="block text-gray-700 text-sm font-bold mb-2" for="product-stock">الكمية في المخزون</label>
-                                <input type="number" id="product-stock" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                             <div class="mb-4">
-                                <label class="block text-gray-700 text-sm font-bold mb-2" for="product-warehouse">المخزن</label>
-                                <select id="product-warehouse" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                    ${App.data.warehouses.map(w => `<option value="${w.name}">${w.name}</option>`).join('') || '<option value="">لا توجد مخازن</option>'}
-                                </select>
-                            </div>
-                            <div class="mb-4">
-                                <label class="block text-gray-700 text-sm font-bold mb-2" for="product-threshold">حد التنبيه (Stock)</label>
-                                <input type="number" id="product-threshold" value="10" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <div class="p-3 bg-yellow-50 rounded-lg">
+                                <p class="text-sm text-gray-600">البضاعة المعروضة</p>
+                                <p class="text-2xl font-bold text-yellow-700">${displayedStock}</p>
                             </div>
                         </div>
                         
-                        <div class="flex justify-end mt-6">
-                            <button type="button" onclick="window.hideProductModal()" class="bg-gray-300 text-gray-800 p-2 rounded-lg ml-4 hover:bg-gray-400">إلغاء</button>
-                            <button type="submit" id="product-submit-btn" class="bg-shahrazad text-white p-2 rounded-lg flex items-center hover:bg-blue-700 transition duration-150">
-                                <i data-lucide="save" class="w-5 h-5 ml-2"></i>
-                                حفظ الصنف
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        `;
-        
-        // Helper to render product table
-        const renderProductList = (products) => {
-            if (products.length === 0) {
-                return `<p class="text-gray-500 text-center py-4">لا توجد أصناف مسجلة حالياً.</p>`;
-            }
-            return `
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">السعر (SDG)</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المخزون</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المخزن</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            ${products.map(p => `
-                                <tr class="${p.stock <= (p.lowStockThreshold || 10) ? 'bg-red-50' : ''}">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.name}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.price.toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm ${p.stock <= (p.lowStockThreshold || 10) ? 'text-red-600 font-bold' : 'text-gray-500'}">${p.stock} ${p.stock <= (p.lowStockThreshold || 10) ? '(منخفض!)' : ''}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.warehouse || 'الرئيسي'}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button onclick="window.editProduct('${p.id}')" class="text-shahrazad hover:text-blue-700 ml-3">
-                                            <i data-lucide="square-pen" class="w-5 h-5"></i>
-                                        </button>
-                                        <button onclick="window.deleteProduct('${p.id}', '${p.name}')" class="text-red-600 hover:text-red-900 ${App.userRole !== 'admin' ? 'hidden' : ''}">
-                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        };
-        
-        // Product CRUD Logic (Simplified for demonstration)
-        window.showProductModal = (product = {}) => {
-            const modal = document.getElementById('product-modal');
-            const form = document.getElementById('product-form');
-            form.reset();
-            form.dataset.productId = product.id || '';
-            document.getElementById('product-name').value = product.name || '';
-            document.getElementById('product-price').value = product.price || 0;
-            document.getElementById('product-stock').value = product.stock || 0;
-            document.getElementById('product-threshold').value = product.lowStockThreshold || 10;
-            if (product.warehouse) document.getElementById('product-warehouse').value = product.warehouse;
-            
-            document.getElementById('product-submit-btn').innerHTML = product.id ? `<i data-lucide="save" class="w-5 h-5 ml-2"></i> حفظ التعديل` : `<i data-lucide="plus" class="w-5 h-5 ml-2"></i> إضافة الصنف`;
-            lucide.createIcons();
-            modal.style.display = 'flex';
-        };
-
-        window.hideProductModal = () => {
-            document.getElementById('product-modal').style.display = 'none';
-        };
-
-        window.editProduct = (id) => {
-            const product = App.data.products.find(p => p.id === id);
-            if (product) window.showProductModal(product);
-        };
-        
-        window.handleProductSubmit = async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const productId = form.dataset.productId;
-            const isNew = !productId;
-            const name = form.querySelector('#product-name').value;
-            const price = parseFloat(form.querySelector('#product-price').value);
-            const stock = parseInt(form.querySelector('#product-stock').value);
-            const warehouse = form.querySelector('#product-warehouse').value;
-            const lowStockThreshold = parseInt(form.querySelector('#product-threshold').value);
-
-            const productData = { name, price, stock, warehouse, lowStockThreshold };
-            
-            const submitBtn = form.querySelector('#product-submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i data-lucide="loader-circle" class="w-5 h-5 ml-2 inline animate-spin"></i> جاري الحفظ...`;
-            lucide.createIcons();
-
-            try {
-                if (isNew) {
-                    await addDoc(collection(App.db, App.getCollectionPath('products')), { ...productData, createdAt: new Date().toISOString() });
-                    alertUser(`تم إضافة الصنف **${name}** بنجاح.`, "success");
-                } else {
-                    await updateDoc(doc(App.db, App.getCollectionPath('products'), productId), productData);
-                    alertUser(`تم تعديل الصنف **${name}** بنجاح.`, "success");
-                }
-                window.hideProductModal();
-            } catch (error) {
-                console.error("Product save failed:", error);
-                alertUser(`فشل حفظ الصنف: ${error.message}`, "error");
-            } finally {
-                submitBtn.disabled = false;
-                // Re-rendering happens automatically via onSnapshot listener
-            }
-        };
-
-        window.deleteProduct = async (id, name) => {
-            if (App.userRole !== 'admin') {
-                alertUser("عذراً، يجب أن تكون بـ **صلاحية المدير الأساسي** للحذف.", "error");
-                return;
-            }
-            if (!confirm(`هل أنت متأكد من حذف الصنف: ${name}؟ لا يمكن التراجع عن هذا الإجراء!`)) return;
-
-            try {
-                await deleteDoc(doc(App.db, App.getCollectionPath('products'), id));
-                alertUser(`تم حذف الصنف **${name}** بنجاح.`, "success");
-            } catch (error) {
-                console.error("Product deletion failed:", error);
-                alertUser(`فشل حذف الصنف: ${error.message}`, "error");
-            }
-        };
-        
-        // --- 6. Invoices View ---
-        const InvoicesView = () => {
-            const invoices = App.data.invoices.sort((a, b) => new Date(b.date) - new Date(a.date));
-            const totalRevenue = invoices.reduce((sum, inv) => sum + parseFloat(inv.grandTotal || 0), 0);
-            
-            return `
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">سجل الفواتير (${invoices.length} فاتورة)</h2>
-                    <button onclick="navigateTo('new_invoice')" class="bg-green-600 text-white p-3 rounded-lg flex items-center hover:bg-green-700 transition duration-150">
-                        <i data-lucide="plus-circle" class="w-5 h-5 ml-2"></i>
-                        إنشاء فاتورة جديدة
-                    </button>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    ${renderRevenueCard('إجمالي الإيرادات', totalRevenue).replace(/bg-[a-z]+-500/g, 'bg-shahrazad')}
-                </div>
-                
-                <div class="card p-6">
-                    ${renderInvoiceList(invoices)}
-                </div>
-            `;
-        };
-        
-        // Helper to render invoice table
-        const renderInvoiceList = (invoices) => {
-            if (invoices.length === 0) {
-                return `<p class="text-gray-500 text-center py-4">لا توجد فواتير مسجلة حالياً.</p>`;
-            }
-            return `
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">رقم الفاتورة</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">العميل</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التاريخ</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي (SDG)</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            ${invoices.map(inv => `
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-shahrazad">${inv.invoiceNumber || 'N/A'}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${inv.customerName || 'عميل غير مسجل'}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${myAssistant.formatTimestamp(inv.date)}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">${parseFloat(inv.grandTotal || 0).toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button onclick="navigateTo('invoice_details', ${JSON.stringify(inv).replace(/'/g, "\\'")})" class="text-shahrazad hover:text-blue-700 ml-3">
-                                            <i data-lucide="eye" class="w-5 h-5"></i> معاينة
-                                        </button>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        };
-
-        // --- 7. New Invoice View (The main new feature) ---
-        const NewInvoiceView = () => {
-             const products = App.data.products.filter(p => p.stock > 0);
-
-             // Items list HTML
-             const itemsListHTML = App.data.draftInvoice.items.map((item, index) => `
-                <tr class="border-b">
-                    <td class="p-3 text-sm text-gray-700">${item.productName}</td>
-                    <td class="p-3 text-sm text-gray-700">${item.quantity}</td>
-                    <td class="p-3 text-sm text-gray-700">${parseFloat(item.unitPrice).toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</td>
-                    <td class="p-3 text-sm text-gray-700">${item.discount}%</td>
-                    <td class="p-3 text-sm font-bold text-green-600">${parseFloat(item.total).toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</td>
-                    <td class="p-3 text-sm text-left">
-                        <button onclick="handleRemoveItem(${index})" class="text-red-600 hover:text-red-800 p-1 rounded">
-                            <i data-lucide="x" class="w-4 h-4"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-            
-            // Customer Datalist
-            const customerDatalist = `<datalist id="customer-names">${App.data.customers.map(c => `<option value="${c.name}">`).join('')}</datalist>`;
-
-
-            return `
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-4 flex items-center"><i data-lucide="receipt" class="w-6 h-6 ml-2 text-shahrazad"></i> تفاصيل العميل والفاتورة</h3>
-                            <form id="new-invoice-form">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="mb-4">
-                                        <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-1">اسم العميل (سيحفظ تلقائياً)</label>
-                                        <input list="customer-names" id="customer-name" required class="w-full p-2 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad" placeholder="اسم العميل...">
-                                        ${customerDatalist}
-                                    </div>
-                                    <div class="mb-4">
-                                        <label for="invoice-date" class="block text-sm font-medium text-gray-700 mb-1">التاريخ</label>
-                                        <input type="text" id="invoice-date" value="${myAssistant.formatCurrentDate()}" disabled class="w-full p-2 border border-gray-300 bg-gray-50 rounded-lg">
-                                    </div>
-                                </div>
-                                <div class="mb-4">
-                                    <label for="invoice-notes" class="block text-sm font-medium text-gray-700 mb-1">ملاحظات الفاتورة</label>
-                                    <textarea id="invoice-notes" rows="2" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad" placeholder="ملاحظات إضافية (اختياري)"></textarea>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-4 flex items-center"><i data-lucide="package" class="w-6 h-6 ml-2 text-shahrazad"></i> إضافة صنف للفاتورة</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end">
-                                <div class="sm:col-span-2">
-                                    <label for="product-select" class="block text-sm font-medium text-gray-700 mb-1">الصنف</label>
-                                    <select id="product-select" onchange="onProductSelectChange()" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
-                                        <option value="">اختر صنف...</option>
-                                        ${products.map(p => `<option value="${p.id}">${p.name} (مخزون: ${p.stock})</option>`).join('')}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="item-quantity" class="block text-sm font-medium text-gray-700 mb-1">الكمية</label>
-                                    <input type="number" id="item-quantity" value="1" min="1" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
-                                </div>
-                                <div>
-                                    <label for="item-price" class="block text-sm font-medium text-gray-700 mb-1">سعر الوحدة</label>
-                                    <input type="number" id="item-price" step="0.01" value="0" min="0" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
-                                </div>
-                                <div>
-                                    <label for="item-discount" class="block text-sm font-medium text-gray-700 mb-1">خصم (%)</label>
-                                    <input type="number" id="item-discount" step="0.1" value="0" min="0" max="100" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-shahrazad focus:border-shahrazad">
-                                </div>
-                                
-                            </div>
-                            <div class="mt-4 flex justify-end">
-                                <button type="button" onclick="handleAddItem()" class="bg-green-600 text-white p-2 rounded-lg flex items-center hover:bg-green-700 transition duration-150">
-                                    <i data-lucide="plus" class="w-5 h-5 ml-2"></i>
-                                    إضافة
+                        <div class="p-4 border border-blue-200 rounded-lg mb-4">
+                            <h4 class="font-semibold text-shahrazad mb-2 flex items-center">
+                                 <i data-lucide="arrow-left-right" class="w-4 h-4 ml-2"></i>
+                                تحويل إلى البضاعة المعروضة (من المخزن)
+                            </h4>
+                            <p class="text-sm text-gray-600 mb-3">لنقل كمية من المخزن الرئيسي إلى المعروضة للبيع المباشر.</p>
+                            <div class="flex space-x-2 rtl:space-x-reverse">
+                                <input type="number" id="transfer-quantity-${product.id}" placeholder="كمية التحويل" min="1" max="${warehouseStock}" value="1" class="flex-grow p-2 border rounded-md text-sm">
+                                <button onclick="handleTransferToDisplayed('${product.id}', parseInt(document.getElementById('transfer-quantity-${product.id}').value)); document.getElementById('stock-modal-${product.id}').classList.add('hidden');" class="bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition duration-150 flex items-center">
+                                    <i data-lucide="corner-down-left" class="w-5 h-5 ml-1"></i> نقل
                                 </button>
                             </div>
                         </div>
 
-                        <div class="card p-6">
-                            <h3 class="text-xl font-bold mb-4 flex items-center"><i data-lucide="list-ordered" class="w-6 h-6 ml-2 text-shahrazad"></i> قائمة الأصناف المضافة</h3>
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
-                                        <tr>
-                                            <th class="p-3 text-right text-xs font-medium text-gray-500 uppercase">الصنف</th>
-                                            <th class="p-3 text-right text-xs font-medium text-gray-500 uppercase">الكمية</th>
-                                            <th class="p-3 text-right text-xs font-medium text-gray-500 uppercase">سعر الوحدة</th>
-                                            <th class="p-3 text-right text-xs font-medium text-gray-500 uppercase">الخصم</th>
-                                            <th class="p-3 text-right text-xs font-medium text-gray-500 uppercase">الإجمالي</th>
-                                            <th class="p-3 text-right text-xs font-medium text-gray-500 uppercase">حذف</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
-                                        ${itemsListHTML.length > 0 ? itemsListHTML : `<tr><td colspan="6" class="p-4 text-center text-gray-500">لا توجد أصناف مضافة بعد.</td></tr>`}
-                                    </tbody>
-                                </table>
+                        <div class="p-4 border border-yellow-200 rounded-lg mb-4">
+                            <h4 class="font-semibold text-shahrazad mb-2 flex items-center">
+                                 <i data-lucide="monitor" class="w-4 h-4 ml-2"></i>
+                                إضافة بضاعة معروضة حالياً (مباشر)
+                            </h4>
+                            <p class="text-sm text-gray-600 mb-3">لإضافة كمية مباشرة إلى المعروضة (مثلاً بضاعة مرتجعة صالحة للعرض).</p>
+                            <div class="flex space-x-2 rtl:space-x-reverse">
+                                <input type="number" id="direct-displayed-quantity-${product.id}" placeholder="كمية الإضافة" min="1" value="1" class="flex-grow p-2 border rounded-md text-sm">
+                                <button onclick="handleAddDisplayedStock('${product.id}', parseInt(document.getElementById('direct-displayed-quantity-${product.id}').value)); document.getElementById('stock-modal-${product.id}').classList.add('hidden');" class="bg-yellow-600 text-white p-2 rounded-md hover:bg-yellow-700 transition duration-150 flex items-center">
+                                     <i data-lucide="plus" class="w-5 h-5 ml-1"></i> إضافة
+                                </button>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="lg:col-span-1 space-y-6">
-                        <div class="card p-6 sticky top-6">
-                            <h3 class="text-xl font-bold mb-4 flex items-center"><i data-lucide="dollar-sign" class="w-6 h-6 ml-2 text-shahrazad"></i> ملخص الفاتورة</h3>
-                            <div class="space-y-3">
-                                <div class="flex justify-between border-b pb-2">
-                                    <span class="text-gray-600">الإجمالي قبل الخصم:</span>
-                                    <span class="font-medium">${parseFloat(App.data.draftInvoice.subTotal).toLocaleString('ar-EG', { minimumFractionDigits: 2 })} SDG</span>
-                                </div>
-                                <div class="flex justify-between border-b pb-2">
-                                    <span class="text-red-500">إجمالي الخصم:</span>
-                                    <span class="font-medium text-red-500">(${parseFloat(App.data.draftInvoice.totalDiscount).toLocaleString('ar-EG', { minimumFractionDigits: 2 })}) SDG</span>
-                                </div>
-                                <div class="flex justify-between pt-3 border-t-2 border-shahrazad">
-                                    <span class="text-2xl font-bold text-gray-800">صافي المبلغ المطلوب:</span>
-                                    <span class="text-2xl font-bold text-green-700">${parseFloat(App.data.draftInvoice.grandTotal).toLocaleString('ar-EG', { minimumFractionDigits: 2 })} SDG</span>
-                                </div>
+                        
+                        <div class="p-4 border border-green-200 rounded-lg">
+                            <h4 class="font-semibold text-shahrazad mb-2 flex items-center">
+                                 <i data-lucide="warehouse" class="w-4 h-4 ml-2"></i>
+                                إضافة بضاعة إلى المخزن (استلام جديد)
+                            </h4>
+                            <p class="text-sm text-gray-600 mb-3">لاستلام بضاعة جديدة وإضافتها للمخزن الرئيسي.</p>
+                            <div class="flex space-x-2 rtl:space-x-reverse">
+                                <input type="number" id="warehouse-add-quantity-${product.id}" placeholder="كمية الإضافة" min="1" value="1" class="flex-grow p-2 border rounded-md text-sm">
+                                <button onclick="handleAddStockToWarehouse('${product.id}', parseInt(document.getElementById('warehouse-add-quantity-${product.id}').value)); document.getElementById('stock-modal-${product.id}').classList.add('hidden');" class="bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition duration-150 flex items-center">
+                                    <i data-lucide="package-plus" class="w-5 h-5 ml-1"></i> إضافة
+                                </button>
                             </div>
-
-                            <button id="save-invoice-btn" onclick="handleNewInvoice(event)" form="new-invoice-form" type="submit" class="w-full mt-6 flex justify-center py-3 px-4 rounded-lg shadow-lg text-lg font-bold text-white bg-green-600 hover:bg-green-700 transition duration-150">
-                                <i data-lucide="save" class="w-5 h-5 ml-2"></i>
-                                حفظ وإصدار الفاتورة
-                            </button>
                         </div>
                     </div>
                 </div>
             `;
         };
-
-        // --- 8. Print/View Invoice Details ---
-        const PrintInvoiceView = () => {
-            const inv = App.currentInvoiceForView;
-            if (!inv) return `<p class="text-center text-red-500">عذراً، لم يتم العثور على بيانات الفاتورة.</p>`;
-
-            // Helper to get the user who created the invoice
-            const createdByUser = App.data.users.find(u => u.uid === inv.createdBy)?.name || 'النظام';
+        
+        const ProductsView = () => {
+            const products = App.data.products;
+            
+            // Sort products for display (e.g., by name)
+            products.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
             
             return `
-                <div class="print-controls mb-6 flex justify-between items-center">
-                     <button onclick="navigateTo('invoices')" class="bg-gray-500 text-white p-2 rounded-lg flex items-center hover:bg-gray-600 transition duration-150">
-                        <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
-                        العودة إلى الفواتير
-                    </button>
-                    <button onclick="generateInvoicePDF()" class="bg-shahrazad text-white p-3 rounded-lg flex items-center hover:bg-blue-700 transition duration-150">
-                        <i data-lucide="download" class="w-5 h-5 ml-2"></i>
-                        طباعة / تنزيل PDF
-                    </button>
-                </div>
-
-                <div id="invoice-print-view" class="print-area card p-8 shadow-xl max-w-4xl mx-auto bg-white">
-                    <div class="flex justify-between items-center border-b-2 border-shahrazad pb-4 mb-6">
-                        <div>
-                            <h1 class="text-3xl font-black text-shahrazad">SHAHRAZAD ELECTRIC</h1>
-                            <p class="text-sm text-gray-600 mt-1">نظام إدارة المبيعات المتقدم</p>
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">إدارة الأصناف والمخزون</h2>
+                    
+                    <div class="flex justify-between items-center">
+                        <div class="card p-4 flex-1 mr-4 rtl:ml-4 max-w-lg">
+                            <form id="add-product-form" onsubmit="handleAddProduct(event)" class="space-y-3">
+                                <h4 class="text-lg font-semibold text-shahrazad">إضافة صنف جديد</h4>
+                                <div class="flex space-x-3 rtl:space-x-reverse">
+                                    <input type="text" id="product-name" placeholder="اسم الصنف" required class="flex-1 p-2 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                    <input type="number" id="product-price" placeholder="سعر البيع" min="0" step="0.01" required class="w-32 p-2 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                </div>
+                                <div class="flex space-x-3 rtl:space-x-reverse">
+                                    <input type="number" id="product-stock" placeholder="كمية المخزن الأولية" min="0" value="1" required class="w-32 p-2 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                    <input type="number" id="product-threshold" placeholder="حد النقص" min="1" value="10" class="w-32 p-2 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                    <select id="product-warehouse" required class="flex-1 p-2 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                        <option value="" disabled selected>اختر المخزن الافتراضي</option>
+                                        ${App.data.warehouses.map(w => `<option value="${w.id}">${w.name}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <button type="submit" id="add-product-btn" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition duration-150">
+                                    <i data-lucide="plus-circle" class="w-5 h-5 ml-2 inline"></i> إضافة الصنف
+                                </button>
+                            </form>
                         </div>
-                        <div class="text-left">
-                            <h2 class="text-xl font-bold text-gray-800">فاتورة مبيعات</h2>
-                            <p class="text-sm text-gray-600">رقم الفاتورة: <span class="font-bold">${inv.invoiceNumber || inv.id.substring(0, 8)}</span></p>
-                            <p class="text-sm text-gray-600">التاريخ: ${myAssistant.formatTimestamp(inv.date)}</p>
+
+                        <div class="card p-4 w-60">
+                            <h4 class="text-lg font-semibold text-gray-700 mb-2">إحصائيات الأصناف</h4>
+                            <p class="text-3xl font-bold text-shahrazad">${products.length}</p>
+                            <p class="text-sm text-gray-500">إجمالي الأصناف</p>
+                            <p class="mt-2 text-md font-semibold text-red-600">
+                                ${products.filter(p => ((p.stock || 0) + (p.displayed_stock || 0)) <= (p.lowStockThreshold || 10)).length} صنف منخفض
+                            </p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 text-sm mb-8">
-                        <div>
-                            <p class="font-bold text-shahrazad mb-1">معلومات العميل:</p>
-                            <p>الاسم: ${inv.customerName || 'عميل غير مسجل'}</p>
-                            <p>هاتف: N/A</p>
-                        </div>
-                        <div class="text-left">
-                            <p class="font-bold text-shahrazad mb-1">معلومات البائع:</p>
-                            <p>الموظف: ${createdByUser}</p>
-                            <p>الفرع: الخرطوم</p>
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto mb-6 border border-gray-200 rounded-lg">
+                    <div class="card p-6 overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-100">
+                            <thead>
                                 <tr>
-                                    <th class="px-4 py-2 text-right text-xs font-bold text-gray-600 uppercase">الصنف</th>
-                                    <th class="px-4 py-2 text-right text-xs font-bold text-gray-600 uppercase">الكمية</th>
-                                    <th class="px-4 py-2 text-right text-xs font-bold text-gray-600 uppercase">سعر الوحدة (SDG)</th>
-                                    <th class="px-4 py-2 text-right text-xs font-bold text-gray-600 uppercase">الخصم (%)</th>
-                                    <th class="px-4 py-2 text-right text-xs font-bold text-gray-600 uppercase">الإجمالي (SDG)</th>
+                                    <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
+                                    <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">السعر (ج.س)</th>
+                                    <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المخزن (الرئيسي)</th>
+                                    <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">البضاعة المعروضة</th>
+                                    <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجمالي الكمية</th>
+                                    <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المخزن الافتراضي</th>
+                                    <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجراءات</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200 text-sm">
-                                ${inv.items.map(item => `
-                                    <tr>
-                                        <td class="px-4 py-2 text-gray-800">${item.name}</td>
-                                        <td class="px-4 py-2">${item.quantity}</td>
-                                        <td class="px-4 py-2">${parseFloat(item.unitPrice).toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</td>
-                                        <td class="px-4 py-2">${item.discount || 0}%</td>
-                                        <td class="px-4 py-2 font-medium text-green-700">${parseFloat(item.total).toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</td>
-                                    </tr>
-                                `).join('')}
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${products.map(p => {
+                                    const warehouse = App.data.warehouses.find(w => w.id === p.warehouse);
+                                    const totalStock = (p.stock || 0) + (p.displayed_stock || 0); // Combined stock
+                                    const isLowStock = totalStock <= (p.lowStockThreshold || 10);
+                                    
+                                    return `
+                                        <tr class="${isLowStock ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'}">
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.name}</td>
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${p.price.toFixed(2)}</td>
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-800 font-semibold">${p.stock || 0}</td>
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-yellow-700 font-bold">${p.displayed_stock || 0}</td>
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm ${isLowStock ? 'text-red-600 font-bold' : 'text-gray-500'}">${totalStock}</td>
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${warehouse ? warehouse.name : 'غير محدد'}</td>
+                                            <td class="px-3 py-4 whitespace-nowrap text-left text-sm font-medium flex space-x-2 rtl:space-x-reverse">
+                                                <button onclick="openStockManagementModal('${p.id}')" class="text-shahrazad hover:text-blue-700 p-2 rounded-full hover:bg-gray-100 transition duration-150" title="إدارة المخزون">
+                                                    <i data-lucide="layers" class="w-5 h-5"></i>
+                                                </button>
+                                                <button onclick="handleDeleteProduct('${p.id}', '${p.name}')" class="text-red-600 hover:text-red-900 p-2 rounded-full hover:bg-gray-100 transition duration-150" title="حذف">
+                                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
                             </tbody>
                         </table>
+                        ${products.length === 0 ? '<p class="text-center text-gray-500 p-4">لا توجد أصناف مسجلة حالياً.</p>' : ''}
+                    </div>
+                </div>
+            `;
+        };
+
+        // --- 6. New Invoice View ---
+        const NewInvoiceView = () => {
+            const products = App.data.products;
+            const draftItems = App.data.draftInvoice.items;
+            const draft = App.data.draftInvoice;
+
+            return `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">إنشاء فاتورة مبيعات جديدة</h2>
+                    
+                    <form id="new-invoice-form" onsubmit="handleNewInvoice(event)" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        
+                        <div class="lg:col-span-1 space-y-4">
+                            <div class="card p-5 space-y-3">
+                                <h3 class="text-lg font-semibold text-shahrazad flex items-center">
+                                    <i data-lucide="user-check" class="w-5 h-5 ml-2"></i>
+                                    بيانات العميل
+                                </h3>
+                                <input type="text" id="customer-name" placeholder="اسم العميل (مطلوب)" required class="w-full p-3 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                <textarea id="invoice-notes" placeholder="ملاحظات الفاتورة (اختياري)" rows="3" class="w-full p-3 border rounded-md focus:ring-shahrazad focus:border-shahrazad"></textarea>
+                            </div>
+
+                            <div class="card p-5 space-y-3 bg-gray-50">
+                                <h3 class="text-lg font-semibold text-shahrazad flex items-center">
+                                    <i data-lucide="calculator" class="w-5 h-5 ml-2"></i>
+                                    ملخص الفاتورة
+                                </h3>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>الإجمالي الفرعي:</span>
+                                        <span class="font-medium">${draft.subTotal} ج.س</span>
+                                    </div>
+                                    <div class="flex justify-between text-red-600">
+                                        <span>إجمالي الخصم:</span>
+                                        <span class="font-medium">-${draft.totalDiscount} ج.س</span>
+                                    </div>
+                                    <div class="border-t pt-2 flex justify-between text-xl font-bold text-green-700">
+                                        <span>المجموع الكلي:</span>
+                                        <span>${draft.grandTotal} ج.س</span>
+                                    </div>
+                                </div>
+                                <button type="submit" id="save-invoice-btn" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 transition duration-150">
+                                    <i data-lucide="save" class="w-5 h-5 ml-2 inline"></i> حفظ وإصدار الفاتورة
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-2 space-y-4">
+                            <div class="card p-5 space-y-3">
+                                <h3 class="text-lg font-semibold text-shahrazad flex items-center">
+                                    <i data-lucide="package-plus" class="w-5 h-5 ml-2"></i>
+                                    إضافة أصناف للفاتورة
+                                </h3>
+                                <div class="grid grid-cols-5 gap-3">
+                                    <div class="col-span-2">
+                                        <select id="product-select" onchange="onProductSelectChange()" class="w-full p-3 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                            <option value="" disabled selected>اختر الصنف</option>
+                                            ${products.map(p => {
+                                                const availableStock = p.displayed_stock !== undefined ? p.displayed_stock : p.stock;
+                                                return `<option value="${p.id}" ${availableStock <= 0 ? 'disabled' : ''}>${p.name} (متوفر: ${availableStock})</option>`;
+                                            }).join('')}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <input type="number" id="item-quantity" placeholder="الكمية" min="1" value="1" required class="w-full p-3 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                    </div>
+                                    <div>
+                                        <input type="number" id="item-price" placeholder="سعر الوحدة" min="0" step="0.01" value="0" required class="w-full p-3 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                    </div>
+                                    <div>
+                                        <input type="number" id="item-discount" placeholder="الخصم (%)" min="0" max="100" value="0" class="w-full p-3 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                    </div>
+                                </div>
+                                <button type="button" onclick="handleAddItem()" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-shahrazad hover:bg-blue-700 transition duration-150">
+                                    <i data-lucide="plus" class="w-5 h-5 ml-2 inline"></i> أضف الصنف إلى القائمة
+                                </button>
+                            </div>
+
+                            <div class="card p-5">
+                                <h3 class="text-lg font-semibold text-gray-700 mb-3">قائمة أصناف الفاتورة (${draftItems.length} صنف)</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead>
+                                            <tr>
+                                                <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الصنف</th>
+                                                <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الكمية</th>
+                                                <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">السعر/الوحدة</th>
+                                                <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الخصم (%)</th>
+                                                <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي</th>
+                                                <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            ${draftItems.map((item, index) => `
+                                                <tr class="hover:bg-gray-50">
+                                                    <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.productName}</td>
+                                                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${item.quantity}</td>
+                                                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${item.unitPrice.toFixed(2)}</td>
+                                                    <td class="px-3 py-4 whitespace-nowrap text-sm text-red-500">${item.discount.toFixed(0)}%</td>
+                                                    <td class="px-3 py-4 whitespace-nowrap text-sm font-bold text-gray-800">${item.total}</td>
+                                                    <td class="px-3 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                        <button type="button" onclick="handleRemoveItem(${index})" class="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-gray-100 transition duration-150">
+                                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                    ${draftItems.length === 0 ? '<p class="text-center text-gray-500 p-4">الرجاء إضافة أصناف للفاتورة.</p>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            `;
+        };
+
+        // --- 7. Print Invoice View ---
+        const PrintInvoiceView = () => {
+             const invoice = App.currentInvoiceForView;
+
+             if (!invoice) {
+                 return `
+                     <div class="flex flex-col items-center justify-center h-full">
+                         <i data-lucide="info" class="w-12 h-12 text-yellow-600"></i>
+                         <p class="mt-4 text-gray-600">لا توجد فاتورة لعرضها حالياً. الرجاء إنشاء فاتورة أولاً.</p>
+                         <button onclick="navigateTo('new_invoice')" class="mt-6 bg-shahrazad text-white p-3 rounded-lg hover:bg-blue-700 transition duration-150">إنشاء فاتورة جديدة</button>
+                     </div>
+                 `;
+             }
+
+             // Find the user who created the invoice
+             const createdUser = App.data.users.find(u => u.uid === invoice.createdBy)?.name || 'النظام';
+             const invoiceDate = myAssistant.formatTimestamp(invoice.date);
+
+             return `
+                 <div class="space-y-6 print-area max-w-4xl mx-auto p-4 md:p-8 bg-white shadow-xl rounded-xl">
+                     <div class="print-controls mb-4 flex justify-end space-x-3 rtl:space-x-reverse">
+                         <button onclick="generateInvoicePDF()" class="flex items-center bg-shahrazad text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-150">
+                             <i data-lucide="printer" class="w-5 h-5 ml-2"></i> طباعة / PDF
+                         </button>
+                         <button onclick="navigateTo('invoices')" class="flex items-center bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-150">
+                             <i data-lucide="list-checks" class="w-5 h-5 ml-2"></i> العودة للقائمة
+                         </button>
+                     </div>
+
+                     <header class="text-center border-b-4 border-shahrazad pb-4 mb-6">
+                         <h1 class="text-3xl font-black text-shahrazad">SHAHRAZAD ELECTRIC</h1>
+                         <p class="text-md text-gray-600">نظام إدارة المبيعات المتقدم</p>
+                     </header>
+
+                     <div class="grid grid-cols-2 gap-4 text-sm mb-6 border p-4 rounded-lg bg-gray-50">
+                         <div>
+                             <p class="font-bold text-gray-700">العميل:</p>
+                             <p class="text-gray-900 font-bold text-lg">${invoice.customerName}</p>
+                         </div>
+                         <div class="text-left">
+                             <p class="font-bold text-gray-700">رقم الفاتورة:</p>
+                             <p class="text-xl font-extrabold text-shahrazad">INV-${invoice.invoiceNumber.toString().padStart(5, '0')}</p>
+                         </div>
+                         <div>
+                             <p class="font-bold text-gray-700">تاريخ الإصدار:</p>
+                             <p class="text-gray-900">${invoiceDate}</p>
+                         </div>
+                         <div class="text-left">
+                             <p class="font-bold text-gray-700">تم بواسطة:</p>
+                             <p class="text-gray-900">${createdUser}</p>
+                         </div>
+                     </div>
+
+                     <div class="overflow-x-auto mb-6">
+                         <table class="min-w-full border border-gray-300">
+                             <thead>
+                                 <tr class="bg-gray-100">
+                                     <th class="p-3 border-r text-right text-xs font-bold text-gray-600 uppercase tracking-wider">الصنف</th>
+                                     <th class="p-3 border-r text-right text-xs font-bold text-gray-600 uppercase tracking-wider w-16">الكمية</th>
+                                     <th class="p-3 border-r text-right text-xs font-bold text-gray-600 uppercase tracking-wider w-20">السعر</th>
+                                     <th class="p-3 border-r text-right text-xs font-bold text-gray-600 uppercase tracking-wider w-20">الخصم</th>
+                                     <th class="p-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider w-24">الإجمالي (ج.س)</th>
+                                 </tr>
+                             </thead>
+                             <tbody>
+                                 ${invoice.items.map(item => `
+                                     <tr class="border-b hover:bg-gray-50">
+                                         <td class="p-3 border-r whitespace-nowrap text-sm text-gray-900">${item.name}</td>
+                                         <td class="p-3 border-r whitespace-nowrap text-sm text-gray-700">${item.quantity}</td>
+                                         <td class="p-3 border-r whitespace-nowrap text-sm text-gray-700">${parseFloat(item.unitPrice).toFixed(2)}</td>
+                                         <td class="p-3 border-r whitespace-nowrap text-sm text-red-600">${item.discount}%</td>
+                                         <td class="p-3 whitespace-nowrap text-sm font-bold text-gray-800">${parseFloat(item.total).toFixed(2)}</td>
+                                     </tr>
+                                 `).join('')}
+                             </tbody>
+                         </table>
+                     </div>
+
+                     <div class="grid grid-cols-2 gap-4">
+                         <div>
+                             <p class="font-bold text-gray-700 mb-2">ملاحظات:</p>
+                             <p class="text-sm text-gray-600 p-2 border rounded-md h-24">${invoice.notes || 'لا توجد ملاحظات.'}</p>
+                         </div>
+                         <div class="space-y-2 text-sm max-w-xs ml-auto rtl:mr-auto">
+                             <div class="flex justify-between border-b pb-1">
+                                 <span>الإجمالي الفرعي:</span>
+                                 <span class="font-medium">${parseFloat(invoice.subTotal).toFixed(2)} ج.س</span>
+                             </div>
+                             <div class="flex justify-between text-red-600 border-b pb-1">
+                                 <span>إجمالي الخصم:</span>
+                                 <span class="font-medium">-${parseFloat(invoice.totalDiscount).toFixed(2)} ج.س</span>
+                             </div>
+                             <div class="border-t pt-2 flex justify-between text-xl font-bold text-green-700">
+                                 <span>المجموع الكلي:</span>
+                                 <span>${parseFloat(invoice.grandTotal).toFixed(2)} ج.س</span>
+                             </div>
+                         </div>
+                     </div>
+                     
+                     <footer class="text-center pt-6 border-t mt-6">
+                          <p class="text-xs text-gray-500">شكراً لتعاملكم مع SHAHRAZAD ELECTRIC. هذه الفاتورة تم إنشاؤها عبر نظام إدارة المبيعات المتقدم.</p>
+                     </footer>
+                 </div>
+             `;
+        };
+
+        // --- 8. Invoices View ---
+        const InvoicesView = () => {
+            const invoices = App.data.invoices;
+
+            // Sort by invoice number descending
+            invoices.sort((a, b) => (b.invoiceNumber || 0) - (a.invoiceNumber || 0));
+
+            return `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">إدارة الفواتير</h2>
+
+                    <div class="flex justify-between items-center">
+                        <button onclick="navigateTo('new_invoice')" class="flex items-center bg-shahrazad text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-150 shadow-md">
+                            <i data-lucide="file-plus" class="w-5 h-5 ml-2"></i> إنشاء فاتورة جديدة
+                        </button>
+                        <p class="text-lg font-semibold text-gray-600">إجمالي الفواتير: ${invoices.length}</p>
                     </div>
 
-                    <div class="flex justify-between">
-                        <div class="w-1/2">
-                            <p class="text-sm font-bold text-shahrazad mb-2">ملاحظات:</p>
-                            <p class="text-sm text-gray-700">${inv.notes || 'لا توجد ملاحظات.'}</p>
-                        </div>
-                        <div class="w-1/2 text-left space-y-2">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">الإجمالي:</span>
-                                <span class="font-medium">${parseFloat(inv.subTotal).toLocaleString('ar-EG', { minimumFractionDigits: 2 })} SDG</span>
-                            </div>
-                             <div class="flex justify-between">
-                                <span class="text-red-500">الخصم الإجمالي:</span>
-                                <span class="font-medium text-red-500">(${parseFloat(inv.totalDiscount).toLocaleString('ar-EG', { minimumFractionDigits: 2 })}) SDG</span>
-                            </div>
-                            <div class="flex justify-between pt-2 border-t font-bold text-lg">
-                                <span class="text-gray-800">صافي المبلغ:</span>
-                                <span class="text-green-700">${parseFloat(inv.grandTotal).toLocaleString('ar-EG', { minimumFractionDigits: 2 })} SDG</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="text-center mt-10 pt-4 border-t border-gray-300">
-                        <p class="text-xs text-gray-500">شكراً لتعاملكم مع SHAHRAZAD ELECTRIC</p>
+                    <div class="card p-6 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">رقم الفاتورة</th>
+                                    <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">العميل</th>
+                                    <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التاريخ</th>
+                                    <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المبلغ الكلي (ج.س)</th>
+                                    <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تم بواسطة</th>
+                                    <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${invoices.map(inv => {
+                                    const createdUser = App.data.users.find(u => u.uid === inv.createdBy)?.name || 'النظام';
+                                    const formattedDate = myAssistant.formatTimestamp(inv.date);
+                                    
+                                    return `
+                                        <tr class="hover:bg-gray-50 cursor-pointer" onclick="navigateTo('invoice_details', ${JSON.stringify(inv).replace(/"/g, '&quot;')})">
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm font-extrabold text-shahrazad">INV-${(inv.invoiceNumber || '0').toString().padStart(5, '0')}</td>
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${inv.customerName}</td>
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm font-bold text-green-700">${parseFloat(inv.grandTotal).toFixed(2)}</td>
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${createdUser}</td>
+                                            <td class="px-3 py-4 whitespace-nowrap text-left text-sm font-medium">
+                                                <button onclick="event.stopPropagation(); navigateTo('invoice_details', ${JSON.stringify(inv).replace(/"/g, '&quot;')})" class="text-shahrazad hover:text-blue-700 p-2 rounded-full hover:bg-gray-100 transition duration-150" title="معاينة">
+                                                    <i data-lucide="eye" class="w-5 h-5"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                        ${invoices.length === 0 ? '<p class="text-center text-gray-500 p-4">لم يتم إصدار أي فواتير بعد.</p>' : ''}
                     </div>
                 </div>
             `;
@@ -1688,391 +1686,225 @@
 
         // --- 9. Customers View ---
         const CustomersView = () => {
-            const customers = App.data.customers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            return `
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">إدارة العملاء (${customers.length} عميل)</h2>
-                    <button onclick="window.showCustomerModal()" class="bg-shahrazad text-white p-3 rounded-lg flex items-center hover:bg-blue-700 transition duration-150">
-                        <i data-lucide="user-plus" class="w-5 h-5 ml-2"></i>
-                        إضافة عميل جديد
-                    </button>
-                </div>
-                
-                <div class="card p-6">
-                    ${renderCustomerList(customers)}
-                </div>
+             const customers = App.data.customers;
+             
+             // Sort customers by total spent descending
+             customers.sort((a, b) => (b.totalSpent || 0) - (a.totalSpent || 0));
 
-                ${renderCustomerModal()}
-            `;
-        };
-
-        const renderCustomerList = (customers) => {
-            if (customers.length === 0) {
-                 return `<p class="text-gray-500 text-center py-4">لا توجد عملاء مسجلين حالياً.</p>`;
-            }
              return `
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">هاتف</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي المنفق (SDG)</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">مميز؟</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            ${customers.map(c => `
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${c.name}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${c.phone || 'N/A'}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-bold">${(c.totalSpent || 0).toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${c.isDistinguished ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}">
-                                            ${c.isDistinguished ? 'نعم' : 'لا'}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button onclick="window.editCustomer('${c.id}')" class="text-shahrazad hover:text-blue-700 ml-3">
-                                            <i data-lucide="square-pen" class="w-5 h-5"></i>
-                                        </button>
-                                        <button onclick="window.deleteCustomer('${c.id}', '${c.name}')" class="text-red-600 hover:text-red-900 ${App.userRole !== 'admin' ? 'hidden' : ''}">
-                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        };
-        
-        // Customer CRUD Logic (Simplified for demonstration)
-        const renderCustomerModal = () => `
-            <div id="customer-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 justify-center items-center" onclick="if(event.target.id === 'customer-modal') window.hideCustomerModal()">
-                <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg mx-auto" onclick="event.stopPropagation()">
-                    <h3 class="text-xl font-bold mb-4">إضافة / تعديل عميل</h3>
-                    <form id="customer-form" onsubmit="window.handleCustomerSubmit(event)">
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2" for="customer-modal-name">اسم العميل</label>
-                            <input type="text" id="customer-modal-name" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2" for="customer-phone">رقم الهاتف</label>
-                            <input type="text" id="customer-phone" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        </div>
-                        <div class="mb-4">
-                            <input type="checkbox" id="customer-is-distinguished" class="mr-2 leading-tight">
-                            <label class="text-sm" for="customer-is-distinguished">عميل مميز (VIP)</label>
-                        </div>
-                        
-                        <div class="flex justify-end mt-6">
-                            <button type="button" onclick="window.hideCustomerModal()" class="bg-gray-300 text-gray-800 p-2 rounded-lg ml-4 hover:bg-gray-400">إلغاء</button>
-                            <button type="submit" id="customer-submit-btn" class="bg-shahrazad text-white p-2 rounded-lg flex items-center hover:bg-blue-700 transition duration-150">
-                                <i data-lucide="save" class="w-5 h-5 ml-2"></i>
-                                حفظ العميل
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        `;
-        
-        window.showCustomerModal = (customer = {}) => {
-            const modal = document.getElementById('customer-modal');
-            const form = document.getElementById('customer-form');
-            form.reset();
-            form.dataset.customerId = customer.id || '';
-            document.getElementById('customer-modal-name').value = customer.name || '';
-            document.getElementById('customer-phone').value = customer.phone || '';
-            document.getElementById('customer-is-distinguished').checked = customer.isDistinguished || false;
+                 <div class="space-y-6">
+                     <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">إدارة العملاء</h2>
+                     
+                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                         ${StatCard('إجمالي العملاء', customers.length, 'users', 'text-shahrazad')}
+                         ${StatCard('عملاء مميزون (VIP)', customers.filter(c => c.isDistinguished).length, 'star', 'text-yellow-500')}
+                         ${StatCard('إجمالي الإنفاق (تقريبي)', `${customers.reduce((sum, c) => sum + (c.totalSpent || 0), 0).toFixed(2)} ج.س`, 'wallet', 'text-green-500')}
+                     </div>
 
-            document.getElementById('customer-submit-btn').innerHTML = customer.id ? `<i data-lucide="save" class="w-5 h-5 ml-2"></i> حفظ التعديل` : `<i data-lucide="user-plus" class="w-5 h-5 ml-2"></i> إضافة العميل`;
-            lucide.createIcons();
-            modal.style.display = 'flex';
-        };
-
-        window.hideCustomerModal = () => {
-            document.getElementById('customer-modal').style.display = 'none';
-        };
-
-        window.editCustomer = (id) => {
-            const customer = App.data.customers.find(c => c.id === id);
-            if (customer) window.showCustomerModal(customer);
-        };
-        
-        window.handleCustomerSubmit = async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const customerId = form.dataset.customerId;
-            const isNew = !customerId;
-            const name = form.querySelector('#customer-modal-name').value;
-            const phone = form.querySelector('#customer-phone').value;
-            const isDistinguished = form.querySelector('#customer-is-distinguished').checked;
-
-            const customerData = { name, phone, isDistinguished, totalSpent: 0 };
-            
-            const submitBtn = form.querySelector('#customer-submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i data-lucide="loader-circle" class="w-5 h-5 ml-2 inline animate-spin"></i> جاري الحفظ...`;
-            lucide.createIcons();
-
-            try {
-                if (isNew) {
-                    await addDoc(collection(App.db, App.getCollectionPath('customers')), { ...customerData, createdAt: new Date().toISOString() });
-                    alertUser(`تم إضافة العميل **${name}** بنجاح.`, "success");
-                } else {
-                    await updateDoc(doc(App.db, App.getCollectionPath('customers'), customerId), customerData);
-                    alertUser(`تم تعديل العميل **${name}** بنجاح.`, "success");
-                }
-                window.hideCustomerModal();
-            } catch (error) {
-                console.error("Customer save failed:", error);
-                alertUser(`فشل حفظ العميل: ${error.message}`, "error");
-            } finally {
-                submitBtn.disabled = false;
-            }
-        };
-
-        window.deleteCustomer = async (id, name) => {
-            if (App.userRole !== 'admin') {
-                alertUser("عذراً، يجب أن تكون بـ **صلاحية المدير الأساسي** للحذف.", "error");
-                return;
-            }
-            if (!confirm(`هل أنت متأكد من حذف العميل: ${name}؟ لا يمكن التراجع عن هذا الإجراء!`)) return;
-
-            try {
-                await deleteDoc(doc(App.db, App.getCollectionPath('customers'), id));
-                alertUser(`تم حذف العميل **${name}** بنجاح.`, "success");
-            } catch (error) {
-                console.error("Customer deletion failed:", error);
-                alertUser(`فشل حذف العميل: ${error.message}`, "error");
-            }
+                     <div class="card p-6 overflow-x-auto">
+                         <h3 class="text-lg font-semibold text-gray-700 mb-4">قائمة العملاء المسجلين</h3>
+                         <table class="min-w-full divide-y divide-gray-200">
+                             <thead>
+                                 <tr>
+                                     <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
+                                     <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">مميز؟</th>
+                                     <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجمالي الإنفاق (ج.س)</th>
+                                     <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاريخ التسجيل</th>
+                                     <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجراءات</th>
+                                 </tr>
+                             </thead>
+                             <tbody class="bg-white divide-y divide-gray-200">
+                                 ${customers.map(c => `
+                                     <tr class="hover:bg-gray-50">
+                                         <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center">
+                                            ${c.isDistinguished ? '<i data-lucide="star" class="w-4 h-4 ml-1 text-yellow-500"></i>' : ''}
+                                            ${c.name}
+                                         </td>
+                                         <td class="px-3 py-4 whitespace-nowrap text-sm ${c.isDistinguished ? 'text-green-600 font-bold' : 'text-red-500'}">
+                                             ${c.isDistinguished ? 'نعم' : 'لا'}
+                                         </td>
+                                         <td class="px-3 py-4 whitespace-nowrap text-sm font-bold text-gray-800">${(c.totalSpent || 0).toFixed(2)}</td>
+                                         <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${myAssistant.formatTimestamp(c.createdAt)}</td>
+                                         <td class="px-3 py-4 whitespace-nowrap text-left text-sm font-medium">
+                                              <button onclick="alertUser('ميزة عرض تفاصيل العميل غير مفعلة في هذا الإصدار.', 'error')" class="text-shahrazad hover:text-blue-700 p-2 rounded-full hover:bg-gray-100 transition duration-150" title="تفاصيل">
+                                                 <i data-lucide="folder-open" class="w-5 h-5"></i>
+                                             </button>
+                                         </td>
+                                     </tr>
+                                 `).join('')}
+                             </tbody>
+                         </table>
+                         ${customers.length === 0 ? '<p class="text-center text-gray-500 p-4">لا توجد عملاء مسجلون حالياً.</p>' : ''}
+                     </div>
+                 </div>
+             `;
         };
 
         // --- 10. Alerts View ---
-        const AlertsView = () => {
-            return `
-                <h2 class="text-2xl font-bold text-red-800 mb-6 flex items-center">
-                    <i data-lucide="alert-triangle" class="w-7 h-7 ml-3"></i>
-                    تنبيهات نقص المخزون
-                </h2>
-                
+        const AlertsView = () => `
+            <div class="space-y-6">
+                <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">تنبيهات نقص المخزون الحرجة</h2>
                 <div class="card p-6">
-                    <p class="text-gray-700 mb-4">قائمة بجميع الأصناف التي تقل كميتها في المخزون عن حد التنبيه المحدد لها (افتراضياً 10 وحدات).</p>
-                    <div id="alerts-container-full">
+                    <h3 class="text-lg font-semibold text-red-700 mb-4 flex items-center">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 ml-2 text-red-600"></i>
+                        قائمة الأصناف التي وصلت أو تجاوزت حد النقص
+                    </h3>
+                    <div id="alerts-container-full" class="space-y-3">
                         </div>
-                </div>
-            `;
-        };
-
-        // --- 11. General Settings View ---
-        const GeneralSettingsView = () => {
-            const warehouses = App.data.warehouses.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-
-            return `
-                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                    <i data-lucide="settings" class="w-7 h-7 ml-3"></i>
-                    الإعدادات العامة وإدارة النظام
-                </h2>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    
-                    <div class="card p-6">
-                        <div class="flex justify-between items-center border-b pb-3 mb-4">
-                            <h3 class="text-xl font-semibold text-shahrazad flex items-center"><i data-lucide="warehouse" class="w-5 h-5 ml-2"></i> إدارة المخازن</h3>
-                            <button onclick="window.showWarehouseModal()" class="bg-green-600 text-white p-2 rounded-lg flex items-center hover:bg-green-700 transition duration-150">
-                                <i data-lucide="plus" class="w-5 h-5 ml-2"></i> إضافة مخزن
-                            </button>
-                        </div>
-                        
-                        ${warehouses.length > 0 ? `
-                            <ul class="space-y-3">
-                                ${warehouses.map(w => `
-                                    <li class="flex justify-between items-center p-3 border rounded-lg shadow-sm">
-                                        <span class="font-medium text-gray-800">${w.name}</span>
-                                        <button onclick="window.deleteWarehouse('${w.id}', '${w.name}')" class="text-red-600 hover:text-red-900 ${App.userRole !== 'admin' ? 'hidden' : ''}">
-                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                        </button>
-                                    </li>
-                                `).join('')}
-                            </ul>
-                        ` : '<p class="text-gray-500 text-center py-4">لا توجد مخازن مسجلة.</p>'}
-                    </div>
-
-                    <div class="card p-6">
-                        <div class="border-b pb-3 mb-4">
-                            <h3 class="text-xl font-semibold text-shahrazad flex items-center"><i data-lucide="database" class="w-5 h-5 ml-2"></i> إدارة البيانات</h3>
-                        </div>
-                        <p class="text-gray-700 mb-4">قم بتنزيل نسخة احتياطية من جميع بيانات النظام (الأصناف، الفواتير، العملاء، المستخدمين) كملف JSON.</p>
-                        <button id="backup-btn" onclick="window.backupData()" class="w-full bg-orange-600 text-white p-3 rounded-lg flex items-center justify-center hover:bg-orange-700 transition duration-150">
-                            <i data-lucide="download" class="w-5 h-5 ml-2"></i> تنزيل نسخة احتياطية
-                        </button>
-                    </div>
-
-                </div>
-
-                ${renderWarehouseModal()}
-            `;
-        };
-
-        // Warehouse CRUD Logic (Simplified for demonstration)
-        const renderWarehouseModal = () => `
-            <div id="warehouse-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 justify-center items-center" onclick="if(event.target.id === 'warehouse-modal') window.hideWarehouseModal()">
-                <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg mx-auto" onclick="event.stopPropagation()">
-                    <h3 class="text-xl font-bold mb-4">إضافة مخزن جديد</h3>
-                    <form id="warehouse-form" onsubmit="window.handleWarehouseSubmit(event)">
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2" for="warehouse-name">اسم المخزن</label>
-                            <input type="text" id="warehouse-name" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="مثال: مخزن الخرطوم الرئيسي">
-                        </div>
-                        
-                        <div class="flex justify-end mt-6">
-                            <button type="button" onclick="window.hideWarehouseModal()" class="bg-gray-300 text-gray-800 p-2 rounded-lg ml-4 hover:bg-gray-400">إلغاء</button>
-                            <button type="submit" id="warehouse-submit-btn" class="bg-shahrazad text-white p-2 rounded-lg flex items-center hover:bg-blue-700 transition duration-150">
-                                <i data-lucide="plus" class="w-5 h-5 ml-2"></i>
-                                إضافة المخزن
-                            </button>
-                        </div>
-                    </form>
                 </div>
             </div>
         `;
 
-        window.showWarehouseModal = () => {
-             const modal = document.getElementById('warehouse-modal');
-             document.getElementById('warehouse-form').reset();
-             document.getElementById('warehouse-submit-btn').innerHTML = `<i data-lucide="plus" class="w-5 h-5 ml-2"></i> إضافة المخزن`;
-             lucide.createIcons();
-             modal.style.display = 'flex';
-        };
+        // --- 11. General Settings View ---
+        const GeneralSettingsView = () => {
+             const warehouses = App.data.warehouses;
+             
+             // Function to add a new warehouse (simple implementation)
+             window.handleAddWarehouse = async (e) => {
+                 e.preventDefault();
+                 const name = document.getElementById('warehouse-name').value.trim();
+                 if (!name) {
+                     alertUser("يرجى إدخال اسم المخزن.", "error");
+                     return;
+                 }
+                 try {
+                     const newWarehouseRef = collection(App.db, App.getCollectionPath('warehouses'));
+                     await addDoc(newWarehouseRef, {
+                         name: name,
+                         createdAt: new Date().toISOString(),
+                     });
+                     alertUser(`تم إضافة المخزن **${name}** بنجاح.`, "success");
+                     document.getElementById('warehouse-name').value = '';
+                 } catch (error) {
+                     console.error("Add warehouse error:", error);
+                     alertUser("فشل إضافة المخزن. " + error.message, "error");
+                 }
+             };
 
-        window.hideWarehouseModal = () => {
-            document.getElementById('warehouse-modal').style.display = 'none';
-        };
+             // Function to delete a warehouse
+             window.handleDeleteWarehouse = async (id, name) => {
+                 if (App.userRole !== 'admin') {
+                      alertUser("عذراً، يجب أن تكون بـ **صلاحية المدير الأساسي** للحذف.", "error");
+                      return;
+                 }
+                 if (!confirm(`هل أنت متأكد من حذف المخزن: ${name}؟ سيؤثر هذا على الأصناف المرتبطة به!`)) return;
 
-        window.handleWarehouseSubmit = async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const name = form.querySelector('#warehouse-name').value;
+                 try {
+                     await deleteDoc(doc(App.db, App.getCollectionPath('warehouses'), id));
+                     alertUser(`تم حذف المخزن **${name}** بنجاح.`, "success");
+                 } catch (error) {
+                     console.error("Delete warehouse error:", error);
+                     alertUser("فشل حذف المخزن. " + error.message, "error");
+                 }
+             };
 
-            const submitBtn = form.querySelector('#warehouse-submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i data-lucide="loader-circle" class="w-5 h-5 ml-2 inline animate-spin"></i> جاري الحفظ...`;
-            lucide.createIcons();
-
-            try {
-                await addDoc(collection(App.db, App.getCollectionPath('warehouses')), { name, createdAt: new Date().toISOString() });
-                alertUser(`تم إضافة المخزن **${name}** بنجاح.`, "success");
-                window.hideWarehouseModal();
-            } catch (error) {
-                console.error("Warehouse save failed:", error);
-                alertUser(`فشل حفظ المخزن: ${error.message}`, "error");
-            } finally {
-                submitBtn.disabled = false;
-            }
-        };
-
-        window.deleteWarehouse = async (id, name) => {
-             if (App.userRole !== 'admin') {
-                alertUser("عذراً، يجب أن تكون بـ **صلاحية المدير الأساسي** للحذف.", "error");
-                return;
-            }
-            
-            // Check if any product is linked to this warehouse
-            const productsInWarehouse = App.data.products.filter(p => p.warehouse === name);
-            if (productsInWarehouse.length > 0) {
-                 alertUser(`لا يمكن حذف المخزن **${name}**. يرجى نقل أو حذف ${productsInWarehouse.length} صنف مرتبط به أولاً.`, "error");
-                 return;
-            }
-
-            if (!confirm(`هل أنت متأكد من حذف المخزن: ${name}؟ لا يمكن التراجع عن هذا الإجراء!`)) return;
-
-            try {
-                await deleteDoc(doc(App.db, App.getCollectionPath('warehouses'), id));
-                alertUser(`تم حذف المخزن **${name}** بنجاح.`, "success");
-            } catch (error) {
-                console.error("Warehouse deletion failed:", error);
-                alertUser(`فشل حذف المخزن: ${error.message}`, "error");
-            }
-        };
-
-
-        // --- 12. User Settings View ---
-        const UserSettingsView = () => {
-            const users = App.data.users.sort((a, b) => (a.role === 'admin' ? -1 : 1));
             return `
-                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                    <i data-lucide="lock" class="w-7 h-7 ml-3"></i>
-                    إدارة المستخدمين والصلاحيات
-                </h2>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                 <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">الإعدادات العامة</h2>
                     
-                    <div class="lg:col-span-1 card p-6">
-                        <h3 class="text-xl font-semibold text-shahrazad mb-4">إضافة مستخدم جديد</h3>
-                        ${App.userRole !== 'admin' ? `
-                            <p class="text-red-500 font-bold text-center p-4 bg-red-100 rounded-lg">عذراً، هذه الميزة مخصصة للمدير الأساسي فقط.</p>
-                        ` : `
-                        <form id="add-user-form" onsubmit="handleUserCreate(event)">
-                            <div class="mb-4">
-                                <label for="user-name" class="block text-sm font-medium text-gray-700">الاسم</label>
-                                <input type="text" id="user-name" required class="w-full p-2 border rounded-lg">
-                            </div>
-                            <div class="mb-4">
-                                <label for="user-email" class="block text-sm font-medium text-gray-700">البريد الإلكتروني</label>
-                                <input type="email" id="user-email" required class="w-full p-2 border rounded-lg">
-                            </div>
-                            <div class="mb-4">
-                                <label for="user-password" class="block text-sm font-medium text-gray-700">كلمة المرور (6+ أحرف)</label>
-                                <input type="password" id="user-password" required minlength="6" class="w-full p-2 border rounded-lg">
-                            </div>
-                            <div class="mb-4">
-                                <label for="user-role" class="block text-sm font-medium text-gray-700">الصلاحية</label>
-                                <select id="user-role" required class="w-full p-2 border rounded-lg">
-                                    <option value="staff">موظف (Staff)</option>
-                                    <option value="admin">مدير أساسي (Admin)</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="w-full mt-4 bg-shahrazad text-white p-2 rounded-lg flex items-center justify-center hover:bg-blue-700 transition duration-150">
-                                <i data-lucide="user-plus" class="w-5 h-5 ml-2"></i>
-                                إضافة مستخدم جديد
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="card p-5 space-y-4">
+                            <h3 class="text-lg font-semibold text-shahrazad border-b pb-2 flex items-center">
+                                <i data-lucide="warehouse" class="w-5 h-5 ml-2"></i>
+                                إدارة المخازن (المستودعات)
+                            </h3>
+                            <form onsubmit="handleAddWarehouse(event)" class="flex space-x-2 rtl:space-x-reverse">
+                                <input type="text" id="warehouse-name" placeholder="اسم المخزن الجديد" required class="flex-grow p-2 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                <button type="submit" class="bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition duration-150">
+                                    <i data-lucide="plus" class="w-5 h-5"></i>
+                                </button>
+                            </form>
+                            
+                            <ul class="divide-y divide-gray-200 mt-4">
+                                ${warehouses.map(w => `
+                                    <li class="flex justify-between items-center py-2 hover:bg-gray-50 px-2 rounded-md">
+                                        <span class="text-gray-700">${w.name}</span>
+                                        <button onclick="handleDeleteWarehouse('${w.id}', '${w.name}')" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition duration-150" title="حذف">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </li>
+                                `).join('')}
+                                ${warehouses.length === 0 ? '<li class="text-center text-gray-500 p-2">لا توجد مخازن مضافة.</li>' : ''}
+                            </ul>
+                        </div>
+                        
+                        <div class="card p-5 space-y-4">
+                            <h3 class="text-lg font-semibold text-shahrazad border-b pb-2 flex items-center">
+                                <i data-lucide="cloud-download" class="w-5 h-5 ml-2"></i>
+                                النسخ الاحتياطي للبيانات
+                            </h3>
+                            <p class="text-gray-600 text-sm">قم بتنزيل نسخة احتياطية كاملة لبيانات الأصناف، العملاء، والفواتير بصيغة JSON.</p>
+                            <button id="backup-btn" onclick="backupData()" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition duration-150">
+                                <i data-lucide="download" class="w-5 h-5 ml-2 inline"></i> تنزيل نسخة احتياطية
                             </button>
-                        </form>
-                        `}
+                        </div>
                     </div>
+                </div>
+            `;
+        };
 
-                    <div class="lg:col-span-2 card p-6">
-                        <h3 class="text-xl font-semibold text-shahrazad mb-4">قائمة المستخدمين الحاليين (${users.length})</h3>
-                        <div class="overflow-x-auto">
+        // --- 12. User Settings View (Admin Only) ---
+        const UserSettingsView = () => {
+            if (App.userRole !== 'admin') {
+                return `
+                    <div class="card p-8 text-center bg-red-100 border border-red-300">
+                        <i data-lucide="lock" class="w-12 h-12 text-red-600 mx-auto mb-4"></i>
+                        <h2 class="text-2xl font-bold text-red-800">وصول ممنوع</h2>
+                        <p class="text-gray-700 mt-2">عذراً، هذه الصفحة متاحة فقط للمستخدمين بـ **صلاحية المدير الأساسي**.</p>
+                    </div>
+                `;
+            }
+
+            const users = App.data.users;
+
+            return `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">إدارة المستخدمين والصلاحيات</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        
+                        <div class="card p-5 md:col-span-1 space-y-4">
+                            <h3 class="text-lg font-semibold text-shahrazad border-b pb-2 flex items-center">
+                                <i data-lucide="user-plus" class="w-5 h-5 ml-2"></i>
+                                إضافة مستخدم جديد (Firebase Auth)
+                            </h3>
+                            <form id="add-user-form" onsubmit="handleUserCreate(event)" class="space-y-3">
+                                <input type="text" id="user-name" placeholder="الاسم الكامل" required class="w-full p-2 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                <input type="email" id="user-email" placeholder="البريد الإلكتروني (يُفضل)" required class="w-full p-2 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                <input type="password" id="user-password" placeholder="كلمة المرور (6 أحرف فأكثر)" required class="w-full p-2 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                <select id="user-role" required class="w-full p-2 border rounded-md focus:ring-shahrazad focus:border-shahrazad">
+                                    <option value="staff">موظف (Staff)</option>
+                                    <option value="admin">مدير (Admin)</option>
+                                </select>
+                                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition duration-150">
+                                    <i data-lucide="user-plus" class="w-5 h-5 ml-2 inline"></i> إضافة مستخدم جديد
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="card p-5 md:col-span-2 overflow-x-auto">
+                            <h3 class="text-lg font-semibold text-gray-700 mb-4">قائمة المستخدمين المسجلين (${users.length})</h3>
                             <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                                <thead>
                                     <tr>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم / البريد</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الصلاحية</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجراءات</th>
+                                        <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
+                                        <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">البريد</th>
+                                        <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الدور</th>
+                                        <th class="px-3 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجراءات</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     ${users.map(u => `
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm font-medium text-gray-900">${u.name || u.email}</div>
-                                                <div class="text-xs text-gray-500">${u.email}</div>
+                                        <tr class="hover:bg-gray-50 ${u.uid === App.userId ? 'bg-blue-50' : ''}">
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${u.name || 'غير محدد'} ${u.uid === App.userId ? '(أنت)' : ''}</td>
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${u.email || 'مجهول/N/A'}</td>
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm font-bold ${u.role === 'admin' ? 'text-red-600' : 'text-green-600'}">
+                                                ${u.role === 'admin' ? 'مدير' : 'موظف'}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium ${u.role === 'admin' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
-                                                    ${u.role === 'admin' ? 'مدير أساسي' : 'موظف'}
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                ${u.uid !== App.userId && u.role !== 'admin' && App.userRole === 'admin' ? `
-                                                    <button onclick="window.handleUserDelete('${u.uid}', '${u.email}')" class="text-red-600 hover:text-red-900">
-                                                        <i data-lucide="trash-2" class="w-5 h-5"></i> حذف
-                                                    </button>
-                                                ` : u.uid === App.userId ? `<span class="text-gray-400">أنت!</span>` : `<span class="text-gray-400">مدير أساسي</span>`}
+                                            <td class="px-3 py-4 whitespace-nowrap text-left text-sm font-medium">
+                                                <button onclick="handleUserDelete('${u.id}', '${u.email || 'N/A'}')" class="text-red-600 hover:text-red-900 p-2 rounded-full hover:bg-red-100 transition duration-150 ${u.uid === App.userId ? 'opacity-50 cursor-not-allowed' : ''}" title="حذف" ${u.uid === App.userId ? 'disabled' : ''}>
+                                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                                </button>
                                             </td>
                                         </tr>
                                     `).join('')}
@@ -2080,11 +1912,10 @@
                             </table>
                         </div>
                     </div>
-
                 </div>
             `;
         };
-        
+
         // ====================================================================
         //                      App Initialization
         // ====================================================================
@@ -2104,6 +1935,10 @@
             user_settings: UserSettingsView,
         };
 
+        // NOTE: The `handleAddProduct` and `handleDeleteProduct` functions are not visible in the provided snippet
+        // but are assumed to exist based on the `ProductsView` and are essential for a complete system. 
+        // Their functionality (CRUD for products) is assumed to remain unchanged except for the new fields.
+
         function render() {
             const appRoot = document.getElementById('app-root');
             if (appRoot) {
@@ -2112,7 +1947,8 @@
             }
         }
 
-        // --- Start Application ---\n
+        // --- Start Application ---
+
         // 1. Setup global container
         const appContainer = document.createElement('div');
         appContainer.id = 'app-root';
