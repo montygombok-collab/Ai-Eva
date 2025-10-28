@@ -50,6 +50,12 @@
                 display: none !important;
             }
         }
+
+        /* Badge styles for customer levels */
+        .badge-bronze { background-color: #cd7f32; color: white; }
+        .badge-silver { background-color: #c0c0c0; color: black; }
+        .badge-gold { background-color: #ffd700; color: black; }
+        .badge-platinum { background-color: #e5e4e2; color: black; }
     </style>
 </head>
 <body>
@@ -149,6 +155,89 @@
         
         const myAssistant = new Assistant("مساعد واجهة المستخدم");
         
+        // ====================================================================
+        //                      Customer Points & Discount System
+        // ====================================================================
+
+        // إعدادات نظام النقاط (يمكن تعديلها)
+        const POINTS_CONFIG = {
+            pointsPerInvoice: 10,            // نقاط لكل فاتورة
+            bronzeThreshold: 50,             // حد البرونز
+            silverThreshold: 100,            // حد الفضة
+            goldThreshold: 250,              // حد الذهب  
+            platinumThreshold: 500,          // حد البلاتين
+            bronzeDiscount: 2,               // تخفيض البرونز 2%
+            silverDiscount: 5,               // تخفيض الفضة 5%
+            goldDiscount: 10,                // تخفيض الذهب 10%
+            platinumDiscount: 15             // تخفيض البلاتين 15%
+        };
+
+        // تحديث نقاط العميل عند إنشاء فاتورة
+        async function updateCustomerPoints(customerId, invoiceAmount) {
+            try {
+                const customerRef = doc(App.db, App.getCollectionPath('customers'), customerId);
+                const customerDoc = await getDoc(customerRef);
+                
+                if (customerDoc.exists()) {
+                    const customerData = customerDoc.data();
+                    const currentPoints = customerData.points || 0;
+                    const totalInvoices = (customerData.totalInvoices || 0) + 1;
+                    
+                    // حساب النقاط الجديدة
+                    const newPoints = currentPoints + POINTS_CONFIG.pointsPerInvoice;
+                    
+                    // تحديد مستوى التخفيض
+                    let discountLevel = 'عادي';
+                    let customerDiscount = 0;
+                    
+                    if (newPoints >= POINTS_CONFIG.platinumThreshold) {
+                        discountLevel = 'بلاتين';
+                        customerDiscount = POINTS_CONFIG.platinumDiscount;
+                    } else if (newPoints >= POINTS_CONFIG.goldThreshold) {
+                        discountLevel = 'ذهبي';
+                        customerDiscount = POINTS_CONFIG.goldDiscount;
+                    } else if (newPoints >= POINTS_CONFIG.silverThreshold) {
+                        discountLevel = 'فضي';
+                        customerDiscount = POINTS_CONFIG.silverDiscount;
+                    } else if (newPoints >= POINTS_CONFIG.bronzeThreshold) {
+                        discountLevel = 'برونزي';
+                        customerDiscount = POINTS_CONFIG.bronzeDiscount;
+                    }
+
+                    // تحديث بيانات العميل
+                    await updateDoc(customerRef, {
+                        points: newPoints,
+                        totalInvoices: totalInvoices,
+                        discountLevel: discountLevel,
+                        customerDiscount: customerDiscount,
+                        totalSpent: (customerData.totalSpent || 0) + invoiceAmount,
+                        lastPurchaseDate: new Date().toISOString()
+                    });
+
+                    console.log(`تم تحديث نقاط العميل: ${newPoints} نقطة، مستوى: ${discountLevel}`);
+                }
+            } catch (error) {
+                console.error("Error updating customer points:", error);
+            }
+        }
+
+        // الحصول على لون البادج حسب المستوى
+        function getBadgeColor(level) {
+            switch(level) {
+                case 'برونزي': return 'badge-bronze';
+                case 'فضي': return 'badge-silver';
+                case 'ذهبي': return 'badge-gold';
+                case 'بلاتين': return 'badge-platinum';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        // الحصول على التخفيض التلقائي للعميل
+        function getCustomerDiscount(customerId) {
+            const customer = App.data.customers.find(c => c.id === customerId);
+            return customer ? (customer.customerDiscount || 0) : 0;
+        }
+
         // ====================================================================
         //                      Auth and Role Management Unit (Auth & Roles)       
         // ====================================================================
@@ -655,6 +744,10 @@
                 phone: '', 
                 email: '',
                 totalSpent: 0,
+                points: 0,
+                totalInvoices: 0,
+                discountLevel: 'عادي',
+                customerDiscount: 0,
                 isDistinguished: false,
                 createdAt: new Date().toISOString(),
             });
@@ -733,7 +826,10 @@
                 // 4. Commit Batch (updates stock and saves invoice)
                 await batch.commit();
 
-                alertUser(`تم إنشاء الفاتورة رقم ${newInvoiceData.invoiceNumber} بنجاح وتحديث المخزون.`, "success");
+                // 5. Update customer points and discount level
+                await updateCustomerPoints(customerId, totalAmount);
+
+                alertUser(`تم إنشاء الفاتورة رقم ${newInvoiceData.invoiceNumber} بنجاح وتحديث المخزون ونقاط العميل.`, "success");
                 
                 // Navigate to the print view and clear draft
                 App.currentInvoiceForView = { id: invoiceRef.id, ...newInvoiceData };
@@ -2039,7 +2135,7 @@
 
         // --- 10. Customers View ---
         const CustomersView = () => {
-            const customers = App.data.customers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            const customers = App.data.customers.sort((a, b) => new Date(b.lastPurchaseDate || b.createdAt) - new Date(a.lastPurchaseDate || a.createdAt));
             return `
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-gray-800">إدارة العملاء (${customers.length} عميل)</h2>
@@ -2047,6 +2143,45 @@
                         <i data-lucide="user-plus" class="w-5 h-5 ml-2"></i>
                         إضافة عميل جديد
                     </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="card p-5 flex items-center bg-gradient-to-r from-yellow-400 to-yellow-600 text-white shadow-lg">
+                        <div class="p-3 rounded-full bg-white bg-opacity-20 ml-4">
+                            <i data-lucide="crown" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm opacity-80">العملاء البلاتين</p>
+                            <p class="text-3xl font-bold">${customers.filter(c => c.discountLevel === 'بلاتين').length}</p>
+                        </div>
+                    </div>
+                    <div class="card p-5 flex items-center bg-gradient-to-r from-yellow-500 to-yellow-700 text-white shadow-lg">
+                        <div class="p-3 rounded-full bg-white bg-opacity-20 ml-4">
+                            <i data-lucide="award" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm opacity-80">العملاء الذهبيين</p>
+                            <p class="text-3xl font-bold">${customers.filter(c => c.discountLevel === 'ذهبي').length}</p>
+                        </div>
+                    </div>
+                    <div class="card p-5 flex items-center bg-gradient-to-r from-gray-400 to-gray-600 text-white shadow-lg">
+                        <div class="p-3 rounded-full bg-white bg-opacity-20 ml-4">
+                            <i data-lucide="star" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm opacity-80">العملاء الفضي</p>
+                            <p class="text-3xl font-bold">${customers.filter(c => c.discountLevel === 'فضي').length}</p>
+                        </div>
+                    </div>
+                    <div class="card p-5 flex items-center bg-gradient-to-r from-orange-600 to-orange-800 text-white shadow-lg">
+                        <div class="p-3 rounded-full bg-white bg-opacity-20 ml-4">
+                            <i data-lucide="user" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm opacity-80">العملاء البرونزي</p>
+                            <p class="text-3xl font-bold">${customers.filter(c => c.discountLevel === 'برونزي').length}</p>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="card p-6">
@@ -2068,8 +2203,10 @@
                             <tr>
                                 <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
                                 <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">هاتف</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">النقاط</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المستوى</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التخفيض</th>
                                 <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي المنفق (SDG)</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">مميز؟</th>
                                 <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجراءات</th>
                             </tr>
                         </thead>
@@ -2078,12 +2215,14 @@
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${c.name}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${c.phone || 'N/A'}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-bold">${(c.totalSpent || 0).toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${c.points || 0}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${c.isDistinguished ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}">
-                                            ${c.isDistinguished ? 'نعم' : 'لا'}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getBadgeColor(c.discountLevel || 'عادي')}">
+                                            ${c.discountLevel || 'عادي'}
                                         </span>
                                     </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">${c.customerDiscount || 0}%</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-bold">${(c.totalSpent || 0).toLocaleString('ar-EG', { minimumFractionDigits: 2 })}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button onclick="window.editCustomer('${c.id}')" class="text-shahrazad hover:text-blue-700 ml-3">
                                             <i data-lucide="square-pen" class="w-5 h-5"></i>
@@ -2115,6 +2254,10 @@
                             <input type="text" id="customer-phone" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                         </div>
                         <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="customer-points">النقاط</label>
+                            <input type="number" id="customer-points" value="0" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-4">
                             <input type="checkbox" id="customer-is-distinguished" class="mr-2 leading-tight">
                             <label class="text-sm" for="customer-is-distinguished">عميل مميز (VIP)</label>
                         </div>
@@ -2138,6 +2281,7 @@
             form.dataset.customerId = customer.id || '';
             document.getElementById('customer-modal-name').value = customer.name || '';
             document.getElementById('customer-phone').value = customer.phone || '';
+            document.getElementById('customer-points').value = customer.points || 0;
             document.getElementById('customer-is-distinguished').checked = customer.isDistinguished || false;
 
             document.getElementById('customer-submit-btn').innerHTML = customer.id ? `<i data-lucide="save" class="w-5 h-5 ml-2"></i> حفظ التعديل` : `<i data-lucide="user-plus" class="w-5 h-5 ml-2"></i> إضافة العميل`;
@@ -2161,9 +2305,37 @@
             const isNew = !customerId;
             const name = form.querySelector('#customer-modal-name').value;
             const phone = form.querySelector('#customer-phone').value;
+            const points = parseInt(form.querySelector('#customer-points').value) || 0;
             const isDistinguished = form.querySelector('#customer-is-distinguished').checked;
 
-            const customerData = { name, phone, isDistinguished, totalSpent: 0 };
+            // تحديد مستوى التخفيض بناءً على النقاط
+            let discountLevel = 'عادي';
+            let customerDiscount = 0;
+            
+            if (points >= POINTS_CONFIG.platinumThreshold) {
+                discountLevel = 'بلاتين';
+                customerDiscount = POINTS_CONFIG.platinumDiscount;
+            } else if (points >= POINTS_CONFIG.goldThreshold) {
+                discountLevel = 'ذهبي';
+                customerDiscount = POINTS_CONFIG.goldDiscount;
+            } else if (points >= POINTS_CONFIG.silverThreshold) {
+                discountLevel = 'فضي';
+                customerDiscount = POINTS_CONFIG.silverDiscount;
+            } else if (points >= POINTS_CONFIG.bronzeThreshold) {
+                discountLevel = 'برونزي';
+                customerDiscount = POINTS_CONFIG.bronzeDiscount;
+            }
+
+            const customerData = { 
+                name, 
+                phone, 
+                points,
+                discountLevel,
+                customerDiscount,
+                isDistinguished, 
+                totalSpent: 0,
+                totalInvoices: 0
+            };
             
             const submitBtn = form.querySelector('#customer-submit-btn');
             submitBtn.disabled = true;
@@ -2251,6 +2423,45 @@
                                 `).join('')}
                             </ul>
                         ` : '<p class="text-gray-500 text-center py-4">لا توجد مخازن مسجلة.</p>'}
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="border-b pb-3 mb-4">
+                            <h3 class="text-xl font-semibold text-shahrazad flex items-center"><i data-lucide="trophy" class="w-5 h-5 ml-2"></i> إعدادات نظام النقاط</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">نقاط لكل فاتورة</label>
+                                    <input type="number" value="${POINTS_CONFIG.pointsPerInvoice}" class="w-full p-2 border rounded-lg" disabled>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">حد البرونز</label>
+                                    <input type="number" value="${POINTS_CONFIG.bronzeThreshold}" class="w-full p-2 border rounded-lg" disabled>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">حد الفضة</label>
+                                    <input type="number" value="${POINTS_CONFIG.silverThreshold}" class="w-full p-2 border rounded-lg" disabled>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">حد الذهب</label>
+                                    <input type="number" value="${POINTS_CONFIG.goldThreshold}" class="w-full p-2 border rounded-lg" disabled>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">حد البلاتين</label>
+                                    <input type="number" value="${POINTS_CONFIG.platinumThreshold}" class="w-full p-2 border rounded-lg" disabled>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">تخفيض البلاتين</label>
+                                    <input type="number" value="${POINTS_CONFIG.platinumDiscount}" class="w-full p-2 border rounded-lg" disabled>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-4">💡 يمكن تعديل هذه الإعدادات في كود النظام</p>
                     </div>
 
                     <div class="card p-6">
