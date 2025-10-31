@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محمود أبو القاسم - معدات الكهرباء والإضاءة | السودان</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0c1b33;
+            --secondary: #ffd700;
+            --accent: #00e5ff;
+            --accent2: #ff2a6d;
+            --light: #f0f6ff;
+            --dark: #0a1429;
+            --text: #e6f1ff;
+            --text-secondary: #a8b2d1;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* رأس الصفحة */
+        header {
+            background: rgba(12, 27, 51, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .logo i {
+            font-size: 32px;
+            margin-left: 10px;
+            color: var(--secondary);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .logo h1 {
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .location {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 14px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .location i {
+            margin-left: 8px;
+            color: var(--secondary);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-right: 25px;
+            position: relative;
+        }
+        
+        nav ul li a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 5px 0;
+            cursor: pointer;
+        }
+        
+        nav ul li a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+            transition: width 0.3s;
+        }
+        
+        nav ul li a:hover, nav ul li a.active {
+            color: var(--secondary);
+        }
+        
+        nav ul li a:hover:after, nav ul li a.active:after {
+            width: 100%;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-box {
+            position: relative;
+            margin-left: 20px;
+        }
+        
+        .search-box input {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 30px;
+            width: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .search-box input::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        .search-box button {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+        }
+        
+        .cart-icon {
+            position: relative;
+            margin-left: 20px;
+            font-size: 22px;
+            color: var(--text);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .cart-icon:hover {
+            color: var(--secondary);
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(45deg, var(--accent2), var(--accent));
+            color: var(--dark);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        /* المحتوى الرئيسي */
+        .main-content {
+            margin-top: 80px;
+            min-height: calc(100vh - 200px);
+        }
+        
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* قسم الهيرو */
+        .hero {
+            background: radial-gradient(circle at top right, rgba(0, 229, 255, 0.2) 0%, transparent 50%),
+                        radial-gradient(circle at bottom left, rgba(255, 215, 0, 0.2) 0%, transparent 50%),
+                        linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            color: white;
+            padding: 120px 0 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .glowing-title {
+            font-size: 52px;
+            margin-bottom: 25px;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--secondary), var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(0, 229, 255, 0.3);
+            }
+            to {
+                text-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 0 30px rgba(0, 229, 255, 0.5), 0 0 40px rgba(255, 42, 109, 0.3);
+            }
+        }
+        
+        .hero p {
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            color: var(--text-secondary);
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+            color: var(--dark);
+            padding: 14px 35px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.5);
+        }
+        
+        .btn:hover:before {
+            left: 100%;
+        }
+        
+        /* قسم الفئات */
+        .categories {
+            padding: 100px 0;
+            background: var(--light);
+            position: relative;
+        }
+        
+        .categories:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230c1b33' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 70px;
+            position: relative;
+        }
+        
+        .section-title h2 {
+            font-size: 38px;
+            color: var(--primary);
+            display: inline-block;
+            padding-bottom: 15px;
+            font-weight: 800;
+        }
+        
+        .section-title h2:after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+        
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        
+        .category-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(12, 27, 51, 0.1);
+            transition: all 0.4s;
+            text-align: center;
+            padding: 40px 25px;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            cursor: pointer;
+        }
+        
+        .category-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+        }
+        
+        .category-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(12, 27, 51, 0.15);
+        }
+        
+        .category-icon {
+            font-size: 60px;
+            color: var(--primary);
+            margin-bottom: 25px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .category-icon:after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 215, 0, 0.1);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+        }
+        
+        .category-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .category-card p {
+            color: #666;
+        }
+        
+        /* قسم المنتجات */
+        .products {
+            padding: 100px 0;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            position: relative;
+        }
+        
+        .glowing-section-title {
+            text-align: center;
+            margin-bottom: 70px;
+        }
+        
+        .glowing-section-title h2 {
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+            display: inline-block;
+            position: relative;
+        }
+        
+        .glowing-section-title h2:after {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .product-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 229, 255, 0.2);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+        }
+        
+        .product-image {
+            height: 220px;
+            background: linear-gradient(45deg, var(--primary), var(--dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .product-image:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255,215,0,0.1), rgba(0,229,255,0.1));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .product-card:hover .product-image:before {
+            opacity: 1;
+        }
+        
+        .product-image img {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: cover;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+        }
+        
+        .product-info {
+            padding: 25px;
+        }
+        
+        .product-info h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+        
+        .product-info p {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .product-price {
+            color: var(--secondary);
+            font-weight: 700;
+            font-size: 22px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        .product-price span {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-right: 5px;
+        }
+        
+        .product-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        
+        .add-to-cart, .view-details {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .add-to-cart {
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+            color: var(--dark);
+        }
+        
+        .add-to-cart:hover {
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        
+        .view-details {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .view-details:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* قسم العروض */
+        .offers {
+            padding: 80px 0;
+            background: linear-gradient(45deg, var(--accent2), var(--accent));
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .offers:before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(30deg);
+        }
+        
+        .offers-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .offers h2 {
+            font-size: 42px;
+            margin-bottom: 20px;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .offers p {
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .btn-outline {
+            display: inline-block;
+            background: transparent;
+            color: white;
+            padding: 14px 35px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s;
+            border: 2px solid white;
+            cursor: pointer;
+        }
+        
+        .btn-outline:hover {
+            background: white;
+            color: var(--accent2);
+        }
+        
+        /* قسم الخدمات */
+        .services {
+            padding: 100px 0;
+            background: var(--light);
+            position: relative;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .service-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(12, 27, 51, 0.1);
+            transition: all 0.4s;
+            text-align: center;
+            padding: 40px 25px;
+            position: relative;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(12, 27, 51, 0.15);
+        }
+        
+        .service-icon {
+            font-size: 50px;
+            color: var(--primary);
+            margin-bottom: 25px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .service-icon:after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 215, 0, 0.1);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+        }
+        
+        .service-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .service-card p {
+            color: #666;
+        }
+        
+        /* صفحة الفئات */
+        .categories-page {
+            padding: 120px 0 80px;
+            background: var(--light);
+            min-height: 100vh;
+        }
+        
+        /* صفحة المعرض */
+        .gallery-page {
+            padding: 120px 0 80px;
+            background: var(--light);
+            min-height: 100vh;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .gallery-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .gallery-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .gallery-item-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            padding: 20px;
+            color: white;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+        
+        .gallery-item:hover .gallery-item-overlay {
+            transform: translateY(0);
+        }
+        
+        /* صفحة الطلبات */
+        .orders-page {
+            padding: 120px 0 80px;
+            background: var(--light);
+            min-height: 100vh;
+        }
+        
+        .orders-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .orders-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .orders-table th, .orders-table td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .orders-table th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .orders-table tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .order-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-processing {
+            background: #cce7ff;
+            color: #004085;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        /* صفحة الاتصال */
+        .contact-page {
+            padding: 120px 0 80px;
+            background: var(--light);
+            min-height: 100vh;
+        }
+        
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        
+        .contact-info {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .contact-info h3 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .contact-details {
+            margin-bottom: 30px;
+        }
+        
+        .contact-detail {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .contact-detail i {
+            margin-left: 15px;
+            color: var(--secondary);
+            font-size: 20px;
+            margin-top: 5px;
+        }
+        
+        .contact-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+        
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        /* لوحة التحكم */
+        .dashboard-page {
+            padding: 120px 0 80px;
+            background: var(--light);
+            min-height: 100vh;
+        }
+        
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-top: 4px solid var(--secondary);
+        }
+        
+        .stat-card i {
+            font-size: 40px;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .stat-card h3 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .stat-card p {
+            color: #666;
+        }
+        
+        .dashboard-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .dashboard-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dashboard-section h3 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        /* تذييل الصفحة */
+        footer {
+            background: linear-gradient(135deg, var(--dark) 0%, #050a17 100%);
+            color: white;
+            padding: 80px 0 20px;
+            position: relative;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-column h3 {
+            font-size: 22px;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 10px;
+            color: var(--secondary);
+        }
+        
+        .footer-column h3:after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+            bottom: 0;
+            right: 0;
+            border-radius: 2px;
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-column ul li a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .footer-column ul li a i {
+            margin-left: 8px;
+            font-size: 12px;
+            color: var(--accent);
+        }
+        
+        .footer-column ul li a:hover {
+            color: var(--secondary);
+        }
+        
+        .contact-info {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .contact-info i {
+            margin-left: 10px;
+            color: var(--accent);
+            font-size: 18px;
+            margin-top: 3px;
+        }
+        
+        .social-links {
+            display: flex;
+            margin-top: 25px;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin-left: 10px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 18px;
+        }
+        
+        .social-links a:hover {
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        /* تصميم متجاوب */
+        @media (max-width: 992px) {
+            .header-content {
+                flex-wrap: wrap;
+            }
+            
+            .logo {
+                margin-bottom: 15px;
+            }
+            
+            nav {
+                order: 3;
+                width: 100%;
+                margin-top: 15px;
+            }
+            
+            nav ul {
+                justify-content: center;
+            }
+            
+            .hero {
+                padding: 150px 0 80px;
+            }
+            
+            .glowing-title {
+                font-size: 42px;
+            }
+            
+            .contact-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-sections {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .glowing-title {
+                font-size: 36px;
+            }
+            
+            .hero p {
+                font-size: 18px;
+            }
+            
+            .search-box input {
+                width: 150px;
+            }
+            
+            .location {
+                display: none;
+            }
+            
+            .categories-grid, .products-grid, .services-grid, .gallery-grid, .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- رأس الصفحة -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo" onclick="showPage('home')">
+                    <i class="fas fa-bolt"></i>
+                    <h1>محمود أبو القاسم</h1>
+                </div>
+                
+                <div class="location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>السودان - الخرطوم</span>
+                </div>
+                
+                <nav>
+                    <ul>
+                        <li><a class="nav-link active" onclick="showPage('home')">الرئيسية</a></li>
+                        <li><a class="nav-link" onclick="showPage('categories')">الفئات</a></li>
+                        <li><a class="nav-link" onclick="showPage('gallery')">المعرض</a></li>
+                        <li><a class="nav-link" onclick="showPage('orders')">الطلبات</a></li>
+                        <li><a class="nav-link" onclick="showPage('contact')">اتصل بنا</a></li>
+                        <li><a class="nav-link" onclick="showPage('dashboard')">لوحة التحكم</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="header-actions">
+                    <div class="search-box">
+                        <input type="text" placeholder="ابحث عن منتج...">
+                        <button><i class="fas fa-search"></i></button>
+                    </div>
+                    
+                    <div class="cart-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count">3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="main-content">
+        <!-- الصفحة الرئيسية -->
+        <div id="home" class="page active">
+            <!-- قسم الهيرو -->
+            <section class="hero">
+                <div class="container">
+                    <div class="hero-content">
+                        <h1 class="glowing-title">معدات كهربائية وإضاءة بجودة عالية</h1>
+                        <p>نوفر لكم أحدث منتجات الكهرباء والإضاءة بأسعار تنافسية بالجنيه السوداني وخدمة توصيل لجميع أنحاء السودان</p>
+                        <button class="btn" onclick="showPage('categories')">تصفح المنتجات</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- قسم الفئات -->
+            <section class="categories">
+                <div class="container">
+                    <div class="section-title">
+                        <h2>فئات المنتجات</h2>
+                    </div>
+                    
+                    <div class="categories-grid">
+                        <div class="category-card" onclick="showPage('categories')">
+                            <div class="category-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <h3>معدات الإضاءة</h3>
+                            <p>تشكيلة واسعة من لمبات LED والثريات والنجف والإضاءة المنزلية</p>
+                        </div>
+                        
+                        <div class="category-card" onclick="showPage('categories')">
+                            <div class="category-icon">
+                                <i class="fas fa-plug"></i>
+                            </div>
+                            <h3>مفاتيح ومقابس</h3>
+                            <p>مفاتيح كهربائية بجودة عالية ومقابس بأحدث التصاميم</p>
+                        </div>
+                        
+                        <div class="category-card" onclick="showPage('categories')">
+                            <div class="category-icon">
+                                <i class="fas fa-tools"></i>
+                            </div>
+                            <h3>أدوات كهربائية</h3>
+                            <p>أدوات التركيب والصيانة الكهربائية للمحترفين والهواة</p>
+                        </div>
+                        
+                        <div class="category-card" onclick="showPage('categories')">
+                            <div class="category-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <h3>كابلات وأسلاك</h3>
+                            <p>كابلات كهربائية بمواصفات قياسية وأطوال متنوعة</p>
+                        </div>
+
+                        <div class="category-card" onclick="showPage('categories')">
+                            <div class="category-icon">
+                                <i class="fas fa-solar-panel"></i>
+                            </div>
+                            <h3>الطاقة الشمسية</h3>
+                            <p>أنظمة الطاقة الشمسية ومستلزماتها بجودة عالية</p>
+                        </div>
+
+                        <div class="category-card" onclick="showPage('categories')">
+                            <div class="category-icon">
+                                <i class="fas fa-car-battery"></i>
+                            </div>
+                            <h3>أنظمة الإنذار</h3>
+                            <p>أنظمة إنذار وكاميرات مراقبة للحماية والأمان</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- قسم المنتجات -->
+            <section class="products">
+                <div class="container">
+                    <div class="glowing-section-title">
+                        <h2>أحدث المنتجات</h2>
+                    </div>
+                    
+                    <div class="products-grid">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img src="https://via.placeholder.com/250x200/0c1b33/ffffff?text=LED+Bulb" alt="لمبة LED">
+                            </div>
+                            <div class="product-info">
+                                <h3>لمبة LED 18 وات</h3>
+                                <p>لمبة LED موفرة للطاقة بدرجة حرارة لونية 6500 كلفن</p>
+                                <div class="product-price"><span>جنيه سوداني</span> 5,500</div>
+                                <div class="product-actions">
+                                    <button class="add-to-cart">أضف للسلة</button>
+                                    <button class="view-details">تفاصيل</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img src="https://via.placeholder.com/250x200/0c1b33/ffffff?text=Electrical+Switch" alt="مفتاح كهربائي">
+                            </div>
+                            <div class="product-info">
+                                <h3>مفتاح كهربائي 3 اتجاه</h3>
+                                <p>مفتاح كهربائي ثلاثي الاتجاهات بلون أبيض</p>
+                                <div class="product-price"><span>جنيه سوداني</span> 3,200</div>
+                                <div class="product-actions">
+                                    <button class="add-to-cart">أضف للسلة</button>
+                                    <button class="view-details">تفاصيل</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img src="https://via.placeholder.com/250x200/0c1b33/ffffff?text=Electrical+Cable" alt="كابل كهربائي">
+                            </div>
+                            <div class="product-info">
+                                <h3>كابل كهربائي 2.5 مم</h3>
+                                <p>كابل نحاسي مزدوج المعزل بطول 100 متر</p>
+                                <div class="product-price"><span>جنيه سوداني</span> 45,000</div>
+                                <div class="product-actions">
+                                    <button class="add-to-cart">أضف للسلة</button>
+                                    <button class="view-details">تفاصيل</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- قسم العروض -->
+            <section class="offers">
+                <div class="container">
+                    <div class="offers-content">
+                        <h2>عروض خاصة للكميات</h2>
+                        <p>خصومات تصل إلى 20% على الطلبات بالجملة - اسعار خاصة للمقاولين وشركات المقاولات</p>
+                        <button class="btn-outline" onclick="showPage('contact')">اطلب عرض سعر</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- قسم الخدمات -->
+            <section class="services">
+                <div class="container">
+                    <div class="section-title">
+                        <h2>خدماتنا</h2>
+                    </div>
+                    
+                    <div class="services-grid">
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <i class="fas fa-shipping-fast"></i>
+                            </div>
+                            <h3>توصيل سريع</h3>
+                            <p>خدمة توصيل سريعة لجميع أنحاء السودان خلال 2-5 أيام عمل</p>
+                        </div>
+                        
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <i class="fas fa-headset"></i>
+                            </div>
+                            <h3>دعم فني</h3>
+                            <p>فريق دعم فني متاح على مدار الساعة للإجابة على استفساراتكم</p>
+                        </div>
+                        
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h3>ضمان الجودة</h3>
+                            <p>جميع منتجاتنا أصلية ومدعومة بضمان من المصنع لمدة عام</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- صفحة الفئات -->
+        <div id="categories" class="page">
+            <section class="categories-page">
+                <div class="container">
+                    <div class="section-title">
+                        <h2>فئات المنتجات</h2>
+                        <p>اكتشف مجموعتنا الكاملة من معدات الكهرباء والإضاءة بجميع الفئات والأصناف</p>
+                    </div>
+                    
+                    <div class="categories-grid">
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <h3>معدات الإضاءة</h3>
+                            <p>تشكيلة واسعة من لمبات LED والثريات والنجف والإضاءة المنزلية والصناعية</p>
+                            <div class="category-stats">
+                                <span>45 منتج</span>
+                            </div>
+                        </div>
+                        
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-plug"></i>
+                            </div>
+                            <h3>مفاتيح ومقابس</h3>
+                            <p>مفاتيح كهربائية بجودة عالية ومقابس بأحدث التصاميم ومواصفات الأمان</p>
+                            <div class="category-stats">
+                                <span>32 منتج</span>
+                            </div>
+                        </div>
+                        
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-tools"></i>
+                            </div>
+                            <h3>أدوات كهربائية</h3>
+                            <p>أدوات التركيب والصيانة الكهربائية للمحترفين والهواة بجودة عالمية</p>
+                            <div class="category-stats">
+                                <span>28 منتج</span>
+                            </div>
+                        </div>
+                        
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <h3>كابلات وأسلاك</h3>
+                            <p>كابلات كهربائية بمواصفات قياسية وأطوال متنوعة لجميع الاستخدامات</p>
+                            <div class="category-stats">
+                                <span>22 منتج</span>
+                            </div>
+                        </div>
+
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-solar-panel"></i>
+                            </div>
+                            <h3>الطاقة الشمسية</h3>
+                            <p>أنظمة الطاقة الشمسية ومستلزماتها بجودة عالية وكفاءة ممتازة</p>
+                            <div class="category-stats">
+                                <span>18 منتج</span>
+                            </div>
+                        </div>
+
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-car-battery"></i>
+                            </div>
+                            <h3>أنظمة الإنذار</h3>
+                            <p>أنظمة إنذار وكاميرات مراقبة للحماية والأمان بمواصفات متطورة</p>
+                            <div class="category-stats">
+                                <span>15 منتج</span>
+                            </div>
+                        </div>
+
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-fire-extinguisher"></i>
+                            </div>
+                            <h3>أنظمة الحماية</h3>
+                            <p>أنظمة الحماية من التيار الزائد والصواعق ومستلزمات السلامة الكهربائية</p>
+                            <div class="category-stats">
+                                <span>12 منتج</span>
+                            </div>
+                        </div>
+
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-tachometer-alt"></i>
+                            </div>
+                            <h3>عدادات الطاقة</h3>
+                            <p>عدادات كهربائية ذكية وجهاز قياس الاستهلاك بأنواع مختلفة</p>
+                            <div class="category-stats">
+                                <span>10 منتج</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- صفحة المعرض -->
+        <div id="gallery" class="page">
+            <section class="gallery-page">
+                <div class="container">
+                    <div class="section-title">
+                        <h2>معرض المنتجات</h2>
+                        <p>تصفح معرض منتجاتنا من معدات الكهرباء والإضاءة بجودة عالية</p>
+                    </div>
+                    
+                    <div class="gallery-grid">
+                        <div class="gallery-item">
+                            <img src="https://via.placeholder.com/400x300/0c1b33/ffffff?text=LED+Lighting" alt="إضاءة LED">
+                            <div class="gallery-item-overlay">
+                                <h4>إضاءة LED متطورة</h4>
+                                <p>تشكيلة متنوعة من إضاءات LED للمنازل والمكاتب</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-item">
+                            <img src="https://via.placeholder.com/400x300/0c1b33/ffffff?text=Electrical+Tools" alt="أدوات كهربائية">
+                            <div class="gallery-item-overlay">
+                                <h4>أدوات كهربائية</h4>
+                                <p>مجموعة متكاملة من أدوات التركيب والصيانة</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-item">
+                            <img src="https://via.placeholder.com/400x300/0c1b33/ffffff?text=Switches+Sockets" alt="مفاتيح ومقابس">
+                            <div class="gallery-item-overlay">
+                                <h4>مفاتيح ومقابس</h4>
+                                <p>أحدث designs للمفاتيح والمقابس الكهربائية</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-item">
+                            <img src="https://via.placeholder.com/400x300/0c1b33/ffffff?text=Solar+Systems" alt="أنظمة شمسية">
+                            <div class="gallery-item-overlay">
+                                <h4>أنظمة الطاقة الشمسية</h4>
+                                <p>حلول متكاملة للطاقة الشمسية للمنازل والشركات</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-item">
+                            <img src="https://via.placeholder.com/400x300/0c1b33/ffffff?text=Cables+Wires" alt="كابلات وأسلاك">
+                            <div class="gallery-item-overlay">
+                                <h4>كابلات وأسلاك</h4>
+                                <p>كابلات بمواصفات قياسية لجميع الاستخدامات</p>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery-item">
+                            <img src="https://via.placeholder.com/400x300/0c1b33/ffffff?text=Security+Systems" alt="أنظمة أمان">
+                            <div class="gallery-item-overlay">
+                                <h4>أنظمة الإنذار والأمان</h4>
+                                <p>أنظمة متكاملة للحماية والمراقبة</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- صفحة الطلبات -->
+        <div id="orders" class="page">
+            <section class="orders-page">
+                <div class="container">
+                    <div class="section-title">
+                        <h2>طلباتي</h2>
+                        <p>تابع حالة طلباتك وتاريخ الشراء</p>
+                    </div>
+                    
+                    <div class="orders-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>رقم الطلب</th>
+                                    <th>التاريخ</th>
+                                    <th>المبلغ</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#ORD-2023-001</td>
+                                    <td>15/10/2023</td>
+                                    <td>125,000 ج.س</td>
+                                    <td><span class="order-status status-completed">مكتمل</span></td>
+                                    <td><button class="btn" style="padding: 8px 15px; font-size: 14px;">تفاصيل</button></td>
+                                </tr>
+                                <tr>
+                                    <td>#ORD-2023-002</td>
+                                    <td>14/10/2023</td>
+                                    <td>540,000 ج.س</td>
+                                    <td><span class="order-status status-processing">قيد المعالجة</span></td>
+                                    <td><button class="btn" style="padding: 8px 15px; font-size: 14px;">تفاصيل</button></td>
+                                </tr>
+                                <tr>
+                                    <td>#ORD-2023-003</td>
+                                    <td>13/10/2023</td>
+                                    <td>78,500 ج.س</td>
+                                    <td><span class="order-status status-pending">معلق</span></td>
+                                    <td><button class="btn" style="padding: 8px 15px; font-size: 14px;">تفاصيل</button></td>
+                                </tr>
+                                <tr>
+                                    <td>#ORD-2023-004</td>
+                                    <td>12/10/2023</td>
+                                    <td>45,000 ج.س</td>
+                                    <td><span class="order-status status-completed">مكتمل</span></td>
+                                    <td><button class="btn" style="padding: 8px 15px; font-size: 14px;">تفاصيل</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- صفحة الاتصال -->
+        <div id="contact" class="page">
+            <section class="contact-page">
+                <div class="container">
+                    <div class="section-title">
+                        <h2>اتصل بنا</h2>
+                        <p>نحن هنا لمساعدتك، تواصل معنا لأي استفسار</p>
+                    </div>
+                    
+                    <div class="contact-container">
+                        <div class="contact-info">
+                            <h3>معلومات الاتصال</h3>
+                            <div class="contact-details">
+                                <div class="contact-detail">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <div>
+                                        <h4>العنوان</h4>
+                                        <p>الخرطوم - السوق المركزي<br>مبنى المحلات الكهربائية، الطابق الثاني</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="contact-detail">
+                                    <i class="fas fa-phone"></i>
+                                    <div>
+                                        <h4>الهاتف</h4>
+                                        <p>+249 123 456 789<br>+249 987 654 321</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="contact-detail">
+                                    <i class="fas fa-envelope"></i>
+                                    <div>
+                                        <h4>البريد الإلكتروني</h4>
+                                        <p>info@mahmoud-abualgassim.sd</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="contact-detail">
+                                    <i class="fas fa-clock"></i>
+                                    <div>
+                                        <h4>ساعات العمل</h4>
+                                        <p>السبت - الخميس: 8:00 ص - 6:00 م<br>الجمعة: 10:00 ص - 4:00 م</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-form">
+                            <h3>أرسل رسالة</h3>
+                            <form id="contactForm">
+                                <div class="form-group">
+                                    <label for="name">الاسم الكامل</label>
+                                    <input type="text" id="name" class="form-control" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email">البريد الإلكتروني</label>
+                                    <input type="email" id="email" class="form-control" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="phone">رقم الهاتف</label>
+                                    <input type="tel" id="phone" class="form-control" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="subject">الموضوع</label>
+                                    <input type="text" id="subject" class="form-control" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="message">الرسالة</label>
+                                    <textarea id="message" class="form-control" required></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn" style="width: 100%;">إرسال الرسالة</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- صفحة لوحة التحكم -->
+        <div id="dashboard" class="page">
+            <section class="dashboard-page">
+                <div class="container">
+                    <div class="section-title">
+                        <h2>لوحة التحكم</h2>
+                        <p>إدارة متجر محمود أبو القاسم لمعدات الكهرباء والإضاءة</p>
+                    </div>
+                    
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <i class="fas fa-shopping-cart"></i>
+                            <h3>24</h3>
+                            <p>طلبات جديدة</p>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <i class="fas fa-box"></i>
+                            <h3>156</h3>
+                            <p>المنتجات</p>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <i class="fas fa-users"></i>
+                            <h3>89</h3>
+                            <p>عملاء جدد</p>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>8,540,000</h3>
+                            <p>إيرادات (جنيه سوداني)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-sections">
+                        <div class="dashboard-section">
+                            <h3>الطلبات الأخيرة</h3>
+                            <div class="orders-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>رقم الطلب</th>
+                                            <th>العميل</th>
+                                            <th>المبلغ</th>
+                                            <th>الحالة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>#ORD-2023-001</td>
+                                            <td>أحمد محمد</td>
+                                            <td>125,000 ج.س</td>
+                                            <td><span class="order-status status-completed">مكتمل</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-2023-002</td>
+                                            <td>شركة النور للمقاولات</td>
+                                            <td>540,000 ج.س</td>
+                                            <td><span class="order-status status-processing">قيد المعالجة</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-2023-003</td>
+                                            <td>مصلح الكهرباء</td>
+                                            <td>78,500 ج.س</td>
+                                            <td><span class="order-status status-pending">معلق</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-section">
+                            <h3>المنتجات الأكثر مبيعاً</h3>
+                            <div class="products-list">
+                                <div class="product-item">
+                                    <div class="product-info">
+                                        <h4>لمبة LED 18 وات</h4>
+                                        <p>تم بيع 45 قطعة</p>
+                                    </div>
+                                    <div class="product-price">5,500 ج.س</div>
+                                </div>
+                                
+                                <div class="product-item">
+                                    <div class="product-info">
+                                        <h4>مفتاح كهربائي 3 اتجاه</h4>
+                                        <p>تم بيع 32 قطعة</p>
+                                    </div>
+                                    <div class="product-price">3,200 ج.س</div>
+                                </div>
+                                
+                                <div class="product-item">
+                                    <div class="product-info">
+                                        <h4>كابل كهربائي 2.5 مم</h4>
+                                        <p>تم بيع 28 قطعة</p>
+                                    </div>
+                                    <div class="product-price">45,000 ج.س</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- تذييل الصفحة -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>عن الشركة</h3>
+                    <p>متجر محمود أبو القاسم متخصص في معدات الكهرباء والإضاءة في السودان منذ عام 2005، نقدم منتجات عالية الجودة بأسعار تنافسية بالجنيه السوداني.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>روابط سريعة</h3>
+                    <ul>
+                        <li><a onclick="showPage('home')"><i class="fas fa-chevron-left"></i> الرئيسية</a></li>
+                        <li><a onclick="showPage('categories')"><i class="fas fa-chevron-left"></i> الفئات</a></li>
+                        <li><a onclick="showPage('gallery')"><i class="fas fa-chevron-left"></i> المعرض</a></li>
+                        <li><a onclick="showPage('orders')"><i class="fas fa-chevron-left"></i> الطلبات</a></li>
+                        <li><a onclick="showPage('contact')"><i class="fas fa-chevron-left"></i> اتصل بنا</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>الفئات</h3>
+                    <ul>
+                        <li><a onclick="showPage('categories')"><i class="fas fa-chevron-left"></i> معدات الإضاءة</a></li>
+                        <li><a onclick="showPage('categories')"><i class="fas fa-chevron-left"></i> مفاتيح ومقابس</a></li>
+                        <li><a onclick="showPage('categories')"><i class="fas fa-chevron-left"></i> أدوات كهربائية</a></li>
+                        <li><a onclick="showPage('categories')"><i class="fas fa-chevron-left"></i> كابلات وأسلاك</a></li>
+                        <li><a onclick="showPage('categories')"><i class="fas fa-chevron-left"></i> أنظمة الطاقة الشمسية</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>اتصل بنا</h3>
+                    <div class="contact-info">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <p>الخرطوم - السوق المركزي</p>
+                            <p>مبنى المحلات الكهربائية، الطابق الثاني</p>
+                        </div>
+                    </div>
+                    <div class="contact-info">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <p>+249 123 456 789</p>
+                            <p>+249 987 654 321</p>
+                        </div>
+                    </div>
+                    <div class="contact-info">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <p>info@mahmoud-abualgassim.sd</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>جميع الحقوق محفوظة &copy; 2023 متجر محمود أبو القاسم لمعدات الكهرباء والإضاءة - السودان</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // متغيرات عامة
+        let cartItems = [];
+        let currentPage = 'home';
+        
+        // تهيئة الصفحة عند التحميل
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            setupEventListeners();
+        });
+        
+        // تهيئة الصفحة
+        function initializePage() {
+            // تحميل محتويات السلة من التخزين المحلي
+            loadCartFromStorage();
+            updateCartCount();
+            
+            // إظهار الصفحة الرئيسية افتراضياً
+            showPage('home');
+        }
+        
+        // إعداد مستمعي الأحداث
+        function setupEventListeners() {
+            // البحث
+            const searchInput = document.querySelector('.search-box input');
+            const searchButton = document.querySelector('.search-box button');
+            
+            if (searchInput && searchButton) {
+                searchButton.addEventListener('click', performSearch);
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        performSearch();
+                    }
+                });
+            }
+            
+            // أزرار إضافة إلى السلة
+            const addToCartButtons = document.querySelectorAll('.add-to-cart');
+            addToCartButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productCard = this.closest('.product-card');
+                    addToCart(productCard);
+                });
+            });
+            
+            // أزرار تفاصيل المنتج
+            const viewDetailsButtons = document.querySelectorAll('.view-details');
+            viewDetailsButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productCard = this.closest('.product-card');
+                    viewProductDetails(productCard);
+                });
+            });
+            
+            // أيقونة السلة
+            const cartIcon = document.querySelector('.cart-icon');
+            if (cartIcon) {
+                cartIcon.addEventListener('click', function() {
+                    showNotification('سيتم فتح صفحة السلة في التحديثات القادمة');
+                });
+            }
+            
+            // نموذج الاتصال
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    submitContactForm();
+                });
+            }
+        }
+        
+        // تحميل السلة من التخزين المحلي
+        function loadCartFromStorage() {
+            const storedCart = localStorage.getItem('mahmoudCart');
+            if (storedCart) {
+                cartItems = JSON.parse(storedCart);
+            }
+        }
+        
+        // حفظ السلة في التخزين المحلي
+        function saveCartToStorage() {
+            localStorage.setItem('mahmoudCart', JSON.stringify(cartItems));
+        }
+        
+        // تحديث عدد العناصر في السلة
+        function updateCartCount() {
+            const cartCount = document.querySelector('.cart-count');
+            if (cartCount) {
+                cartCount.textContent = cartItems.length;
+            }
+        }
+        
+        // إضافة منتج إلى السلة
+        function addToCart(productCard) {
+            const productName = productCard.querySelector('h3').textContent;
+            const productPrice = productCard.querySelector('.product-price').textContent;
+            
+            // استخراج السعر الرقمي
+            const priceMatch = productPrice.match(/([\d,]+)/);
+            const price = priceMatch ? parseInt(priceMatch[1].replace(/,/g, '')) : 0;
+            
+            // إضافة المنتج إلى السلة
+            cartItems.push({
+                name: productName,
+                price: price
+            });
+            
+            // حفظ وتحديث السلة
+            saveCartToStorage();
+            updateCartCount();
+            
+            // عرض رسالة تأكيد
+            showNotification(`تم إضافة "${productName}" إلى السلة`);
+        }
+        
+        // عرض تفاصيل المنتج
+        function viewProductDetails(productCard) {
+            const productName = productCard.querySelector('h3').textContent;
+            const productDescription = productCard.querySelector('p').textContent;
+            const productPrice = productCard.querySelector('.product-price').textContent;
+            
+            alert(`تفاصيل المنتج:\n\n${productName}\n\n${productDescription}\n\nالسعر: ${productPrice}`);
+        }
+        
+        // تنفيذ البحث
+        function performSearch() {
+            const searchInput = document.querySelector('.search-box input');
+            const searchTerm = searchInput.value.trim();
+            
+            if (searchTerm) {
+                showNotification(`سيتم البحث عن: "${searchTerm}" في التحديثات القادمة`);
+            } else {
+                showNotification('يرجى إدخال مصطلح البحث');
+            }
+        }
+        
+        // إرسال نموذج الاتصال
+        function submitContactForm() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+            
+            // في التطبيق الحقيقي، سيتم إرسال البيانات إلى الخادم
+            showNotification(`شكراً ${name}، تم استلام رسالتك وسنقوم بالرد عليك قريباً`);
+            
+            // إعادة تعيين النموذج
+            document.getElementById('contactForm').reset();
+        }
+        
+        // عرض إشعار
+        function showNotification(message) {
+            // إنشاء عنصر الإشعار
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            
+            // إضافة الأنماط
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: linear-gradient(45deg, var(--secondary), var(--accent));
+                color: var(--dark);
+                padding: 15px 25px;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                z-index: 10000;
+                font-weight: 600;
+                transform: translateX(150%);
+                transition: transform 0.5s ease;
+            `;
+            
+            // إضافة الإشعار إلى الصفحة
+            document.body.appendChild(notification);
+            
+            // عرض الإشعار
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // إخفاء الإشعار بعد 3 ثوان
+            setTimeout(() => {
+                notification.style.transform = 'translateX(150%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 3000);
+        }
+        
+        // عرض صفحة محددة
+        function showPage(pageId) {
+            // إخفاء جميع الصفحات
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // إزالة النشاط من جميع روابط التنقل
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // إضافة النشاط للرابط المحدد
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.textContent.trim() === getPageTitle(pageId)) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // إظهار الصفحة المطلوبة
+            document.getElementById(pageId).classList.add('active');
+            currentPage = pageId;
+            
+            // التمرير إلى أعلى الصفحة
+            window.scrollTo(0, 0);
+        }
+        
+        // الحصول على عنوان الصفحة من معرفها
+        function getPageTitle(pageId) {
+            const titles = {
+                'home': 'الرئيسية',
+                'categories': 'الفئات',
+                'gallery': 'المعرض',
+                'orders': 'الطلبات',
+                'contact': 'اتصل بنا',
+                'dashboard': 'لوحة التحكم'
+            };
+            
+            return titles[pageId] || 'الرئيسية';
+        }
+        
+        // إضافة أنماط إضافية لقائمة المنتجات في لوحة التحكم
+        document.addEventListener('DOMContentLoaded', function() {
+            const style = document.createElement('style');
+            style.textContent = `
+                .products-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
+                }
+                
+                .product-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 15px;
+                    background: #f9f9f9;
+                    border-radius: 8px;
+                }
+                
+                .product-info h4 {
+                    margin: 0 0 5px;
+                    color: var(--primary);
+                }
+                
+                .product-info p {
+                    margin: 0;
+                    color: #666;
+                    font-size: 14px;
+                }
+                
+                .product-price {
+                    font-weight: 700;
+                    color: var(--secondary);
+                }
+                
+                .category-stats {
+                    margin-top: 15px;
+                    padding-top: 10px;
+                    border-top: 1px solid #eee;
+                    color: #666;
+                    font-size: 14px;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
