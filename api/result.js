@@ -14,7 +14,8 @@ module.exports = async (req, res) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Referer': 'https://result.sd/'
             },
             body: `seat_number=${encodeURIComponent(seatNo)}`
         });
@@ -22,16 +23,27 @@ module.exports = async (req, res) => {
         const htmlText = await response.text();
         const $ = cheerio.load(htmlText);
 
-        // جلب أول 200 حرف من نص الصفحة لنرى هل رجعت صفحة خطأ أم صفحة نتيجة
         const pageTitle = $('title').text().trim();
-        const bodySnippet = $('body').text().substring(0, 150).trim();
+        const bodyText = $('body').text();
+
+        if (bodyText.includes('إقبالاً كبيراً') || bodyText.includes('غير متاحة')) {
+            return res.json({
+                success: false,
+                message: 'الموقع الرسمي يشهد ضغطاً عالياً حالياً، جرب مرة أخرى بعد قليل.'
+            });
+        }
+
+        let studentName = $('.name, #student_name, td').first().text().trim();
+        let studentScore = $('.score, #result_score, td').last().text().trim();
 
         return res.json({
-            success: false,
-            message: `عنوان الصفحة: ${pageTitle} | عينة النص: ${bodySnippet}`
+            success: true,
+            name: studentName || "متوفر",
+            seat: seatNo,
+            score: studentScore || "متوفر"
         });
 
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'خطأ في الاتصال بالخادم.' });
+        return res.status(500).json({ success: false, message: 'حدث خطأ أثناء الاتصال بالنظام.' });
     }
 };
