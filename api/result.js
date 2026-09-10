@@ -22,27 +22,20 @@ module.exports = async (req, res) => {
         const htmlText = await response.text();
         const $ = cheerio.load(htmlText);
 
-        let studentName = "";
-        let studentScore = "";
+        // جلب النصوص من الجداول أو العناصر بشكل أدق
+        let studentName = $('table tr').eq(0).text().trim() || $('.name').text().trim() || $('td').first().text().trim();
+        let studentScore = $('table tr').eq(1).text().trim() || $('.score').text().trim() || $('td').last().text().trim();
 
-        $('td, th, span, div').each((i, el) => {
-            const text = $(el).text().trim();
-            if (text.includes('اسم') && !studentName) {
-                studentName = $(el).next().text().trim() || text;
-            }
-            if ((text.includes('المجموع') || text.includes('النتيجة')) && !studentScore) {
-                studentScore = $(el).next().text().trim() || text;
-            }
-        });
-
-        if (!studentName) studentName = $('h4').first().text().trim() || "غير متوفر";
-        if (!studentScore) studentScore = $('strong').last().text().trim() || "غير متوفر";
+        // لو ما ظهرت، نجرب نفحص كل الـ inputs أو النصوص الكبيرة
+        if (!studentName || studentName.length < 3) {
+            studentName = $('h3').text().trim() || $('h4').text().trim() || "غير متوفر";
+        }
 
         return res.json({
             success: true,
-            name: studentName,
+            name: studentName || "غير متوفر",
             seat: seatNo,
-            score: studentScore
+            score: studentScore || "غير متوفر"
         });
 
     } catch (error) {
