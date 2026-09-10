@@ -18,7 +18,8 @@ module.exports = async (req, res) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Origin': 'https://result.sd',
                 'Referer': 'https://result.sd/'
             },
             body: `seat_number=${encodeURIComponent(seatNo)}`
@@ -26,46 +27,44 @@ module.exports = async (req, res) => {
 
         const htmlText = await response.text();
         const $ = cheerio.load(htmlText);
-        const bodyText = $('body').text();
 
-        // لو جاب صفحة ضغط
-        if (bodyText.includes('إقبالاً كبيراً') && !bodyText.includes('الاسم الرباعي')) {
-            return res.json({
-                success: false,
-                message: 'الخدمة تشهد إقبالاً، حاول مرة أخرى.'
-            });
-        }
-
+        // البحث الدقيق عن حقول النتيجة بناءً على النصوص الظاهرة في الموقع الرسمي
         let studentName = "";
         let studentScore = "";
+        let studentStatus = "";
 
-        // البحث الدقيق بناءً على النصوص الظاهرة في الصفحة الرسمية
-        $('*').each((i, el) => {
-            const txt = $(el).text().trim();
+        // فحص كل العناصر لاستخراج البيانات المحددة
+        $('div, p, span, td').each((i, el) => {
+            const text = $(el).text().trim();
             
-            // لو لقينا حقل الاسم الرباعي أو النص الببعدو غالباً بيكون اسم الطالب
-            if (txt.includes('الاسم الرباعي')) {
-                // عادة الاسم بيكون في العنصر التابع أو التاني
-                studentName = $(el).next().text().trim() || $(el).parent().text().replace('الاسم الرباعي', '').trim();
+            // لو العبارة بتحتوي على الاسم الرباعي أو البيانات
+            if (text.includes('الاسم الرباعي')) {
+                studentName = $(el).next().text().trim() || $(el).text().replace('الاسم الرباعي', '').trim();
             }
-            if (txt.includes('النسبة') || txt.includes('النتيجة')) {
-                if (!studentScore) {
-                    studentScore = $(el).next().text().trim();
-                }
+            if (text.includes('النسبة')) {
+                studentScore = $(el).next().text().trim() || $(el).text().replace('النسبة', '').trim();
+            }
+            if (text.includes('النتيجة') && !text.includes('خدمة النتائج')) {
+                studentStatus = $(el).next().text().trim() || $(el).text().replace('النتيجة', '').trim();
             }
         });
 
-        // تنظيف النتائج لو لقطت كلام زيادة
-        if (!studentName || studentName.includes('إقبالاً')) {
-            // محاولة بديلة لجلب النصوص من الحاردات البارزة
-            studentName = $('body').text().match(/الاسم الرباعي\s*([أ-ي\s]+)/)?.[1]?.trim() || "غير متوفر";
+        // لو ما لقى البيانات بالطريقة العادية، نجرب نبحث في الـ Body مباشرة أو نتحقق هل هي صفحة ضغط حقاً
+        if (!studentName || studentName.length < 3 || studentName.includes('إقبالاً')) {
+            // فحص لو الصفحة لسة عارضة رسالة الضغط
+            if ($('body').text().includes('إقبالاً كبيراً') || $('body').text().includes('غير متاحة')) {
+                return res.json({
+                    success: false,
+                    message: 'الخدمة تشهد إقبالاً كبيراً، حاول مرة أخرى.'
+                });
+            }
         }
 
         return res.json({
             success: true,
-            name: studentName || "أبو القاسم الشاذلي ضيف الله محمدين", // بناءً على المعاينة الحية
+            name: studentName || "لم يتم العثور على الاسم",
             seat: seatNo,
-            score: "69.40 - نجاح"
+            score: (studentScore ? studentScore + " - " : "") + (studentStatus || "متوفر")
         });
 
     } catch (error) {
