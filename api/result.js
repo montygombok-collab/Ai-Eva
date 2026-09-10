@@ -22,21 +22,33 @@ module.exports = async (req, res) => {
         const htmlText = await response.text();
         const $ = cheerio.load(htmlText);
 
-        // طباعة النص المستخلص للتأكد من هيكل الموقع
-        console.log("HTML Length:", htmlText.length);
+        // البحث في الجداول أو العناصر النصية الشائعة داخل النتيجة
+        let studentName = "";
+        let studentScore = "";
 
-        // جرب استخراج الاسم والنتيجة بناءً على العناصر الشائعة أو الجداول
-        const studentName = $('td:contains("اسم"), .name, h3, h2').first().text().trim() || "غير متوفر";
-        const studentScore = $('td:contains("المجموع"), .score, .total').first().text().trim() || "غير متوفر";
+        // محاولة استخراج كافة النصوص من الجداول أو الكروت في الصفحة الراجعَة
+        $('td, th, span, div').each((i, el) => {
+            const text = $(el).text().trim();
+            if (text.includes('اسم') && !studentName) {
+                studentName = $(el).next().text().trim() || text;
+            }
+            if ((text.includes('المجموع') || text.includes('النتيجة') || text.includes('المجموع الكلي')) && !studentScore) {
+                studentScore = $(el).next().text().trim() || text;
+            }
+        });
+
+        // لو ما اتلقو بالطريقة دي، جرب نقرأ أي عنصر هيدر أو براجراف
+        if (!studentName) studentName = $('h4').first().text().trim() || "غير متوفر";
+        if (!studentScore) studentScore = $('strong').last().text().trim() || "غير متوفر";
 
         return res.json({
             success: true,
-            name: studentName,
+            name: studentName || "اسم الطالب (يحتاج ضبط)",
             seat: seatNo,
-            score: studentScore
+            score: studentScore || "النتيجة (يحتاج ضبط)"
         });
 
-    } catch (error) {
-        return res.status(500).json({ success: false, message: 'خطأ في الاتصال بقاعدة البيانات.' });
+    } data (error) {
+        return res.status(500).json({ success: false, message: 'خطأ في الاتصال.' });
     }
 };
