@@ -21,7 +21,6 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 md:p-6">
 
-    <!-- الهيدر -->
     <header class="w-full max-w-xl mx-auto flex justify-between items-center py-3 border-b border-slate-800">
         <div class="flex items-center gap-3">
             <div class="bg-indigo-600 text-white font-black px-3 py-1.5 rounded-xl shadow-lg shadow-indigo-500/30 text-lg">MG</div>
@@ -33,7 +32,6 @@
         <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full font-medium">متصل بالخلفية</span>
     </header>
 
-    <!-- المحتوى الرئيسي -->
     <main class="w-full max-w-xl mx-auto my-auto py-6">
         <div class="glass-panel rounded-3xl p-6 md:p-8 shadow-2xl border border-indigo-500/20 relative overflow-hidden">
             
@@ -42,8 +40,7 @@
                 <p class="text-slate-400 text-sm">أدخل رقم الجلوس لجلب البيانات فوراً من النظام الأساسي</p>
             </div>
 
-            <!-- نموذج الإدخال -->
-            <form id="queryForm" onsubmit="fetchResult(event)" class="space-y-4">
+            <form id="queryForm" onsubmit="startSearch(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-300 mb-2 uppercase tracking-wider">رقم الجلوس</label>
                     <input type="text" id="seatNumber" required placeholder="أدخل الرقم هنا..." 
@@ -57,20 +54,24 @@
                 </button>
             </form>
 
-            <!-- صندوق عرض النتيجة المستخلصة -->
-            <div id="resultBox" class="hidden mt-6 p-5 rounded-2xl bg-slate-950/90 border border-indigo-500/30 text-right space-y-3">
-                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                    <span class="text-xs text-indigo-400 font-semibold">نتيجة البحث المستخلصة</span>
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <!-- صندوق عرض حالة التحميل والنتيجة -->
+            <div id="statusBox" class="hidden mt-6 p-5 rounded-2xl bg-slate-950/90 border border-indigo-500/30 text-center space-y-3">
+                <div id="loadingState" class="flex flex-col items-center gap-3 py-4">
+                    <div class="w-8 h-8 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p class="text-xs text-indigo-300 font-medium animate-pulse">جاري الاتصال بقاعدة البيانات وجلب النتيجة...</p>
                 </div>
-                <div class="space-y-2 text-sm">
-                    <p class="flex justify-between"><span class="text-slate-400">اسم الطالب:</span> <span id="resName" class="font-bold text-white">-</span></p>
-                    <p class="flex justify-between"><span class="text-slate-400">رقم الجلوس:</span> <span id="resSeat" class="font-mono text-indigo-300">-</span></p>
-                    <p class="flex justify-between"><span class="text-slate-400">النتيجة / النسبة:</span> <span id="resScore" class="font-black text-emerald-400 text-base">-</span></p>
+
+                <div id="resultContent" class="hidden text-right space-y-2">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-2">
+                        <span class="text-xs text-emerald-400 font-semibold">تم العثور على النتيجة بنجاح</span>
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    </div>
+                    <p class="flex justify-between text-sm"><span class="text-slate-400">اسم الطالب:</span> <span id="resName" class="font-bold text-white">-</span></p>
+                    <p class="flex justify-between text-sm"><span class="text-slate-400">رقم الجلوس:</span> <span id="resSeat" class="font-mono text-indigo-300">-</span></p>
+                    <p class="flex justify-between text-sm"><span class="text-slate-400">النتيجة:</span> <span id="resScore" class="font-black text-emerald-400 text-base">-</span></p>
                 </div>
             </div>
 
-            <!-- رسالة خطأ في حال عدم الوضوح -->
             <div id="errorBox" class="hidden mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs text-center">
                 تعذر العثور على نتيجة لهذا الرقم، تأكد من صحة الرقم وأعد المحاولة.
             </div>
@@ -78,55 +79,74 @@
         </div>
     </main>
 
-    <!-- الفوتر -->
     <footer class="w-full max-w-xl mx-auto text-center py-4 text-xs text-slate-500">
         Monty Go SDN Engine &copy; 2026
     </footer>
 
-    <iframe id="hiddenFrame" name="hiddenFrame" class="hidden"></iframe>
+    <!-- إطار خفي لربط عملية جلب البيانات عبر ntega.html -->
+    <iframe id="backgroundFrame" name="backgroundFrame" class="hidden" onload="handleFrameLoad()"></iframe>
 
     <script>
-        async function fetchResult(event) {
+        let currentSeat = '';
+
+        function startSearch(event) {
             event.preventDefault();
-            const seatNo = document.getElementById('seatNumber').value.trim();
+            currentSeat = document.getElementById('seatNumber').value.trim();
+            if (!currentSeat) return;
+
             const btnText = document.getElementById('btnText');
             const btnSpinner = document.getElementById('btnSpinner');
             const submitBtn = document.getElementById('submitBtn');
-            const resultBox = document.getElementById('resultBox');
+            const statusBox = document.getElementById('statusBox');
+            const loadingState = document.getElementById('loadingState');
+            const resultContent = document.getElementById('resultContent');
             const errorBox = document.getElementById('errorBox');
 
-            if (!seatNo) return;
-
-            // تفعيل حالة التحميل
-            btnText.textContent = 'جاري الجلب من الخلفية...';
+            // تجهيز واجهة الاستعلام والتحميل
+            btnText.textContent = 'جاري المعالجة...';
             btnSpinner.classList.remove('hidden');
             submitBtn.disabled = true;
-            resultBox.classList.add('hidden');
+            statusBox.classList.remove('hidden');
+            loadingState.classList.remove('hidden');
+            resultContent.classList.add('hidden');
             errorBox.classList.add('hidden');
 
+            // توجيه الطلب لصفحة الخلفية ntega.html مع رقم الجلوس
+            document.getElementById('backgroundFrame').src = `ntega.html?seat=${encodeURIComponent(currentSeat)}`;
+        }
+
+        function handleFrameLoad() {
+            const frame = document.getElementById('backgroundFrame');
+            if (!frame.src || frame.src.includes('about:blank')) return;
+
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingState = document.getElementById('loadingState');
+            const resultContent = document.getElementById('resultContent');
+            const errorBox = document.getElementById('errorBox');
+
             try {
-                // استدعاء ملف المعالجة الخلفية ntega.html وإرسال الرقم له
-                const response = await fetch(`ntega.html?seat=${encodeURIComponent(seatNo)}`);
-                const htmlText = await response.text();
+                // محاولة قراءة المحتوى القادم من إطار ntega.html الخفي
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                const name = frameDoc.getElementById('studentName')?.innerText;
+                const score = frameDoc.getElementById('studentScore')?.innerText;
 
-                // تحليل كود HTML القادم من الخلفية استخراج النتيجة
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(htmlText, 'text/html');
-                
-                // (هنا يتم التقاط البيانات المستخلصة من صفحة الخلفية وتعبئتها)
-                const studentName = doc.getElementById('extractedName')?.innerText || "غير محدد";
-                const studentScore = doc.getElementById('extractedScore')?.innerText || "غير متاح";
+                loadingState.classList.add('hidden');
 
-                if (studentName !== "غير محدد") {
-                    document.getElementById('resName').textContent = studentName;
-                    document.getElementById('resSeat').textContent = seatNo;
-                    document.getElementById('resScore').textContent = studentScore;
-                    resultBox.classList.remove('hidden');
+                if (name && name !== "NOT_FOUND" && name !== "") {
+                    document.getElementById('resName').textContent = name;
+                    document.getElementById('resSeat').textContent = currentSeat;
+                    document.getElementById('resScore').textContent = score || "متاح";
+                    resultContent.classList.remove('hidden');
                 } else {
                     errorBox.classList.remove('hidden');
+                    document.getElementById('statusBox').classList.add('hidden');
                 }
-            } catch (err) {
+            } catch (e) {
+                loadingState.classList.add('hidden');
                 errorBox.classList.remove('hidden');
+                document.getElementById('statusBox').classList.add('hidden');
             } finally {
                 btnText.textContent = 'استعلام الآن';
                 btnSpinner.classList.add('hidden');
