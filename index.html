@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monty Go SDN - بوابة الاستعلام الذكية</title>
+    <title>Monty Go SDN - متصفح النتائج المدمج</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
@@ -13,84 +13,93 @@
             color: #f8fafc;
         }
         .glass-card {
-            background: rgba(30, 41, 59, 0.7);
+            background: rgba(30, 41, 59, 0.75);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+        /* تصميم حاوية المتصفح المدمج */
+        .browser-window {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-4 md:p-8">
+<body class="min-h-screen flex flex-col justify-between p-3 md:p-6">
 
-    <!-- الهيدر أو الشعار -->
-    <header class="w-full max-w-4xl mx-auto flex justify-between items-center py-4 border-b border-slate-800">
+    <!-- الهيدر -->
+    <header class="w-full max-w-5xl mx-auto flex justify-between items-center py-3 border-b border-slate-800">
         <div class="flex items-center gap-3">
             <div class="bg-blue-600 text-white font-black px-3 py-1.5 rounded-xl shadow-lg shadow-blue-500/30 text-lg">MG</div>
             <div>
-                <h1 class="font-black text-lg tracking-wider">Monty Go SDN</h1>
-                <p class="text-xs text-slate-400">بوابة التوجيه والخدمات الذكية</p>
+                <h1 class="font-black text-base tracking-wider">Monty Go SDN</h1>
+                <p class="text-[10px] text-slate-400">متصفح النتائج الداخلي والذكي</p>
             </div>
         </div>
-        <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full font-medium">النظام نشط</span>
+        <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full font-medium">متصل بالنظام</span>
     </header>
 
-    <!-- المحتوى الرئيسي -->
-    <main class="w-full max-w-md mx-auto my-auto py-8">
-        <div class="glass-card rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
-            <div class="absolute -top-12 -right-12 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+    <!-- المحتوى الرئيسي (واجهة المتصفح المدمج) -->
+    <main class="w-full max-w-5xl mx-auto my-4 flex-1 flex flex-col">
+        <div class="browser-window rounded-2xl overflow-hidden flex flex-col flex-1 shadow-2xl">
             
-            <div class="text-center mb-6">
-                <h2 class="text-2xl font-black text-white mb-2">استعلام رقم الجلوس</h2>
-                <p class="text-slate-400 text-sm">أدخل رقم الجلوس وسنقوم بنسخه وتوجيهك للموقع الرسمي فوراً</p>
+            <!-- شريط عنوان المتصفح (Browser Toolbar) -->
+            <div class="bg-slate-900 px-4 py-2.5 flex items-center gap-3 border-b border-slate-800">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+                    <span class="w-3 h-3 rounded-full bg-yellow-500/80 inline-block"></span>
+                    <span class="w-3 h-3 rounded-full bg-green-500/80 inline-block"></span>
+                </div>
+                <!-- شريط الروابط الوهمي -->
+                <div class="flex-1 bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-1 text-xs text-slate-400 flex items-center justify-between">
+                    <span id="currentUrl" class="truncate font-mono text-blue-400">https://result.sd/</span>
+                    <button onclick="refreshBrowser()" class="text-slate-400 hover:text-white transition-colors" title="إعادة تحميل">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+                </div>
             </div>
 
-            <form id="resultForm" class="space-y-4" onsubmit="handleQuery(event)">
-                <div>
-                    <label for="seatNumber" class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">رقم الجلوس</label>
-                    <input type="text" id="seatNumber" required placeholder="مثال: 123456" 
-                        class="w-full px-4 py-3.5 bg-slate-900/80 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-center text-xl font-bold tracking-widest">
+            <!-- محرك العرض والتحميل -->
+            <div class="relative flex-1 bg-slate-950 flex flex-col min-h-[500px]">
+                
+                <!-- شاشة التحميل الوهمية -->
+                <div id="loader" class="absolute inset-0 bg-slate-950/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-3 transition-opacity duration-300">
+                    <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    <p class="text-xs text-slate-400 font-medium">جاري الاتصال بموقع النتائج الرسمي...</p>
                 </div>
 
-                <button type="submit" 
-                    class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-2xl shadow-lg shadow-blue-600/30 transition-all transform active:scale-95 flex items-center justify-center gap-2">
-                    <span>استعلام والانتقال للموقع الرسمي</span>
-                    <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                </button>
-            </form>
-
-            <!-- رسالة الإرشاد والتنبيه -->
-            <div id="toast" class="hidden mt-4 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs text-center leading-relaxed animate-pulse">
-                تم نسخ رقم الجلوس الحافظة بنجاح! جاري تحويلك للموقع الرسمي، قم باللصق (Ctrl+V) في خانة البحث هناك.
+                <!-- إطار المحاكاة والتحميل (يعتمد على خدمة وسيطة لتجاوز قيود CORS) -->
+                <!-- ملاحظة: بعض المواقع الحكومية تمنع التضمين تماماً، وفي حال ظهر خطأ يتم جلب الصفحة عبر بروكسي عام آمن -->
+                <iframe id="resultFrame" 
+                    src="https://api.allorigins.win/raw?url=https%3A%2F%2Fresult.sd%2F" 
+                    class="w-full flex-1 border-0 bg-white"
+                    onload="hideLoader()">
+                </iframe>
             </div>
+
         </div>
     </main>
 
     <!-- الفوتر -->
-    <footer class="w-full max-w-4xl mx-auto text-center py-4 border-t border-slate-800 text-xs text-slate-500">
-        جميع الحقوق محفوظة &copy; 2026 - <span class="text-slate-400 font-semibold">Monty Go SDN</span>
+    <footer class="w-full max-w-5xl mx-auto text-center py-2 text-[11px] text-slate-500">
+        Monty Go SDN Engine &copy; 2026 - جميع الحقوق محفوظة
     </footer>
 
     <script>
-        function handleQuery(event) {
-            event.preventDefault();
-            const seatInput = document.getElementById('seatNumber');
-            const seatValue = seatInput.value.trim();
-            const toast = document.getElementById('toast');
+        function hideLoader() {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 300);
+            }
+        }
 
-            if (!seatValue) return;
-
-            // نسخ رقم الجلوس إلى الحافظة تلقائياً
-            navigator.clipboard.writeText(seatValue).then(() => {
-                toast.classList.remove('hidden');
-                
-                // فتح الموقع الرسمي في نافذة جديدة بعد جزء من الثانية لضمان إتمام النسخ
-                setTimeout(() => {
-                    window.open('https://result.sd/', '_blank');
-                }, 1000);
-            }).catch(err => {
-                // في حال فشل النسخ التلقائي لأسباب أمنية في المتصفح
-                alert('تعذر النسخ التلقائي، يرجى نسخ الرقم يدوياً.');
-                window.open('https://result.sd/', '_blank');
-            });
+        function refreshBrowser() {
+            const loader = document.getElementById('loader');
+            const frame = document.getElementById('resultFrame');
+            loader.style.display = 'flex';
+            loader.style.opacity = '1';
+            frame.src = frame.src; // إعادة تحميل الإطار
         }
     </script>
 </body>
