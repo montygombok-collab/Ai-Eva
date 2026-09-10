@@ -22,20 +22,13 @@ module.exports = async (req, res) => {
         const htmlText = await response.text();
         const $ = cheerio.load(htmlText);
 
-        // جلب النصوص من الجداول أو العناصر بشكل أدق
-        let studentName = $('table tr').eq(0).text().trim() || $('.name').text().trim() || $('td').first().text().trim();
-        let studentScore = $('table tr').eq(1).text().trim() || $('.score').text().trim() || $('td').last().text().trim();
-
-        // لو ما ظهرت، نجرب نفحص كل الـ inputs أو النصوص الكبيرة
-        if (!studentName || studentName.length < 3) {
-            studentName = $('h3').text().trim() || $('h4').text().trim() || "غير متوفر";
-        }
+        // جلب أول 200 حرف من نص الصفحة لنرى هل رجعت صفحة خطأ أم صفحة نتيجة
+        const pageTitle = $('title').text().trim();
+        const bodySnippet = $('body').text().substring(0, 150).trim();
 
         return res.json({
-            success: true,
-            name: studentName || "غير متوفر",
-            seat: seatNo,
-            score: studentScore || "غير متوفر"
+            success: false,
+            message: `عنوان الصفحة: ${pageTitle} | عينة النص: ${bodySnippet}`
         });
 
     } catch (error) {
