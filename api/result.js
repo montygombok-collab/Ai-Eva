@@ -2,7 +2,6 @@ const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
 module.exports = async (req, res) => {
-    // منع التخزين المؤقت تماماً في السيرفر
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
@@ -39,14 +38,38 @@ module.exports = async (req, res) => {
                 continue;
             }
 
-            let studentName = $('.name, #student_name, td').first().text().trim();
-            let studentScore = $('.score, #result_score, td').last().text().trim();
+            // استخراج النصوص الحقيقية من الجداول أو العناصر المخصصة للنتيجة
+            let studentName = "";
+            let studentScore = "";
+
+            // البحث الذكي داخل الجداول والعناصر النصية
+            $('td, th, span, div, h3, h4, p').each((i, el) => {
+                const txt = $(el).text().trim();
+                // التقط النص إذا كان مميزاً ولا يحتوي على كلمات عامة
+                if (txt.length > 3 && !txt.includes('النتيجة') && !txt.includes('رقم الجلوس') && !studentName) {
+                    // افتراض أن اسم الطالب يأتي في أول العناصر النصية البارزة
+                    if ($(el).hasClass('name') || $(el).attr('id')?.includes('name') || i < 15) {
+                        // ممكن نلتقط النص لو بدا وكأنه اسم (أكثر من كلمة عربية)
+                        if (txt.split(' ').length >= 2 && !studentName) {
+                            studentName = txt;
+                        }
+                    }
+                }
+            });
+
+            // طريقة بديلة مباشرة لجلب أول نص داخل الجداول أو الكلاسات المحتملة
+            if (!studentName) {
+                studentName = $('.student-name, #name, td.name, .result-name').first().text().trim() || $('table tr td').eq(1).text().trim() || "اسم الطالب غير محدد";
+            }
+            if (!studentScore) {
+                studentScore = $('.total-score, #score, td.score, .result-total').first().text().trim() || $('table tr td').eq(3).text().trim() || "النتيجة غير محددة";
+            }
 
             return res.json({
                 success: true,
-                name: studentName || "متوفر",
+                name: studentName,
                 seat: seatNo,
-                score: studentScore || "متوفر"
+                score: studentScore
             });
 
         } catch (error) {
