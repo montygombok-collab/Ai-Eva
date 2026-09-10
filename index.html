@@ -2,84 +2,75 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8">
-    <title>استعلام النتيجة الذكي</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>استعلام نتيجة الشهادة الثانوية - Monty Go SDN</title>
     <style>
-        body { font-family: Tahoma, sans-serif; background: #f4f7f6; padding: 40px; text-align: center; }
-        .box { background: #fff; padding: 30px; border-radius: 8px; max-width: 400px; margin: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; background: #1677ff; color: #fff; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
-        button:hover { background: #0866df; }
-        #resultArea { margin-top: 20px; text-align: right; }
+        body { background: #0f172a; color: #f8fafc; font-family: Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center; }
+        h2 { margin-bottom: 20px; color: #38bdf8; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 16px; box-sizing: border-box; text-align: center; }
+        input:focus { border-color: #38bdf8; outline: none; }
+        button { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #1d4ed8; }
+        #resultContainer { margin-top: 20px; text-align: right; }
+        /* تنسيق لبعض عناصر النتيجة المرجعة من الموقع الأصلي لتبدو مرتبة */
+        .result { background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-top: 15px; }
+        .errorlist { color: #f87171; list-style: none; padding: 0; }
+        .notice { color: #fbbf24; }
     </style>
 </head>
 <body>
 
-<div class="box">
+<div class="card">
     <h2>استعلام الشهادة الثانوية</h2>
-    <input type="text" id="serialInput" placeholder="أدخل رقم الجلوس (مثال: 6 أرقام)" maxlength="6">
-    <button onclick="fetchResult()">استعلام الآن</button>
-    <div id="resultArea"></div>
+    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">أدخل رقم الجلوس لجلب البيانات فوراً</p>
+    
+    <input type="text" id="serialInput" placeholder="أدخل رقم الجلوس" maxlength="6">
+    <button onclick="getResult()">استعلام الآن</button>
+
+    <div id="resultContainer"></div>
 </div>
 
 <script>
-async function fetchResult() {
+async function getResult() {
     const serial = document.getElementById('serialInput').value.trim();
-    const resultArea = document.getElementById('resultArea');
-    
+    const container = document.getElementById('resultContainer');
+
     if (!serial) {
-        alert('الرجاء إدخال رقم الجلوس أولاً');
+        alert('الرجاء إدخال رقم الجلوس');
         return;
     }
 
-    resultArea.innerHTML = 'جاري البحث وسحب البيانات... ⏳';
+    container.innerHTML = '<p style="color: #38bdf8;">جاري جلب النتيجة... ⏳</p>';
 
     try {
-        // الخطوة 1: جلب الصفحة الرئيسية لاستخراج رمز الحماية (CSRF Token) والكوكي
-        const getResponse = await fetch('https://result.sd/', {
-            method: 'GET',
-            credentials: 'include' // للحفاظ على جلسة الكوكي
-        });
-        const htmlText = await getResponse.text();
-        
-        // استخراج الـ csrfmiddlewaretoken تلقائياً من الـ HTML
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(htmlText, 'text/html');
-        const csrfToken = doc.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
-
-        if (!csrfToken) {
-            resultArea.innerHTML = '<span style="color:red;">عفواً، فشل جلب رمز الحماية من الموقع.</span>';
-            return;
-        }
-
-        // الخطوة 2: تجهيز البيانات للإرسال (POST) بالحقل الصحيح serial_number
-        const formData = new URLSearchParams();
-        formData.append('csrfmiddlewaretoken', csrfToken);
-        formData.append('serial_number', serial);
-
-        // الخطوة 3: إرسال طلب النتيجة
-        const postResponse = await fetch('https://result.sd/', {
+        const response = await fetch('/api/result', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: formData.toString()
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.identity ? JSON.stringify({ serial_number: serial }) : JSON.stringify({ serial_number: serial })
         });
 
-        const responseHtml = await postResponse.text();
-        const responseDoc = parser.parseFromString(responseHtml, 'text/html');
-        
-        // استخراج صندوق النتيجة أو الأخطاء من الرد المرجع
-        const resultCard = responseDoc.querySelector('.result') || responseDoc.querySelector('.errorlist') || responseDoc.querySelector('.notice');
+        const data = await response.json();
 
-        if (resultCard) {
-            resultArea.innerHTML = resultCard.outerHTML;
+        if (data.success) {
+            // تحليل الHTML المرجع واستخراج محتوى صندوق النتيجة أو رسالة الخطأ فقط
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data.html, 'text/html');
+            
+            const targetElement = doc.querySelector('.result') || doc.querySelector('.errorlist') || doc.querySelector('.notice') || doc.querySelector('form');
+
+            if (targetElement) {
+                container.innerHTML = targetElement.outerHTML;
+            } else {
+                container.innerHTML = '<p style="color: #f87171;">لم يتم العثور على بيانات مطابقة لهذا الرقم.</p>';
+            }
         } else {
-            resultArea.innerHTML = '<span style="color:green;">تم إرسال الطلب بنجاح، راجع الـ Console أو الـ Network للتفاصيل.</span>';
+            container.innerHTML = `<p style="color: #f87171;">${data.message}</p>`;
         }
 
     } catch (error) {
         console.error(error);
-        resultArea.innerHTML = '<span style="color:red;">حدث خطأ في الاتصال (غالباً بسبب قيود الـ CORS من المتصفح).</span>';
+        container.innerHTML = '<p style="color: #f87171;">حدث خطأ أثناء الاتصال بالخادم.</p>';
     }
 }
 </script>
