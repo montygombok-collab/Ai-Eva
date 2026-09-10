@@ -67,7 +67,7 @@
             </div>
 
             <div id="errorBox" class="hidden mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs text-center">
-                <span id="errorText">تعذر العثور على نتيجة لهذا الرقم، تأكد من صحة الرقم وأعد المحاولة.</span>
+                <span id="errorText">تعذر العثور على نتيجة لهذا الرقم.</span>
             </div>
 
         </div>
@@ -97,8 +97,8 @@
             errorBox.classList.add('hidden');
 
             try {
-                // الربط المباشر بمسار الـ API المعتمد في Vercel
-                const response = await fetch(`/api/result?seat=${encodeURIComponent(seatNo)}`);
+                // إضافة timestamp لمنع الكاش (Cache) وضمان طلب حي دائم
+                const response = await fetch(`/api/result?seat=${encodeURIComponent(seatNo)}&_t=${Date.now()}`);
                 const data = await response.json();
 
                 if (data.success) {
