@@ -1,79 +1,557 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>استعلام نتيجة الشهادة الثانوية - Monty Go SDN</title>
+    <title>الاستعلام عن النتيجة</title>
     <style>
-        body { background: #0f172a; color: #f8fafc; font-family: Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center; }
-        h2 { margin-bottom: 20px; color: #38bdf8; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 16px; box-sizing: border-box; text-align: center; }
-        input:focus { border-color: #38bdf8; outline: none; }
-        button { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: background 0.2s; }
-        button:hover { background: #1d4ed8; }
-        #resultContainer { margin-top: 20px; text-align: right; }
-        /* تنسيق لبعض عناصر النتيجة المرجعة من الموقع الأصلي لتبدو مرتبة */
-        .result { background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-top: 15px; }
-        .errorlist { color: #f87171; list-style: none; padding: 0; }
-        .notice { color: #fbbf24; }
-    </style>
-</head>
-<body>
-
-<div class="card">
-    <h2>استعلام الشهادة الثانوية</h2>
-    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">أدخل رقم الجلوس لجلب البيانات فوراً</p>
-    
-    <input type="text" id="serialInput" placeholder="أدخل رقم الجلوس" maxlength="6">
-    <button onclick="getResult()">استعلام الآن</button>
-
-    <div id="resultContainer"></div>
-</div>
-
-<script>
-async function getResult() {
-    const serial = document.getElementById('serialInput').value.trim();
-    const container = document.getElementById('resultContainer');
-
-    if (!serial) {
-        alert('الرجاء إدخال رقم الجلوس');
-        return;
-    }
-
-    container.innerHTML = '<p style="color: #38bdf8;">جاري جلب النتيجة... ⏳</p>';
-
-    try {
-        const response = await fetch('/api/result', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.identity ? JSON.stringify({ serial_number: serial }) : JSON.stringify({ serial_number: serial })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            // تحليل الHTML المرجع واستخراج محتوى صندوق النتيجة أو رسالة الخطأ فقط
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(data.html, 'text/html');
-            
-            const targetElement = doc.querySelector('.result') || doc.querySelector('.errorlist') || doc.querySelector('.notice') || doc.querySelector('form');
-
-            if (targetElement) {
-                container.innerHTML = targetElement.outerHTML;
-            } else {
-                container.innerHTML = '<p style="color: #f87171;">لم يتم العثور على بيانات مطابقة لهذا الرقم.</p>';
-            }
-        } else {
-            container.innerHTML = `<p style="color: #f87171;">${data.message}</p>`;
+        @font-face {
+            font-family: 'Cairo';
+            src: url("/static/fonts/Cairo/static/Cairo-Regular.ttf") format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Cairo';
+            src: url("/static/fonts/Cairo/static/Cairo-Bold.ttf") format('truetype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
         }
 
-    } catch (error) {
-        console.error(error);
-        container.innerHTML = '<p style="color: #f87171;">حدث خطأ أثناء الاتصال بالخادم.</p>';
-    }
-}
-</script>
+        * {
+            box-sizing: border-box;
+        }
 
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+
+
+        body {
+            background: #ffffff;
+            color: #2b2b2b;
+
+            font-family: 'Cairo', Tahoma, sans-serif;
+
+            line-height: 1.6;
+        }
+
+
+        /* =========================
+           Page
+        ========================= */
+
+        .page {
+            width: min(100% - 32px, 760px);
+
+            margin: 48px auto;
+        }
+
+
+        /* =========================
+           Logos
+        ========================= */
+
+        .logos {
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 35px;
+
+            margin-bottom: 28px;
+        }
+
+
+        .logos img {
+            display: block;
+
+            width: auto;
+            height: auto;
+
+            max-width: 150px;
+            max-height: 85px;
+
+            object-fit: contain;
+        }
+
+
+        /* =========================
+           Card
+        ========================= */
+
+        .card {
+            background: #ffffff;
+
+            border: 1px solid #d0d0d0;
+            border-radius: 7px;
+
+            box-shadow:
+                0 2px 5px rgba(0, 0, 0, 0.08);
+
+            padding: 28px 20px 20px;
+        }
+
+
+        /* =========================
+           Heading
+        ========================= */
+
+        .heading {
+            text-align: center;
+
+            margin-bottom: 28px;
+        }
+
+
+        .heading h1 {
+            margin: 0;
+
+            color: #292929;
+
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+
+        .heading p {
+            margin: 8px 0 0;
+
+            color: #777;
+
+            font-size: 14px;
+        }
+
+
+        /* =========================
+           Form Row
+        ========================= */
+
+        .form-row {
+            display: flex;
+
+            align-items: center;
+
+            gap: 18px;
+
+            margin-bottom: 18px;
+        }
+
+
+        .form-label {
+            width: 150px;
+
+            flex-shrink: 0;
+
+            color: #555;
+
+            font-size: 16px;
+
+            text-align: right;
+        }
+
+
+        .form-control-wrapper {
+            flex: 1;
+        }
+
+
+        /* =========================
+           Inputs
+        ========================= */
+
+        .form-control-wrapper input {
+            display: block;
+
+            width: 100%;
+            height: 44px;
+
+            padding: 8px 13px;
+
+            background: #ffffff;
+
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+
+            color: #333;
+
+            font-family: inherit;
+            font-size: 16px;
+
+            transition:
+                border-color 0.15s,
+                box-shadow 0.15s;
+        }
+
+
+        input::placeholder {
+            color: #888;
+        }
+
+
+        input:focus {
+            outline: none;
+
+            border-color: #86b7fe;
+
+            box-shadow:
+                0 0 0 3px rgba(13, 110, 253, 0.12);
+        }
+
+
+        /* Django input */
+        .form-control-wrapper > input {
+            width: 100%;
+        }
+
+
+        /* =========================
+           Button
+        ========================= */
+
+        .button-row {
+            display: flex;
+
+            gap: 18px;
+        }
+
+
+        .button-space {
+            width: 0;
+        }
+
+
+        .submit-button {
+            width: 100%;
+
+            height: 58px;
+
+            border: 0;
+            border-radius: 6px;
+
+            background: #1677ff;
+            color: #ffffff;
+
+            font-family: inherit;
+            font-size: 16px;
+
+            cursor: pointer;
+
+            transition:
+                background 0.15s;
+        }
+
+
+        .submit-button:hover {
+            background: #0866df;
+        }
+
+
+        /* =========================
+           Errors
+        ========================= */
+
+        .errorlist {
+            list-style: none;
+
+            padding: 0;
+
+            margin: 6px 0 0;
+
+            color: #b42318;
+
+            font-size: 13px;
+        }
+
+
+        .notice {
+            width: min(100% - 32px, 760px);
+
+            margin: 20px auto 0;
+
+            padding: 13px 16px;
+
+            background: #ffffff;
+
+            border: 1px solid #d4d4d4;
+            border-radius: 6px;
+
+            color: #555;
+
+            text-align: center;
+        }
+
+
+        /* =========================
+           Result
+        ========================= */
+
+        .result {
+            margin-top: 25px;
+
+            background: #ffffff;
+
+            border: 1px solid #d0d0d0;
+            border-radius: 7px;
+
+            box-shadow:
+                0 2px 5px rgba(0, 0, 0, 0.06);
+
+            padding: 25px;
+        }
+
+
+        .result h2 {
+            margin: 0 0 20px;
+
+            padding-bottom: 14px;
+
+            border-bottom: 1px solid #e0e0e0;
+
+            text-align: center;
+
+            font-size: 22px;
+        }
+
+
+        .result-row {
+            display: grid;
+
+            grid-template-columns:
+                160px 1fr;
+
+            gap: 20px;
+
+            padding: 13px 5px;
+
+            border-bottom: 1px solid #eeeeee;
+        }
+
+
+        .result-row:last-child {
+            border-bottom: 0;
+        }
+
+
+        .result-label {
+            color: #666;
+        }
+
+
+        .result-value {
+            color: #222;
+
+            font-weight: bold;
+        }
+
+
+        .logos .ministry-logo {
+            max-width: 173px;
+            max-height: 98px;
+        }
+
+        /* =========================
+           Mobile
+        ========================= */
+
+        @media (max-width: 600px) {
+
+            .page {
+                margin-top: 25px;
+            }
+
+
+            .logos {
+                gap: 20px;
+
+                margin-bottom: 20px;
+            }
+
+
+            .logos img {
+                max-width: 110px;
+                max-height: 70px;
+            }
+
+            .logos .ministry-logo {
+                max-width: 127px;
+                max-height: 81px;
+            }
+
+
+            .card {
+                padding: 24px 18px;
+            }
+
+
+            .heading h1 {
+                font-size: 23px;
+            }
+
+
+            .form-row {
+                display: block;
+            }
+
+
+            .form-label {
+                width: auto;
+
+                margin-bottom: 7px;
+
+                display: block;
+            }
+
+
+            .submit-button {
+                height: 50px;
+            }
+
+
+            .result-row {
+                grid-template-columns: 1fr;
+
+                gap: 4px;
+            }
+
+        }
+
+    </style>
+    <style>
+        @font-face {
+            font-family: 'Cairo';
+            src: url("/static/fonts/Cairo/static/Cairo-Regular.ttf") format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Cairo';
+            src: url("/static/fonts/Cairo/static/Cairo-Bold.ttf") format('truetype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        .result-actions { margin-top: 24px; }
+        .result-actions a { display: flex; align-items: center; justify-content: center; text-decoration: none; }
+        .result h1 { margin: 0 0 20px; padding-bottom: 14px; border-bottom: 1px solid #e0e0e0; text-align: center; font-size: 22px; }
+        .result-value { overflow-wrap: anywhere; }
+        .submit-button:focus-visible { outline: 3px solid #173e70; outline-offset: 3px; }
+        .official-header {
+    text-align: center;
+    margin-bottom: 24px;
+    color: #222;
+    line-height: 1.8;
+}
+
+.official-header div {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.official-header .certificate-title {
+    margin-top: 4px;
+    font-size: 22px;
+    color: #000000;
+}
+    </style>
+    
+    <style>
+        .notice.notice-error,
+        .errorlist {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .errorlist {
+            padding: 10px 12px;
+            border-radius: 6px;
+        }
+    </style>
+    <script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+        async
+        defer
+    ></script>
+
+</head>
+<body>
+<main class="page">
+    <div class="logos">
+        <img
+            src="/static/img/logo-new.jpg"
+            class="ministry-logo"
+            alt="شعار وزارة التربية و التعليم"
+        >
+        <img
+            src="/static/img/logo-baldna.webp"
+            alt="شعار منصة بلدنا"
+        >
+    </div>
+    <div class="official-header">
+    <div>جمهورية السودان</div>
+    <div>وزارة التعليم و التربية الوطنية</div>
+    <div class="certificate-title">نتيجة الشهادة الثانوية للعام 2026</div>
+</div>
+
+    <div class="card">
+        <div class="heading">
+            <p>
+                أدخل رقم الجلوس للتحقق من النتيجة
+            </p>
+        </div>
+     <!-- Messages -->
+        
+        <!-- Form -->
+        <form
+            method="post"
+            action="/">
+            <input type="hidden" name="csrfmiddlewaretoken" value="0Cn3nGGUpnmHEpjSlikOoBQj2we7vTKWseOqdximOIWaRsr1fDYyYyPh1bBIWzLs">
+            <div class="form-row">
+                <label
+                    class="form-label"
+                    for="id_serial_number">
+                    رقم الجلوس
+                </label>
+                <div class="form-control-wrapper">
+                    <input type="text" name="serial_number" inputmode="numeric" placeholder="أدخل رقم الجلوس" maxlength="6" required id="id_serial_number">
+                    
+                </div>
+            </div>
+            <!-- Submit -->
+
+            <div class="button-row">
+
+                <button
+                    type="submit"
+                    class="submit-button"
+                >
+                    استعلام
+                </button>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+
+
+    <!-- =========================
+         Not Found
+    ========================= -->
+
+    
+
+</main>
 </body>
 </html>
