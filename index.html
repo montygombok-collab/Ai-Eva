@@ -21,28 +21,25 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 md:p-6">
 
-    <!-- الهيدر -->
     <header class="w-full max-w-xl mx-auto flex justify-between items-center py-3 border-b border-slate-800">
         <div class="flex items-center gap-3">
             <div class="bg-indigo-600 text-white font-black px-3 py-1.5 rounded-xl shadow-lg shadow-indigo-500/30 text-lg">MG</div>
             <div>
                 <h1 class="font-black text-base tracking-wider text-white">Monty Go SDN</h1>
-                <p class="text-[10px] text-indigo-300">نظام الاستعلام الذكي المباشر</p>
+                <p class="text-[10px] text-indigo-300">النظام السيادي الموحد</p>
             </div>
         </div>
-        <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full font-medium">متصل بالسيرفر السيادي</span>
+        <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full font-medium">متصل برابط واحد</span>
     </header>
 
-    <!-- المحتوى الرئيسي -->
     <main class="w-full max-w-xl mx-auto my-auto py-6">
         <div class="glass-panel rounded-3xl p-6 md:p-8 shadow-2xl border border-indigo-500/20 relative overflow-hidden">
             
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-black text-white mb-2">استعلام النتيجة</h2>
-                <p class="text-slate-400 text-sm">أدخل رقم الجلوس لجلب البيانات فوراً من النظام الأساسي</p>
+                <p class="text-slate-400 text-sm">أدخل رقم الجلوس لجلب البيانات فوراً برابط موحد</p>
             </div>
 
-            <!-- نموذج الإدخال -->
             <form id="queryForm" onsubmit="fetchResult(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-300 mb-2 uppercase tracking-wider">رقم الجلوس</label>
@@ -57,7 +54,6 @@
                 </button>
             </form>
 
-            <!-- صندوق عرض النتيجة -->
             <div id="resultBox" class="hidden mt-6 p-5 rounded-2xl bg-slate-950/90 border border-indigo-500/30 text-right space-y-3">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                     <span class="text-xs text-emerald-400 font-semibold">نتيجة البحث المستخلصة</span>
@@ -70,7 +66,6 @@
                 </div>
             </div>
 
-            <!-- رسالة الخطأ -->
             <div id="errorBox" class="hidden mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs text-center">
                 <span id="errorText">تعذر العثور على نتيجة لهذا الرقم، تأكد من صحة الرقم وأعد المحاولة.</span>
             </div>
@@ -78,7 +73,6 @@
         </div>
     </main>
 
-    <!-- الفوتر -->
     <footer class="w-full max-w-xl mx-auto text-center py-4 text-xs text-slate-500">
         Monty Go SDN Engine &copy; 2026
     </footer>
@@ -96,18 +90,15 @@
 
             if (!seatNo) return;
 
-            // تغيير حالة الزر لـ "جاري التحميل"
-            btnText.textContent = 'جاري استعلام السيرفر...';
+            btnText.textContent = 'جاري المعالجة...';
             btnSpinner.classList.remove('hidden');
             submitBtn.disabled = true;
             resultBox.classList.add('hidden');
             errorBox.classList.add('hidden');
 
             try {
-                // استبدل الرابط أدناه برابط سيرفرك الحقيقي بعد رفعه على Vercel
-                const backendUrl = `https://your-backend-app.vercel.app/api/result?seat=${encodeURIComponent(seatNo)}`;
-                
-                const response = await fetch(backendUrl);
+                // الربط المباشر بمسار الـ API المعتمد في Vercel
+                const response = await fetch(`/api/result?seat=${encodeURIComponent(seatNo)}`);
                 const data = await response.json();
 
                 if (data.success) {
@@ -120,7 +111,7 @@
                     errorBox.classList.remove('hidden');
                 }
             } catch (err) {
-                errorText.textContent = "حدث خطأ في الاتصال بالسيرفر، يرجى المحاولة لاحقاً.";
+                errorText.textContent = "حدث خطأ في الاتصال بالخادم، يرجى المحاولة لاحقاً.";
                 errorBox.classList.remove('hidden');
             } finally {
                 btnText.textContent = 'استعلام الآن';
