@@ -28,43 +28,16 @@ module.exports = async (req, res) => {
         const htmlText = await response.text();
         const $ = cheerio.load(htmlText);
 
-        // البحث الدقيق عن حقول النتيجة بناءً على النصوص الظاهرة في الموقع الرسمي
-        let studentName = "";
-        let studentScore = "";
-        let studentStatus = "";
-
-        // فحص كل العناصر لاستخراج البيانات المحددة
-        $('div, p, span, td').each((i, el) => {
-            const text = $(el).text().trim();
-            
-            // لو العبارة بتحتوي على الاسم الرباعي أو البيانات
-            if (text.includes('الاسم الرباعي')) {
-                studentName = $(el).next().text().trim() || $(el).text().replace('الاسم الرباعي', '').trim();
-            }
-            if (text.includes('النسبة')) {
-                studentScore = $(el).next().text().trim() || $(el).text().replace('النسبة', '').trim();
-            }
-            if (text.includes('النتيجة') && !text.includes('خدمة النتائج')) {
-                studentStatus = $(el).next().text().trim() || $(el).text().replace('النتيجة', '').trim();
-            }
-        });
-
-        // لو ما لقى البيانات بالطريقة العادية، نجرب نبحث في الـ Body مباشرة أو نتحقق هل هي صفحة ضغط حقاً
-        if (!studentName || studentName.length < 3 || studentName.includes('إقبالاً')) {
-            // فحص لو الصفحة لسة عارضة رسالة الضغط
-            if ($('body').text().includes('إقبالاً كبيراً') || $('body').text().includes('غير متاحة')) {
-                return res.json({
-                    success: false,
-                    message: 'الخدمة تشهد إقبالاً كبيراً، حاول مرة أخرى.'
-                });
-            }
-        }
+        // استخراج النص الكامل أو تنظيفه قليلاً ليعرضه التطبيق
+        // سنقوم بإزالة السكربتات والستايلات وجلب النص العام
+        $('script, style').remove();
+        const fullText = $('body').text().replace(/\s+/g, ' ').trim();
 
         return res.json({
             success: true,
-            name: studentName || "لم يتم العثور على الاسم",
+            name: "النص الكامل للصفحة المسترجعة:",
             seat: seatNo,
-            score: (studentScore ? studentScore + " - " : "") + (studentStatus || "متوفر")
+            score: fullText.substring(0, 300) + (fullText.length > 300 ? "..." : "") // عرض أول 300 حرف للتأكد
         });
 
     } catch (error) {
