@@ -14,17 +14,17 @@
         body, html {
             width: 100%;
             height: 100%;
-            overflow: hidden;
             background-color: #f4f7f6;
+            display: flex;
+            flex-direction: column;
         }
         .header {
             background-color: #1b365d;
             color: white;
-            padding: 10px 20px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 50px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .header h1 {
@@ -34,27 +34,63 @@
             font-size: 14px;
             color: #b0c4de;
         }
-        .container {
-            width: 100%;
-            height: calc(100% - 50px);
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
         }
-        iframe {
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-width: 400px;
             width: 100%;
-            height: 100%;
-            border: none;
+        }
+        .card h2 {
+            margin-bottom: 15px;
+            color: #1b365d;
+            font-size: 20px;
+        }
+        .card p {
+            margin-bottom: 20px;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>Monty Go SDN - بوابة النتائج</h1>
-        <span>خدمات الاستعلام الإلكتروني</span>
+        <h1>Monty Go SDN</h1>
+        <span>بوابة النتائج الرسمية</span>
     </div>
 
-    <div class="container">
-        <!-- نافذة تضمين الرابط المطلوب -->
-        <iframe src="https://result.sd/" title="نظام النتائج"></iframe>
+    <div class="content">
+        <div class="card">
+            <h2>استعلام النتيجة</h2>
+            <p>انقر على الزر أدناه للانتقال إلى بوابة استخراج النتائج الرسمية عبر النظام:</p>
+            <a href="https://result.sd/" target="_blank" class="btn">عرض النتيجة الآن</a>
+        </div>
     </div>
 
 </body>
