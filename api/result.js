@@ -22,12 +22,12 @@ module.exports = async (req, res) => {
         const htmlText = await response.text();
         const $ = cheerio.load(htmlText);
 
-        const studentName = $('#student_name').text().trim() || $('.name').text().trim() || "";
-        const studentScore = $('#result_score').text().trim() || $('.score').text().trim() || "";
+        // طباعة النص المستخلص للتأكد من هيكل الموقع
+        console.log("HTML Length:", htmlText.length);
 
-        if (!studentName) {
-            return res.json({ success: false, message: 'تعذر العثور على نتيجة لهذا الرقم في الموقع الرسمي.' });
-        }
+        // جرب استخراج الاسم والنتيجة بناءً على العناصر الشائعة أو الجداول
+        const studentName = $('td:contains("اسم"), .name, h3, h2').first().text().trim() || "غير متوفر";
+        const studentScore = $('td:contains("المجموع"), .score, .total').first().text().trim() || "غير متوفر";
 
         return res.json({
             success: true,
