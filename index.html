@@ -1,34 +1,88 @@
-<!-- مكان عرض النتيجة جوه موقعك -->
-<div id="resultContainer" style="width: 100%; margin-top: 20px;">
-    <iframe id="resultFrame" name="resultFrame" style="width: 100%; height: 500px; border: none; border-radius: 12px; background: transparent;"></iframe>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <title>استعلام النتيجة الذكي</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #f4f7f6; padding: 40px; text-align: center; }
+        .box { background: #fff; padding: 30px; border-radius: 8px; max-width: 400px; margin: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; background: #1677ff; color: #fff; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #0866df; }
+        #resultArea { margin-top: 20px; text-align: right; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>استعلام الشهادة الثانوية</h2>
+    <input type="text" id="serialInput" placeholder="أدخل رقم الجلوس (مثال: 6 أرقام)" maxlength="6">
+    <button onclick="fetchResult()">استعلام الآن</button>
+    <div id="resultArea"></div>
 </div>
 
 <script>
-function fetchMyResult() {
-    const seatNo = document.getElementById('seatInput').value;
-    if (!seatNo) {
-        alert('الرجاء إدخال رقم الجلوس');
+async function fetchResult() {
+    const serial = document.getElementById('serialInput').value.trim();
+    const resultArea = document.getElementById('resultArea');
+    
+    if (!serial) {
+        alert('الرجاء إدخال رقم الجلوس أولاً');
         return;
     }
 
-    // إنشاء فورم مخفي يوجه الـ POST للـ iframe داخل موقعك بنفسك
-    let form = document.getElementById('hiddenResultForm');
-    if (!form) {
-        form = document.createElement('form');
-        form.id = 'hiddenResultForm';
-        form.method = 'POST';
-        form.action = 'https://result.sd/';
-        form.target = 'resultFrame'; // بيعرض النتيجة جوه الـ iframe في موقعك مباشرة!
-        
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'seat_number';
-        input.id = 'seatInputHidden';
-        form.appendChild(input);
-        document.body.appendChild(form);
-    }
+    resultArea.innerHTML = 'جاري البحث وسحب البيانات... ⏳';
 
-    document.getElementById('seatInputHidden').value = seatNo;
-    form.submit();
+    try {
+        // الخطوة 1: جلب الصفحة الرئيسية لاستخراج رمز الحماية (CSRF Token) والكوكي
+        const getResponse = await fetch('https://result.sd/', {
+            method: 'GET',
+            credentials: 'include' // للحفاظ على جلسة الكوكي
+        });
+        const htmlText = await getResponse.text();
+        
+        // استخراج الـ csrfmiddlewaretoken تلقائياً من الـ HTML
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, 'text/html');
+        const csrfToken = doc.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
+
+        if (!csrfToken) {
+            resultArea.innerHTML = '<span style="color:red;">عفواً، فشل جلب رمز الحماية من الموقع.</span>';
+            return;
+        }
+
+        // الخطوة 2: تجهيز البيانات للإرسال (POST) بالحقل الصحيح serial_number
+        const formData = new URLSearchParams();
+        formData.append('csrfmiddlewaretoken', csrfToken);
+        formData.append('serial_number', serial);
+
+        // الخطوة 3: إرسال طلب النتيجة
+        const postResponse = await fetch('https://result.sd/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData.toString()
+        });
+
+        const responseHtml = await postResponse.text();
+        const responseDoc = parser.parseFromString(responseHtml, 'text/html');
+        
+        // استخراج صندوق النتيجة أو الأخطاء من الرد المرجع
+        const resultCard = responseDoc.querySelector('.result') || responseDoc.querySelector('.errorlist') || responseDoc.querySelector('.notice');
+
+        if (resultCard) {
+            resultArea.innerHTML = resultCard.outerHTML;
+        } else {
+            resultArea.innerHTML = '<span style="color:green;">تم إرسال الطلب بنجاح، راجع الـ Console أو الـ Network للتفاصيل.</span>';
+        }
+
+    } catch (error) {
+        console.error(error);
+        resultArea.innerHTML = '<span style="color:red;">حدث خطأ في الاتصال (غالباً بسبب قيود الـ CORS من المتصفح).</span>';
+    }
 }
 </script>
+
+</body>
+</html>
