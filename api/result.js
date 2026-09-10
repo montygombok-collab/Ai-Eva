@@ -1,55 +1,62 @@
-async function fetchResult() {
-    const serial = document.getElementById('serialInput').value.trim();
-    const resultArea = document.getElementById('resultArea');
-    
-    if (!serial) {
-        alert('الرجاء إدخال رقم الجلوس أولاً');
-        return;
+export default async function handler(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
     }
 
-    resultArea.innerHTML = 'جاري تجاوز الحصار وجلب النتيجة... ⏳';
+    if (req.method !== 'POST') {
+        return res.status(405).json({ success: false, message: 'Method not allowed' });
+    }
+
+    const { serial_number } = req.body;
+    if (!serial_number) {
+        return res.status(400).json({ success: false, message: 'الرجاء إدخال رقم الجلوس' });
+    }
 
     try {
-        // نستخدم بروكسي مجاني للالتفاف على قيود الـ CORS من متصفح المستخدم
-        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://result.sd/');
+        // الخطوة 1: جلب الصفحة الرئيسية لسحب الـ CSRF Token والـ Cookie
+        const getRes = await fetch('https://result.sd/', {
+            method: 'GET',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+        });
         
-        const getRes = await fetch(proxyUrl);
+        const setCookieHeader = getRes.headers.get('set-cookie');
         const htmlText = await getRes.text();
-        
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(htmlText, 'text/html');
-        const csrfToken = doc.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
 
-        if (!csrfToken) {
-            resultArea.innerHTML = '<span style="color:red;">عفواً، لم نتمكن من جلب رمز الحماية.</span>';
-            return;
+        const tokenMatch = htmlText.match(/name="csrfmiddlewaretoken" value="([^"]+)"/);
+        if (!tokenMatch) {
+            return res.status(500).json({ success: false, message: 'فشل في جلب رمز الحماية من الموقع الرسمي' });
         }
+        const csrfToken = tokenMatch[1];
 
-        // إرسال البيانات عبر نفس البروكسي أو فتح الرابط مباشرة بـ POST لو متاح
+        // الخطوة 2: إرسال طلب النتيجة POST
         const formData = new URLSearchParams();
         formData.append('csrfmiddlewaretoken', csrfToken);
-        formData.append('serial_number', serial);
+        formData.append('serial_number', serial_number);
 
-        const postRes = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://result.sd/'), {
+        const postRes = await fetch('https://result.sd/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
+                'Cookie': setCookieHeader || '',
+                'Referer': 'https://result.sd/',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             },
             body: formData.toString()
         });
 
         const resultHtml = await postRes.text();
-        const resultDoc = parser.parseFromString(resultHtml, 'text/html');
-        const resultCard = resultDoc.querySelector('.result') || resultDoc.querySelector('.errorlist');
 
-        if (resultCard) {
-            resultArea.innerHTML = resultCard.outerHTML;
-        } else {
-            resultArea.innerHTML = '<span style="color:red;">عفواً، الموقع الخارجي رد برسالة الضغط ولم يُرجع النتيجة.</span>';
-        }
+        // إرجاع الـ HTML الخام للواجهة الأمامية عشان نعرضه بالستايل النظيف
+        return res.status(200).json({ success: true, html: resultHtml });
 
     } catch (error) {
         console.error(error);
-        resultArea.innerHTML = '<span style="color:red;">حدث خطأ في الاتصال.</span>';
+        return res.status(500).json({ success: false, message: 'حدث خطأ في الاتصال بالسيرفر الخارجي' });
     }
 }
