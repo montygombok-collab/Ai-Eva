@@ -45,17 +45,16 @@
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.08);
             width: 100%;
-            max-width: 480px;
-            text-align: center;
+            max-width: 420px;
         }
         .card h2 {
             color: #2d3748;
             font-size: 18px;
             margin-bottom: 20px;
+            text-align: center;
         }
         .form-group {
             margin-bottom: 20px;
-            text-align: right;
         }
         .form-group label {
             display: block;
@@ -69,10 +68,11 @@
             padding: 12px 15px;
             border: 2px solid #e2e8f0;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 18px;
             outline: none;
             transition: border-color 0.3s;
             text-align: center;
+            letter-spacing: 2px;
         }
         .form-group input:focus {
             border-color: #3182ce;
@@ -92,16 +92,6 @@
         .btn:hover {
             background-color: #2b6cb0;
         }
-        #resultArea {
-            display: none;
-            margin-top: 15px;
-            text-align: right;
-        }
-        .loading {
-            color: #3182ce;
-            font-weight: bold;
-            margin: 15px 0;
-        }
         .footer {
             text-align: center;
             padding: 15px;
@@ -109,14 +99,6 @@
             font-size: 12px;
             background-color: #fff;
             border-top: 1px solid #e2e8f0;
-        }
-        .back-btn {
-            background-color: #e2e8f0;
-            color: #4a5568;
-            margin-top: 15px;
-        }
-        .back-btn:hover {
-            background-color: #cbd5e0;
         }
     </style>
 </head>
@@ -128,23 +110,15 @@
     </div>
 
     <div class="container">
-        <div class="card" id="mainCard">
-            <div id="formSection">
-                <h2>أدخل رقم الجلوس للاستعلام</h2>
-                <form id="resultForm" onsubmit="submitResult(event)">
-                    <div class="form-group">
-                        <label for="seatNumber">رقم الجلوس</label>
-                        <input type="text" id="seatNumber" placeholder="أدخل رقم الجلوس هنا" required>
-                    </div>
-                    <button type="submit" class="btn">عرض النتيجة</button>
-                </form>
-            </div>
-
-            <div id="resultArea">
-                <div class="loading" id="loadingText">جاري جلب النتيجة... يرجى الانتظار</div>
-                <div id="resultContent"></div>
-                <button type="button" class="btn back-btn" onclick="resetForm()">بحث برقم جلوس آخر</button>
-            </div>
+        <div class="card">
+            <h2>أدخل رقم الجلوس للاستعلام</h2>
+            <form id="resultForm" onsubmit="redirectToResult(event)">
+                <div class="form-group">
+                    <label for="seatNumber">رقم الجلوس</label>
+                    <input type="text" id="seatNumber" placeholder="مثال: 409353" required autocomplete="off">
+                </div>
+                <button type="submit" class="btn">استعلام النتيجة</button>
+            </form>
         </div>
     </div>
 
@@ -153,52 +127,21 @@
     </div>
 
     <script>
-        async function submitResult(event) {
+        function redirectToResult(event) {
             event.preventDefault();
             const seatNo = document.getElementById('seatNumber').value.trim();
             
-            if(!seatNo) return;
+            if(seatNo) {
+                // حفظ رقم الجلوس في الذاكرة المؤقتة للمتصفح لتسهيل نسخه إن أردت
+                navigator.clipboard.writeText(seatNo).then(() => {
+                    console.log('تم نسخ رقم الجلوس');
+                }).catch(err => {
+                    console.log('فشل النسخ', err);
+                });
 
-            // إخفاء نموذج الإدخال وإظهار منطقة النتيجة
-            document.getElementById('formSection').style.display = 'none';
-            document.getElementById('resultArea').style.display = 'block';
-            document.getElementById('loadingText').style.display = 'block';
-            document.getElementById('resultContent').innerHTML = '';
-
-            try {
-                // استخدام وسيط (CORS Proxy) لجلب بيانات النتيجة داخل صفحتك دون الخروج منها
-                const proxyUrl = 'https://api.allorigins.win/get?url=';
-                const targetUrl = encodeURIComponent('https://result.sd/'); // أو الرابط المخصص للنتيجة إذا توفر مسار مباشر
-                
-                const response = await fetch(proxyUrl + targetUrl);
-                const data = await response.json();
-                
-                if(data && data.contents) {
-                    document.getElementById('loadingText').style.display = 'none';
-                    // عرض محتوى الصفحة أو تخصيصه
-                    document.getElementById('resultContent').innerHTML = `
-                        <div style="background: #e6fffa; color: #234e52; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 14px;">
-                            تم الاتصال بنظام النتائج بنجاح برقم الجلوس: <b>${seatNo}</b>
-                        </div>
-                        <iframe src="https://result.sd/" style="width:100%; height:300px; border:1px solid #cbd5e0; border-radius:8px;"></iframe>
-                    `;
-                } else {
-                    throw new Error('فشل الاتصال');
-                }
-            } catch (error) {
-                document.getElementById('loadingText').style.display = 'none';
-                // حل بديل مباشر في حال قيود الخادم: فتح الموقع في تاب جديد مع بقاء التصميم كخيار احتياطي آمن
-                document.getElementById('resultContent').innerHTML = `
-                    <p style="color: #c53030; margin-bottom: 15px;">عذراً، يمنع النظام الحماية العرض المباشر. اضغط الزر أدناه لمشاهدة النتيجة فوراً:</p>
-                    <a href="https://result.sd/" target="_blank" class="btn">فتح النتيجة في نافذة جديدة</a>
-                `;
+                // فتح الموقع الرسمي
+                window.open('https://result.sd/', '_blank');
             }
-        }
-
-        function resetForm() {
-            document.getElementById('seatNumber').value = '';
-            document.getElementById('resultArea').style.display = 'none';
-            document.getElementById('formSection').style.display = 'block';
         }
     </script>
 
