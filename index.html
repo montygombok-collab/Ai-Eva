@@ -1,21 +1,341 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة جبهة - استراتيجية السودان 3D</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        body { font-family: 'Cairo', sans-serif; overflow: hidden; background-color: #050b14; color: #f3f4f6; }
+        canvas { display: block; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 0; }
+        .ui-layer { position: relative; z-index: 10; pointer-events: none; }
+        .interactive { pointer-events: auto; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4">
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBujvBUSOumEa81BnoSkechTBnUwcH9FKg",
-  authDomain: "gbha-online.firebaseapp.com",
-  projectId: "gbha-online",
-  storageBucket: "gbha-online.firebasestorage.app",
-  messagingSenderId: "231284480188",
-  appId: "1:231284480188:web:74a803d2a83400b0d398b9",
-  measurementId: "G-MCNEX0P94X"
-};
+    <!-- رندر الثلاثي الأبعاد -->
+    <div id="canvas-container"></div>
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+    <!-- واجهة المستخدم (UI) -->
+    <div class="ui-layer flex justify-between items-start w-full max-w-7xl mx-auto">
+        <!-- لوحة معلومات القيادة -->
+        <div class="interactive bg-slate-900/90 border border-slate-700/80 p-4 rounded-2xl backdrop-blur-md shadow-2xl w-80">
+            <h1 class="text-xl font-black text-red-500 mb-1">لعبة جبهة 🎖️</h1>
+            <p class="text-xs text-slate-400 mb-3">مسرح العمليات الاستراتيجي ثلاثي الأبعاد</p>
+            <div class="space-y-2 text-sm border-t border-slate-800 pt-3">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">القاعدة:</span>
+                    <span id="ui-base-name" class="font-bold text-white">منطقة العمليات A1</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">الإمدادات:</span>
+                    <span id="ui-supplies" class="font-bold text-amber-400">350</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">الوقت:</span>
+                    <span id="ui-time" class="font-bold text-blue-400">نهار (08:00)</span>
+                </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-800 flex gap-2">
+                <button onclick="toggleMoveMode()" id="move-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-xl text-xs transition shadow-lg shadow-red-600/30">
+                    وضع نقل المبنى
+                </button>
+            </div>
+        </div>
+
+        <!-- لوحة التحكم في الحركة والتحكم -->
+        <div class="interactive bg-slate-900/90 border border-slate-700/80 p-4 rounded-2xl backdrop-blur-md shadow-2xl flex flex-col items-center">
+            <span class="text-xs text-slate-400 mb-2 font-bold">أزرار الحركة الاستراتيجية</span>
+            <div class="grid grid-cols-3 gap-1 w-32 mb-2">
+                <div></div>
+                <button onmousedown="startMove('FORWARD')" onmouseup="stopMove()" ontouchstart="startMove('FORWARD')" ontouchend="stopMove()" class="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-lg text-xs font-bold border border-slate-600">▲</button>
+                <div></div>
+                <button onmousedown="startMove('LEFT')" onmouseup="stopMove()" ontouchstart="startMove('LEFT')" ontouchend="stopMove()" class="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-lg text-xs font-bold border border-slate-600">◀</button>
+                <button onmousedown="startMove('BACKWARD')" onmouseup="stopMove()" ontouchstart="startMove('BACKWARD')" ontouchend="stopMove()" class="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-lg text-xs font-bold border border-slate-600">▼</button>
+                <button onmousedown="startMove('RIGHT')" onmouseup="stopMove()" ontouchstart="startMove('RIGHT')" ontouchend="stopMove()" class="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-lg text-xs font-bold border border-slate-600">▶</button>
+            </div>
+            <span class="text-[10px] text-slate-500">استخدم W, A, S, D أو الماوس للتجول</span>
+        </div>
+    </div>
+
+    <!-- شاشة الإشعارات السفلية -->
+    <div class="ui-layer w-full max-w-4xl mx-auto text-center">
+        <div id="status-msg" class="interactive inline-block bg-slate-900/80 border border-slate-700 px-6 py-2 rounded-xl text-xs text-amber-300 shadow-xl backdrop-blur-md">
+            انقر على أي برج أو مبنى لتحديده ثم انقر على زر النقل لتحريكه في الخريطة!
+        </div>
+    </div>
+
+    <!-- كود المحرك ثلاثي الأبعاد Three.js والمنطق التفاعلي -->
+    <script>
+        let scene, camera, renderer, clock;
+        let moveDirection = { forward: 0, right: 0 };
+        let isMoving = false;
+        let currentMoveCommand = null;
+        let selectedBuilding = null;
+        let isMoveMode = false;
+        let worldObjects = [];
+        let timeOfDay = 0; // 0 to 24
+
+        // إعداد المشهد الأساسي
+        function init3D() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111827);
+            scene.fog = new THREE.FogExp2(0x111827, 0.003);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 5000);
+            camera.position.set(0, 150, 250);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            clock = new THREE.Clock();
+
+            // الإضاءة العامة
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const sunLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+            sunLight.position.set(300, 500, 300);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            scene.add(sunLight);
+
+            createTerrain();
+            createRiver();
+            createDetailedCity();
+
+            // الاستماع للنقر والتفاعل
+            window.addEventListener('resize', onWindowResize, false);
+            window.addEventListener('click', onPointerClick, false);
+            setupKeyboardControls();
+
+            animate();
+        }
+
+        // إنشاء الأرض الترابية والغابات
+        function createTerrain() {
+            const groundGeo = new THREE.PlaneGeometry(6000, 6000, 64, 64);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x2d3748, roughness: 0.9, metalness: 0.1 });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // إضافة أشجار واقعية متفرقة
+            const treeGeo = new THREE.ConeGeometry(8, 25, 6);
+            const treeMat = new THREE.MeshStandardMaterial({ color: 0x1e4620, roughness: 0.8 });
+            const trunkGeo = new THREE.CylinderGeometry(2, 2, 8);
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3525 });
+
+            for (let i = 0; i < 200; i++) {
+                const x = (Math.random() - 0.5) * 4000;
+                const z = (Math.random() - 0.5) * 4000;
+                if (Math.abs(x) < 300 && Math.abs(z) < 300) continue; // الابتعاد عن مركز القاعدة قليلاً
+
+                const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+                trunk.position.set(x, 4, z);
+                const leaves = new THREE.Mesh(treeGeo, treeMat);
+                leaves.position.set(x, 16, z);
+                leaves.castShadow = true;
+
+                scene.add(trunk);
+                scene.add(leaves);
+            }
+        }
+
+        // إنشاء مسار النهر
+        function createRiver() {
+            const riverGeo = new THREE.PlaneGeometry(120, 6000);
+            const riverMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.2, metalness: 0.8 });
+            const river = new THREE.Mesh(riverGeo, riverMat);
+            river.rotation.x = -Math.PI / 2;
+            river.position.set(-400, 1, 0);
+            scene.add(river);
+        }
+
+        // بناء تفصيلي للأبراج وناطحات السحاب مع الشبابيك
+        function createDetailedCity() {
+            for (let i = 0; i < 40; i++) {
+                const width = 30 + Math.random() * 40;
+                const depth = 30 + Math.random() * 40;
+                const height = 80 + Math.random() * 250;
+
+                const x = (Math.random() - 0.5) * 2000;
+                const z = (Math.random() - 0.5) * 2000;
+
+                const buildingGroup = new THREE.Group();
+
+                // الهيكل الرئيسي للبرج
+                const bGeo = new THREE.BoxGeometry(width, height, depth);
+                const bMat = new THREE.MeshStandardMaterial({
+                    color: 0x334155,
+                    roughness: 0.4,
+                    metalness: 0.6
+                });
+                const buildingMesh = new THREE.Mesh(bGeo, bMat);
+                buildingMesh.position.y = height / 2;
+                buildingMesh.castShadow = true;
+                buildingMesh.receiveShadow = true;
+                buildingGroup.add(buildingMesh);
+
+                // إضافة تفاصيل الشبابيك والإضاءة الواقعية (طبقات متكررة)
+                const windowGeo = new THREE.BoxGeometry(width * 0.85, 2, depth * 0.85);
+                const windowMat = new THREE.MeshBasicMaterial({ color: 0xfde047 }); // إضاءة صفراء دافئة للشبابيك
+
+                for (let h = 15; h < height - 10; h += 20) {
+                    const winLayer = new THREE.Mesh(windowGeo, windowMat);
+                    winLayer.position.y = h;
+                    buildingGroup.add(winLayer);
+                }
+
+                buildingGroup.position.set(x, 0, z);
+                buildingGroup.userData = { id: `Building_${i}`, name: `برج استراتيجي #${i+1}` };
+
+                scene.add(buildingGroup);
+                worldObjects.push(buildingGroup);
+            }
+        }
+
+        // تفاعل النقر واختيار المباني للتحريك
+        function onPointerClick(event) {
+            // تجاهل النقر إذا كان على واجهة الأزرار
+            if (event.clientY < 120 && event.clientX < 320) return;
+
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+
+            if (intersects.length > 0) {
+                let obj = intersects[0].object;
+                while (obj.parent && !obj.userData.id) {
+                    obj = obj.parent;
+                }
+                if (obj.userData && obj.userData.id) {
+                    selectedBuilding = obj;
+                    document.getElementById('status-msg').innerText = `تم تحديد: ${obj.userData.name}. انقر على وضع نقل المبنى لتحريكه.`;
+                    highlightSelectedBuilding();
+                } else if (isMoveMode && selectedBuilding) {
+                    // نقل المبنى للمكان المنقور الجديد على الأرض
+                    selectedBuilding.position.x = intersects[0].point.x;
+                    selectedBuilding.position.z = intersects[0].point.z;
+                    document.getElementById('status-msg').innerText = `تم نقل ${selectedBuilding.userData.name} إلى الموقع الجديد بنجاح!`;
+                    toggleMoveMode(); // إيقاف وضع النقل
+                }
+            }
+        }
+
+        function highlightSelectedBuilding() {
+            worldObjects.forEach(obj => {
+                obj.children.forEach(child => {
+                    if (child.material && child.material.emissive) {
+                        child.material.emissive.setHex(0x000000);
+                    }
+                });
+            });
+            if (selectedBuilding) {
+                selectedBuilding.children.forEach(child => {
+                    if (child.material && child.material.emissive) {
+                        child.material.emissive.setHex(0xef4444);
+                    }
+                });
+            }
+        }
+
+        function toggleMoveMode() {
+            if (!selectedBuilding) {
+                alert('الرجاء تحديد مبنى أو برج أولاً بالضغط عليه!');
+                return;
+            }
+            isMoveMode = !isMoveMode;
+            const btn = document.getElementById('move-btn');
+            if (isMoveMode) {
+                btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+                btn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                btn.innerText = 'انقر مكان الهدف الجديد...';
+                document.getElementById('status-msg').innerText = 'وضع النقل مفعل: انقر في أي مكان على الأرض لنقل المبنى المحدد إليه.';
+            } else {
+                btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
+                btn.classList.add('bg-red-600', 'hover:bg-red-700');
+                btn.innerText = 'وضع نقل المبنى';
+                document.getElementById('status-msg').innerText = 'تم إلغاء وضع النقل.';
+            }
+        }
+
+        // أزرار التحكم بالحركة
+        function startMove(direction) {
+            isMoving = true;
+            currentMoveCommand = direction;
+        }
+
+        function stopMove() {
+            isMoving = false;
+            currentMoveCommand = null;
+        }
+
+        function setupKeyboardControls() {
+            window.addEventListener('keydown', (e) => {
+                switch(e.key.toLowerCase()) {
+                    case 'w': startMove('FORWARD'); break;
+                    case 's': startMove('BACKWARD'); break;
+                    case 'a': startMove('LEFT'); break;
+                    case 'd': startMove('RIGHT'); break;
+                }
+            });
+            window.addEventListener('keyup', (e) => {
+                switch(e.key.toLowerCase()) {
+                    case 'w':
+                    case 's':
+                    case 'a':
+                    case 'd': stopMove(); break;
+                }
+            });
+        }
+
+        // حلقة التحديث والرندر المستمر
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // تحديث حركة الكاميرا بناءً على الأوامر
+            const speed = 15;
+            if (isMoving && currentMoveCommand) {
+                if (currentMoveCommand === 'FORWARD') camera.position.z -= speed;
+                if (currentMoveCommand === 'BACKWARD') camera.position.z += speed;
+                if (currentMoveCommand === 'LEFT') camera.position.x -= speed;
+                if (currentMoveCommand === 'RIGHT') camera.position.x += speed;
+            }
+
+            // تحديث الوقت اليومي (ليل ونهار حي ومباشر)
+            timeOfDay += 0.01;
+            if (timeOfDay > 24) timeOfDay = 0;
+            const hours = Math.floor(timeOfDay);
+            const mins = Math.floor((timeOfDay - hours) * 60);
+            const timeStr = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+            const isNight = hours < 6 || hours > 19;
+            document.getElementById('ui-time').innerText = `${isNight ? 'ليل 🌙' : 'نهار ☀️'} (${timeStr})`;
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.onload = init3D;
+    </script>
+</body>
+</html>
