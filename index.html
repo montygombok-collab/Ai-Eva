@@ -1,94 +1,21 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>خريطة عمليات جبهة</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-        body { font-family: 'Cairo', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
-        .radar-grid {
-            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
-        }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-    <!-- حاوية خريطة العمليات -->
-    <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 radar-grid relative overflow-hidden">
-        
-        <!-- رأس الخريطة العسكرية -->
-        <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
-            <div>
-                <span class="text-xs text-red-500 font-bold tracking-wider block">مسرح العمليات العسكرية</span>
-                <h2 class="text-2xl font-black text-white">خريطة السودان الاستراتيجية</h2>
-            </div>
-            <div class="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                <span class="text-xs text-emerald-400 font-bold">النظام متصل</span>
-            </div>
-        </div>
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBujvBUSOumEa81BnoSkechTBnUwcH9FKg",
+  authDomain: "gbha-online.firebaseapp.com",
+  projectId: "gbha-online",
+  storageBucket: "gbha-online.firebasestorage.app",
+  messagingSenderId: "231284480188",
+  appId: "1:231284480188:web:74a803d2a83400b0d398b9",
+  measurementId: "G-MCNEX0P94X"
+};
 
-        <!-- مساحة عرض الخريطة (SVG) -->
-        <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-6 flex flex-col items-center justify-center relative min-h-[420px]">
-            
-            <!-- أداة تحكم مصغرة في زوايا الخريطة -->
-            <div class="absolute top-3 right-3 text-[10px] text-slate-500 font-mono">SEC-A // 15.5007° N, 32.5599° E</div>
-            <div class="absolute bottom-3 left-3 text-[10px] text-red-500/60 font-mono">LIVE_RADAR: ACTIVE</div>
-
-            <!-- خريطة السودان SVG الصاروخية -->
-            <svg viewBox="0 0 500 500" class="w-full max-w-[360px] h-auto drop-shadow-2xl">
-                
-                <!-- حدود السودان بتصميم هندسي تكتيكي داكن -->
-                <path d="M150,50 L350,70 L400,200 L380,380 L250,450 L120,400 L90,250 Z" 
-                      fill="#151c2c" stroke="#334155" stroke-width="3" />
-                
-                <!-- مسار النيل الرئيسي بتدرج وتصميم انسيابي -->
-                <path d="M220,450 Q240,300 210,200 T280,70" 
-                      fill="none" stroke="#1d4ed8" stroke-width="4" stroke-linecap="round" opacity="0.8" />
-                <path d="M180,250 Q210,230 210,200" 
-                      fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" opacity="0.8" />
-
-                <!-- نقاط تمركز اللاعبين (أمثلة افتراضية لجبهات نشطة على الخريطة) -->
-                <!-- قاعدة اللاعب الحالية -->
-                <g class="cursor-pointer group">
-                    <circle cx="210" cy="200" r="9" fill="#ef4444" class="animate-pulse" />
-                    <circle cx="210" cy="200" r="16" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,3" class="animate-spin" />
-                    <text x="228" y="204" fill="#f87171" font-size="11" font-weight="bold">قاعدتك (الخرطوم)</text>
-                </g>
-
-                <!-- قواعد خصوم أو جبهات أخرى افتراضية -->
-                <g class="cursor-pointer">
-                    <circle cx="320" cy="120" r="6" fill="#64748b" />
-                    <text x="332" y="124" fill="#94a3b8" font-size="10">بورتسودان</text>
-                </g>
-
-                <g class="cursor-pointer">
-                    <circle cx="140" cy="300" r="6" fill="#64748b" />
-                    <text x="152" y="304" fill="#94a3b8" font-size="10">الأبيض</text>
-                </g>
-
-                <g class="cursor-pointer">
-                    <circle cx="280" cy="380" r="6" fill="#64748b" />
-                    <text x="292" y="384" fill="#94a3b8" font-size="10">الدمازين</text>
-                </g>
-            </svg>
-
-            <!-- تلميح أسفل الخريطة -->
-            <div class="mt-4 text-center text-xs text-slate-400">
-                انقر على أي قطاع أو نقطة على الخريطة لاستطلاع القوات أو بدء خطة العمليات.
-            </div>
-        </div>
-
-        <!-- شريط حالة الخريطة السفلي -->
-        <div class="mt-4 flex justify-between items-center text-xs text-slate-500 px-2">
-            <span>مقياس الرسم: 1:1,000,000</span>
-            <span class="text-red-400 font-semibold">جاهز لإرسال الإحداثيات</span>
-        </div>
-    </div>
-
-</body>
-</html>
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
