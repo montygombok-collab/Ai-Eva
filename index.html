@@ -1,557 +1,94 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>الاستعلام عن النتيجة</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خريطة عمليات جبهة</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        @font-face {
-            font-family: 'Cairo';
-            src: url("/static/fonts/Cairo/static/Cairo-Regular.ttf") format('truetype');
-            font-weight: 400;
-            font-style: normal;
-            font-display: swap;
-        }
-        @font-face {
-            font-family: 'Cairo';
-            src: url("/static/fonts/Cairo/static/Cairo-Bold.ttf") format('truetype');
-            font-weight: 700;
-            font-style: normal;
-            font-display: swap;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100%;
-        }
-
-
-        body {
-            background: #ffffff;
-            color: #2b2b2b;
-
-            font-family: 'Cairo', Tahoma, sans-serif;
-
-            line-height: 1.6;
-        }
-
-
-        /* =========================
-           Page
-        ========================= */
-
-        .page {
-            width: min(100% - 32px, 760px);
-
-            margin: 48px auto;
-        }
-
-
-        /* =========================
-           Logos
-        ========================= */
-
-        .logos {
-            display: flex;
-
-            align-items: center;
-            justify-content: center;
-
-            gap: 35px;
-
-            margin-bottom: 28px;
-        }
-
-
-        .logos img {
-            display: block;
-
-            width: auto;
-            height: auto;
-
-            max-width: 150px;
-            max-height: 85px;
-
-            object-fit: contain;
-        }
-
-
-        /* =========================
-           Card
-        ========================= */
-
-        .card {
-            background: #ffffff;
-
-            border: 1px solid #d0d0d0;
-            border-radius: 7px;
-
-            box-shadow:
-                0 2px 5px rgba(0, 0, 0, 0.08);
-
-            padding: 28px 20px 20px;
-        }
-
-
-        /* =========================
-           Heading
-        ========================= */
-
-        .heading {
-            text-align: center;
-
-            margin-bottom: 28px;
-        }
-
-
-        .heading h1 {
-            margin: 0;
-
-            color: #292929;
-
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-
-        .heading p {
-            margin: 8px 0 0;
-
-            color: #777;
-
-            font-size: 14px;
-        }
-
-
-        /* =========================
-           Form Row
-        ========================= */
-
-        .form-row {
-            display: flex;
-
-            align-items: center;
-
-            gap: 18px;
-
-            margin-bottom: 18px;
-        }
-
-
-        .form-label {
-            width: 150px;
-
-            flex-shrink: 0;
-
-            color: #555;
-
-            font-size: 16px;
-
-            text-align: right;
-        }
-
-
-        .form-control-wrapper {
-            flex: 1;
-        }
-
-
-        /* =========================
-           Inputs
-        ========================= */
-
-        .form-control-wrapper input {
-            display: block;
-
-            width: 100%;
-            height: 44px;
-
-            padding: 8px 13px;
-
-            background: #ffffff;
-
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-
-            color: #333;
-
-            font-family: inherit;
-            font-size: 16px;
-
-            transition:
-                border-color 0.15s,
-                box-shadow 0.15s;
-        }
-
-
-        input::placeholder {
-            color: #888;
-        }
-
-
-        input:focus {
-            outline: none;
-
-            border-color: #86b7fe;
-
-            box-shadow:
-                0 0 0 3px rgba(13, 110, 253, 0.12);
-        }
-
-
-        /* Django input */
-        .form-control-wrapper > input {
-            width: 100%;
-        }
-
-
-        /* =========================
-           Button
-        ========================= */
-
-        .button-row {
-            display: flex;
-
-            gap: 18px;
-        }
-
-
-        .button-space {
-            width: 0;
-        }
-
-
-        .submit-button {
-            width: 100%;
-
-            height: 58px;
-
-            border: 0;
-            border-radius: 6px;
-
-            background: #1677ff;
-            color: #ffffff;
-
-            font-family: inherit;
-            font-size: 16px;
-
-            cursor: pointer;
-
-            transition:
-                background 0.15s;
-        }
-
-
-        .submit-button:hover {
-            background: #0866df;
-        }
-
-
-        /* =========================
-           Errors
-        ========================= */
-
-        .errorlist {
-            list-style: none;
-
-            padding: 0;
-
-            margin: 6px 0 0;
-
-            color: #b42318;
-
-            font-size: 13px;
-        }
-
-
-        .notice {
-            width: min(100% - 32px, 760px);
-
-            margin: 20px auto 0;
-
-            padding: 13px 16px;
-
-            background: #ffffff;
-
-            border: 1px solid #d4d4d4;
-            border-radius: 6px;
-
-            color: #555;
-
-            text-align: center;
-        }
-
-
-        /* =========================
-           Result
-        ========================= */
-
-        .result {
-            margin-top: 25px;
-
-            background: #ffffff;
-
-            border: 1px solid #d0d0d0;
-            border-radius: 7px;
-
-            box-shadow:
-                0 2px 5px rgba(0, 0, 0, 0.06);
-
-            padding: 25px;
-        }
-
-
-        .result h2 {
-            margin: 0 0 20px;
-
-            padding-bottom: 14px;
-
-            border-bottom: 1px solid #e0e0e0;
-
-            text-align: center;
-
-            font-size: 22px;
-        }
-
-
-        .result-row {
-            display: grid;
-
-            grid-template-columns:
-                160px 1fr;
-
-            gap: 20px;
-
-            padding: 13px 5px;
-
-            border-bottom: 1px solid #eeeeee;
-        }
-
-
-        .result-row:last-child {
-            border-bottom: 0;
-        }
-
-
-        .result-label {
-            color: #666;
-        }
-
-
-        .result-value {
-            color: #222;
-
-            font-weight: bold;
-        }
-
-
-        .logos .ministry-logo {
-            max-width: 173px;
-            max-height: 98px;
-        }
-
-        /* =========================
-           Mobile
-        ========================= */
-
-        @media (max-width: 600px) {
-
-            .page {
-                margin-top: 25px;
-            }
-
-
-            .logos {
-                gap: 20px;
-
-                margin-bottom: 20px;
-            }
-
-
-            .logos img {
-                max-width: 110px;
-                max-height: 70px;
-            }
-
-            .logos .ministry-logo {
-                max-width: 127px;
-                max-height: 81px;
-            }
-
-
-            .card {
-                padding: 24px 18px;
-            }
-
-
-            .heading h1 {
-                font-size: 23px;
-            }
-
-
-            .form-row {
-                display: block;
-            }
-
-
-            .form-label {
-                width: auto;
-
-                margin-bottom: 7px;
-
-                display: block;
-            }
-
-
-            .submit-button {
-                height: 50px;
-            }
-
-
-            .result-row {
-                grid-template-columns: 1fr;
-
-                gap: 4px;
-            }
-
-        }
-
-    </style>
-    <style>
-        @font-face {
-            font-family: 'Cairo';
-            src: url("/static/fonts/Cairo/static/Cairo-Regular.ttf") format('truetype');
-            font-weight: 400;
-            font-style: normal;
-            font-display: swap;
-        }
-        @font-face {
-            font-family: 'Cairo';
-            src: url("/static/fonts/Cairo/static/Cairo-Bold.ttf") format('truetype');
-            font-weight: 700;
-            font-style: normal;
-            font-display: swap;
-        }
-        .result-actions { margin-top: 24px; }
-        .result-actions a { display: flex; align-items: center; justify-content: center; text-decoration: none; }
-        .result h1 { margin: 0 0 20px; padding-bottom: 14px; border-bottom: 1px solid #e0e0e0; text-align: center; font-size: 22px; }
-        .result-value { overflow-wrap: anywhere; }
-        .submit-button:focus-visible { outline: 3px solid #173e70; outline-offset: 3px; }
-        .official-header {
-    text-align: center;
-    margin-bottom: 24px;
-    color: #222;
-    line-height: 1.8;
-}
-
-.official-header div {
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.official-header .certificate-title {
-    margin-top: 4px;
-    font-size: 22px;
-    color: #000000;
-}
-    </style>
-    
-    <style>
-        .notice.notice-error,
-        .errorlist {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
-        }
-
-        .errorlist {
-            padding: 10px 12px;
-            border-radius: 6px;
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        body { font-family: 'Cairo', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
+        .radar-grid {
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
         }
     </style>
-    <script
-        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-        async
-        defer
-    ></script>
-
 </head>
-<body>
-<main class="page">
-    <div class="logos">
-        <img
-            src="/static/img/logo-new.jpg"
-            class="ministry-logo"
-            alt="شعار وزارة التربية و التعليم"
-        >
-        <img
-            src="/static/img/logo-baldna.webp"
-            alt="شعار منصة بلدنا"
-        >
-    </div>
-    <div class="official-header">
-    <div>جمهورية السودان</div>
-    <div>وزارة التعليم و التربية الوطنية</div>
-    <div class="certificate-title">نتيجة الشهادة الثانوية للعام 2026</div>
-</div>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="card">
-        <div class="heading">
-            <p>
-                أدخل رقم الجلوس للتحقق من النتيجة
-            </p>
-        </div>
-     <!-- Messages -->
+    <!-- حاوية خريطة العمليات -->
+    <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 radar-grid relative overflow-hidden">
         
-        <!-- Form -->
-        <form
-            method="post"
-            action="/">
-            <input type="hidden" name="csrfmiddlewaretoken" value="0Cn3nGGUpnmHEpjSlikOoBQj2we7vTKWseOqdximOIWaRsr1fDYyYyPh1bBIWzLs">
-            <div class="form-row">
-                <label
-                    class="form-label"
-                    for="id_serial_number">
-                    رقم الجلوس
-                </label>
-                <div class="form-control-wrapper">
-                    <input type="text" name="serial_number" inputmode="numeric" placeholder="أدخل رقم الجلوس" maxlength="6" required id="id_serial_number">
-                    
-                </div>
+        <!-- رأس الخريطة العسكرية -->
+        <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
+            <div>
+                <span class="text-xs text-red-500 font-bold tracking-wider block">مسرح العمليات العسكرية</span>
+                <h2 class="text-2xl font-black text-white">خريطة السودان الاستراتيجية</h2>
             </div>
-            <!-- Submit -->
-
-            <div class="button-row">
-
-                <button
-                    type="submit"
-                    class="submit-button"
-                >
-                    استعلام
-                </button>
-
+            <div class="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span class="text-xs text-emerald-400 font-bold">النظام متصل</span>
             </div>
+        </div>
 
+        <!-- مساحة عرض الخريطة (SVG) -->
+        <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-6 flex flex-col items-center justify-center relative min-h-[420px]">
+            
+            <!-- أداة تحكم مصغرة في زوايا الخريطة -->
+            <div class="absolute top-3 right-3 text-[10px] text-slate-500 font-mono">SEC-A // 15.5007° N, 32.5599° E</div>
+            <div class="absolute bottom-3 left-3 text-[10px] text-red-500/60 font-mono">LIVE_RADAR: ACTIVE</div>
 
-        </form>
+            <!-- خريطة السودان SVG الصاروخية -->
+            <svg viewBox="0 0 500 500" class="w-full max-w-[360px] h-auto drop-shadow-2xl">
+                
+                <!-- حدود السودان بتصميم هندسي تكتيكي داكن -->
+                <path d="M150,50 L350,70 L400,200 L380,380 L250,450 L120,400 L90,250 Z" 
+                      fill="#151c2c" stroke="#334155" stroke-width="3" />
+                
+                <!-- مسار النيل الرئيسي بتدرج وتصميم انسيابي -->
+                <path d="M220,450 Q240,300 210,200 T280,70" 
+                      fill="none" stroke="#1d4ed8" stroke-width="4" stroke-linecap="round" opacity="0.8" />
+                <path d="M180,250 Q210,230 210,200" 
+                      fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" opacity="0.8" />
 
+                <!-- نقاط تمركز اللاعبين (أمثلة افتراضية لجبهات نشطة على الخريطة) -->
+                <!-- قاعدة اللاعب الحالية -->
+                <g class="cursor-pointer group">
+                    <circle cx="210" cy="200" r="9" fill="#ef4444" class="animate-pulse" />
+                    <circle cx="210" cy="200" r="16" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,3" class="animate-spin" />
+                    <text x="228" y="204" fill="#f87171" font-size="11" font-weight="bold">قاعدتك (الخرطوم)</text>
+                </g>
+
+                <!-- قواعد خصوم أو جبهات أخرى افتراضية -->
+                <g class="cursor-pointer">
+                    <circle cx="320" cy="120" r="6" fill="#64748b" />
+                    <text x="332" y="124" fill="#94a3b8" font-size="10">بورتسودان</text>
+                </g>
+
+                <g class="cursor-pointer">
+                    <circle cx="140" cy="300" r="6" fill="#64748b" />
+                    <text x="152" y="304" fill="#94a3b8" font-size="10">الأبيض</text>
+                </g>
+
+                <g class="cursor-pointer">
+                    <circle cx="280" cy="380" r="6" fill="#64748b" />
+                    <text x="292" y="384" fill="#94a3b8" font-size="10">الدمازين</text>
+                </g>
+            </svg>
+
+            <!-- تلميح أسفل الخريطة -->
+            <div class="mt-4 text-center text-xs text-slate-400">
+                انقر على أي قطاع أو نقطة على الخريطة لاستطلاع القوات أو بدء خطة العمليات.
+            </div>
+        </div>
+
+        <!-- شريط حالة الخريطة السفلي -->
+        <div class="mt-4 flex justify-between items-center text-xs text-slate-500 px-2">
+            <span>مقياس الرسم: 1:1,000,000</span>
+            <span class="text-red-400 font-semibold">جاهز لإرسال الإحداثيات</span>
+        </div>
     </div>
 
-
-
-    <!-- =========================
-         Not Found
-    ========================= -->
-
-    
-
-</main>
 </body>
 </html>
