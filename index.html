@@ -3,195 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ود الحاج AI - بوابة تاريخ وآثار الكلية</title>
+    <title>ود الحاج AI - تجربة 3D تفاعلية</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Reem+Kufi:wght@500;700;900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700;900&display=swap" rel="stylesheet">
+
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Reem Kufi', sans-serif;
-            background-color: #0d0a06;
+            background-color: #050302;
             color: #f3e5ab;
-            overflow-x: hidden;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
         }
 
-        /* خلفية رملية متحركة ونصوص هيروغليفية */
-        .desert-bg {
-            background: linear-gradient(180deg, #0a0805 0%, #1e130a 40%, #3a220f 80%, #140d06 100%);
+        /* حاوية مشهد الـ 3D */
+        #webgl-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
 
-        /* تأثير العمق الثلاثي الأبعاد */
-        .perspective-container {
-            perspective: 1200px;
+        /* واجهة المستخدم الزجاجية الطافية فوق الـ 3D */
+        .ui-layer {
+            position: relative;
+            z-index: 10;
+            pointer-events: none; /* للسماح بحركة الماوس بالوصول للـ 3D خلفها */
         }
 
-        /* الكارت البارز 3D */
-        .card-3d {
-            transform-style: preserve-3d;
-            transition: transform 0.5s ease, box-shadow 0.5s ease;
-            background: rgba(25, 17, 10, 0.75);
-            backdrop-filter: blur(12px);
-            border: 2px solid rgba(212, 175, 55, 0.3);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9),
-                        inset 0 1px 0 rgba(255, 223, 0, 0.2);
+        .interactive-element {
+            pointer-events: auto; /* إعادة التفاعل للأزرار والنصوص */
         }
 
-        .card-3d:hover {
-            transform: rotateX(6deg) rotateY(-4deg) translateZ(20px);
-            box-shadow: 0 40px 80px rgba(212, 175, 55, 0.25),
-                        0 0 40px rgba(212, 175, 55, 0.15);
+        .glass-panel {
+            background: rgba(15, 10, 5, 0.55);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8),
+                        0 0 30px rgba(212, 175, 55, 0.15);
         }
 
-        /* النص الذهبي المضيء والبارز */
-        .gold-3d-text {
-            background: linear-gradient(135deg, #fff3a1 0%, #d4af37 45%, #aa7c11 70%, #ffd700 100%);
+        .gold-glow-text {
+            background: linear-gradient(135deg, #fff3a1 0%, #d4af37 50%, #aa7c11 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 10px 20px rgba(0,0,0,0.8);
-            filter: drop-shadow(0px 4px 10px rgba(212, 175, 55, 0.4));
+            filter: drop-shadow(0 5px 15px rgba(212, 175, 55, 0.4));
         }
 
-        /* الجمل والهيروغليفية الخفيفة في الخلفية */
-        .hieroglyph-pattern {
-            position: absolute;
-            opacity: 0.08;
-            font-size: 2rem;
-            letter-spacing: 12px;
-            user-select: none;
-            pointer-events: none;
-            color: #d4af37;
-            white-space: nowrap;
-            animation: floatText 40s linear infinite;
-        }
-
-        @keyframes floatText {
-            from { transform: translateX(100%); }
-            to { transform: translateX(-100%); }
-        }
-
-        /* تأثير أهرامات مروي بالـ SVG مع عمق 3D */
-        .pyramid-silhouette {
-            filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.2));
-            transform: translateZ(40px);
-        }
-
-        /* زر الإضاءة والذهبي البارز */
-        .btn-gold {
-            background: linear-gradient(135deg, #d4af37 0%, #8a640f 100%);
-            color: #0d0a06;
-            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4),
-                        0 0 0 2px rgba(255, 235, 150, 0.5) inset;
+        .btn-gold-3d {
+            background: linear-gradient(135deg, #d4af37 0%, #996e14 100%);
+            color: #0a0602;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4),
+                        0 0 0 2px rgba(255, 235, 150, 0.6) inset;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform: translateZ(50px);
         }
 
-        .btn-gold:hover {
-            transform: translateZ(70px) scale(1.05);
-            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.7),
-                        0 0 20px rgba(255, 255, 255, 0.8);
+        .btn-gold-3d:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.7),
+                        0 0 25px rgba(255, 255, 255, 0.9);
             background: linear-gradient(135deg, #ffe066 0%, #d4af37 100%);
         }
 
-        /* توهج الذهب الدائري في المنتصف */
-        .gold-glow {
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, rgba(0, 0, 0, 0) 70%);
-            border-radius: 50%;
-            pointer-events: none;
+        /* الجمل الهيروغليفية في الزوايا */
+        .hieroglyph {
+            font-size: 1.5rem;
+            color: rgba(212, 175, 55, 0.4);
+            user-select: none;
         }
     </style>
 </head>
-<body class="desert-bg min-h-screen flex items-center justify-center relative overflow-hidden p-4">
+<body class="flex items-center justify-center">
 
-    <!-- نقش هيروغليفي متحرك في الخلفية -->
-    <div class="hieroglyph-pattern top-10 font-serif">
-        𓀀 𓀁 𓀂 𓀃 𓀄 𓀅 𓀆 𓀇 𓀈 𓀉 𓀊 𓀋 𓀌 𓀍 𓀎 𓀏 𓀐 𓏤 𓏥 𓏦 𓂀 𓋹 𓍹 𓍺 𓎤 𓎥 𓎦
-    </div>
-    <div class="hieroglyph-pattern bottom-12 font-serif" style="animation-duration: 60s; animation-direction: reverse;">
-        𓂀 𓋹 𓏤 𓀀 𓀁 𓀂 𓀃 𓀄 𓀅 𓀆 𓁀 𓁁 𓁂 𓁃 𓁄 𓁅 𓁆 𓁇 𓎢 𓎣 𓎤 𓎥 𓎦 𓎧 𓎨
-    </div>
+    <!-- 1. الكانفاس الخاص بمحرك الـ 3D -->
+    <div id="webgl-container"></div>
 
-    <!-- توهج الذهب الخفي -->
-    <div class="gold-glow"></div>
+    <!-- 2. طبقة عناصر الواجهة التفاعلية (UI Layer) -->
+    <div class="ui-layer min-h-screen w-full flex flex-col justify-between p-6 md:p-12">
 
-    <!-- الحاوية الرئيسية بتقنية 3D -->
-    <div class="perspective-container w-full max-w-4xl z-10">
-        
-        <div class="card-3d rounded-3xl p-8 md:p-14 text-center relative overflow-hidden flex flex-col items-center justify-center">
-            
-            <!-- زخرفة أركان ذهبية كلاسيكية -->
-            <div class="absolute top-4 right-4 text-amber-500 opacity-40 text-xl">𓋹</div>
-            <div class="absolute top-4 left-4 text-amber-500 opacity-40 text-xl">𓂀</div>
-            <div class="absolute bottom-4 right-4 text-amber-500 opacity-40 text-xl">𓍹</div>
-            <div class="absolute bottom-4 left-4 text-amber-500 opacity-40 text-xl">𓍺</div>
-
-            <!-- أهرامات مروي سودانية (رسوم متجهة ثلاثية الأبعاد) -->
-            <div class="pyramid-silhouette mb-4">
-                <svg width="180" height="90" viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- الهرم الرئيسي المروي (زاوية حادة تميز أهرامات البجراوية) -->
-                    <polygon points="100,10 135,90 65,90" fill="url(#goldGradient1)" stroke="#d4af37" stroke-width="1"/>
-                    <polygon points="100,10 135,90 100,90" fill="rgba(0,0,0,0.35)"/> <!-- ظل الهرم -->
-                    
-                    <!-- هرم مجاور أصغر -->
-                    <polygon points="50,30 80,90 20,90" fill="url(#goldGradient2)" stroke="#b8860b" stroke-width="1"/>
-                    <polygon points="50,30 80,90 50,90" fill="rgba(0,0,0,0.4)"/>
-                    
-                    <!-- هرم ثالث -->
-                    <polygon points="150,40 175,90 125,90" fill="url(#goldGradient2)" stroke="#b8860b" stroke-width="1"/>
-                    <polygon points="150,40 175,90 150,90" fill="rgba(0,0,0,0.4)"/>
-
-                    <defs>
-                        <linearGradient id="goldGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#ffe066" />
-                            <stop offset="50%" stop-color="#d4af37" />
-                            <stop offset="100%" stop-color="#7a5200" />
-                        </linearGradient>
-                        <linearGradient id="goldGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#d4af37" />
-                            <stop offset="100%" stop-color="#4a3200" />
-                        </linearGradient>
-                    </defs>
-                </svg>
+        <!-- الهيدر -->
+        <header class="flex justify-between items-center w-full max-w-7xl mx-auto interactive-element">
+            <div class="flex items-center gap-3">
+                <span class="hieroglyph">𓋹</span>
+                <span class="text-xl font-bold tracking-wider gold-glow-text">ود الحاج AI</span>
             </div>
+            <div class="text-xs md:text-sm text-amber-200/60 font-mono border border-amber-500/20 px-3 py-1.5 rounded-full glass-panel">
+                قسم التاريخ وعلم الآثار
+            </div>
+        </header>
 
-            <!-- العنونة الرئيسية بارزة للخارج -->
-            <div style="transform: translateZ(60px);">
-                <p class="text-xs md:text-sm tracking-widest text-amber-400/80 mb-2 font-bold uppercase">
-                    𓋹 المساعد الذكي لقسم التاريخ وعلم الآثار 𓋹
+        <!-- المحتوى المركزي (البطاقة الرئيسية) -->
+        <main class="w-full max-w-2xl mx-auto text-center interactive-element my-auto">
+            <div class="glass-panel p-8 md:p-12 rounded-3xl relative overflow-hidden">
+                <div class="absolute -top-10 -left-10 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+                
+                <p class="text-xs md:text-sm text-amber-400/90 tracking-widest mb-3 font-semibold">
+                    𓏤 منصة الذكاء الاصطناعي الأكاديمية 𓏤
                 </p>
-                <h1 class="text-5xl md:text-7xl font-extrabold gold-3d-text mb-4 tracking-normal">
+
+                <h1 class="text-4xl md:text-6xl font-black gold-glow-text mb-4 leading-tight">
                     ود الحاج AI
                 </h1>
-                <p class="text-amber-100/70 text-sm md:text-base max-w-lg mx-auto mb-8 font-serif leading-relaxed">
-                    منصة الذكاء الاصطناعي الأكاديمية لاستخراج واستكشاف اجابات المحاضرات والوثائق التاريخية والأثرية بكل دقة وسرعة.
-                </p>
-            </div>
 
-            <!-- زر التفاعل البارز للغاية (زر ابدأ البحث) -->
-            <div style="transform: translateZ(80px);" class="w-full max-w-md">
-                <a href="#search" class="btn-gold inline-flex items-center justify-center gap-3 w-full py-4 px-8 rounded-2xl font-bold text-lg md:text-xl cursor-pointer">
+                <p class="text-amber-100/70 text-sm md:text-base leading-relaxed mb-8 max-w-lg mx-auto">
+                    استكشف واكتشف إجابات المحاضرات والوثائق التاريخية والأثرية في بيئة تفاعلية ثلاثية الأبعاد.
+                </p>
+
+                <a href="#search" class="btn-gold-3d inline-flex items-center justify-center gap-3 w-full py-4 px-8 rounded-2xl font-bold text-lg md:text-xl">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <span>ابدأ البحث عن إجابات المحاضرات</span>
                 </a>
             </div>
+        </main>
 
-            <!-- تفاصيل إضافية أسفل الكارت -->
-            <div class="mt-8 flex items-center gap-6 text-xs text-amber-500/60 font-serif" style="transform: translateZ(30px);">
-                <span>• مدعوم بقواعد بيانات المحاضرات</span>
-                <span>• آليات بحث ذكية في المخطوطات</span>
+        <!-- الفوتر -->
+        <footer class="flex justify-between items-center w-full max-w-7xl mx-auto text-xs text-amber-500/50 interactive-element">
+            <div class="flex gap-2 items-center">
+                <span class="hieroglyph">𓂀</span>
+                <span>تفاعل 3D حي (حرك الماوس للمعاينة)</span>
             </div>
-
-        </div>
+            <div>كلية الآداب والتاريخ</div>
+        </footer>
 
     </div>
 
+    <!-- 3. كود Three.js لبناء مشهد 3D تفاعلي للصحراء والأهرامات -->
+    <script>
+        // إعداد المشهد والكاميرا والمحرك
+        const container = document.getElementById('webgl-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0a0603, 0.03);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 2, 8);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        // --- الإضاءة (Lighting) ---
+        const ambientLight = new THREE.AmbientLight(0xffd580, 0.6);
+        scene.add(ambientLight);
+
+        // ضوء أصفر ذهبي يمثل شمس الصحراء
+        const sunLight = new THREE.DirectionalLight(0xffa500, 2.5);
+        sunLight.position.set(5, 10, 5);
+        sunLight.castShadow = true;
+        scene.add(sunLight);
+
+        // ضوء بؤري ناعم من الأسفل
+        const pointLight = new THREE.PointLight(0xff8c00, 1.5, 20);
+        pointLight.position.set(0, 0, 3);
+        scene.add(pointLight);
+
+        // --- المجسمات (3D Pyramids & Terrain) ---
+        const pyramidGroup = new THREE.Group();
+
+        // خامة الذهب المعتق للأهرامات
+        const goldMaterial = new THREE.MeshStandardMaterial({
+            color: 0xd4af37,
+            metalness: 0.8,
+            roughness: 0.25,
+            flatShading: true
+        });
+
+        // دالة لإنشاء أهرامات مروي (زوايا حادة نوبية)
+        function createPyramid(radius, height, x, z) {
+            const geometry = new THREE.ConeGeometry(radius, height, 4);
+            const pyramid = new THREE.Mesh(geometry, goldMaterial);
+            pyramid.position.set(x, height / 2 - 1, z);
+            pyramid.rotation.y = Math.PI / 4;
+            pyramid.castShadow = true;
+            pyramid.receiveShadow = true;
+            return pyramid;
+        }
+
+        // إنشاء هرم مروي الرئيسي في المنتصف
+        const mainPyramid = createPyramid(2.2, 4.5, 0, -1);
+        pyramidGroup.add(mainPyramid);
+
+        // أهرامات جانبية أصغر
+        const sidePyramid1 = createPyramid(1.3, 2.8, -3.2, -2);
+        const sidePyramid2 = createPyramid(1.1, 2.3, 3.2, -1.5);
+        pyramidGroup.add(sidePyramid1);
+        pyramidGroup.add(sidePyramid2);
+
+        scene.add(pyramidGroup);
+
+        // أرضية الصحراء الكثيبية
+        const planeGeo = new THREE.PlaneGeometry(60, 60, 32, 32);
+        const planeMat = new THREE.MeshStandardMaterial({
+            color: 0x2b1808,
+            roughness: 0.9,
+            metalness: 0.1,
+            wireframe: false
+        });
+        const plane = new THREE.Mesh(planeGeo, planeMat);
+        plane.rotation.x = -Math.PI / 2;
+        plane.position.y = -1;
+        plane.receiveShadow = true;
+        scene.add(plane);
+
+        // --- جزيئات رمل ونجوم عائمة (Dust Particles) ---
+        const particlesCount = 400;
+        const particleGeo = new THREE.BufferGeometry();
+        const positions = new Float32Array(particlesCount * 3);
+
+        for (let i = 0; i < particlesCount * 3; i += 3) {
+            positions[i] = (Math.random() - 0.5) * 20;
+            positions[i + 1] = Math.random() * 10 - 1;
+            positions[i + 2] = (Math.random() - 0.5) * 20;
+        }
+
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particleMat = new THREE.PointsMaterial({
+            size: 0.05,
+            color: 0xffd700,
+            transparent: true,
+            opacity: 0.6
+        });
+        const particles = new THREE.Points(particleGeo, particleMat);
+        scene.add(particles);
+
+        // --- تفاعل الماوس مع الـ 3D (Mouse Interaction) ---
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - windowHalfX) / 100;
+            mouseY = (e.clientY - windowHalfY) / 100;
+        });
+
+        // لدعم الشاشات اللمسية (الهواتف)
+        document.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                mouseX = (e.touches[0].clientX - windowHalfX) / 100;
+                mouseY = (e.touches[0].clientY - windowHalfY) / 100;
+            }
+        });
+
+        // --- حلقة التحريك والأنيميشن (Animation Loop) ---
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            // دوران بطيء مستمر للأهرامات
+            pyramidGroup.rotation.y = elapsedTime * 0.15;
+
+            // استجابة الكاميرا والمجسمات لحركة الماوس بسلاسة (Interpolation)
+            targetX += (mouseX - targetX) * 0.05;
+            targetY += (mouseY - targetY) * 0.05;
+
+            pyramidGroup.rotation.x = targetY * 0.2;
+            pyramidGroup.rotation.z = -targetX * 0.1;
+
+            camera.position.x = targetX * 0.5;
+            camera.position.y = 2 - (targetY * 0.5);
+            camera.lookAt(0, 1, 0);
+
+            // تحريك جزيئات الذهب العائمة
+            particles.rotation.y = elapsedTime * 0.03;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // إعادة ضبط الحجم عند تغيير حجم الشاشة
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
 </html>
