@@ -3,151 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة جبهة - استراتيجية السودان 3D</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>ود الحاج AI - بوابة تاريخ وآثار الكلية</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Reem+Kufi:wght@500;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-        body { font-family: 'Cairo', sans-serif; overflow: hidden; background-color: #38bdf8; margin: 0; }
-        canvas { display: block; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 0; cursor: grab; }
-        canvas:active { cursor: grabbing; }
-        .ui-clean { position: relative; z-index: 10; pointer-events: none; }
+        body {
+            font-family: 'Reem Kufi', sans-serif;
+            background-color: #0d0a06;
+            color: #f3e5ab;
+            overflow-x: hidden;
+        }
+
+        /* خلفية رملية متحركة ونصوص هيروغليفية */
+        .desert-bg {
+            background: linear-gradient(180deg, #0a0805 0%, #1e130a 40%, #3a220f 80%, #140d06 100%);
+        }
+
+        /* تأثير العمق الثلاثي الأبعاد */
+        .perspective-container {
+            perspective: 1200px;
+        }
+
+        /* الكارت البارز 3D */
+        .card-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+            background: rgba(25, 17, 10, 0.75);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9),
+                        inset 0 1px 0 rgba(255, 223, 0, 0.2);
+        }
+
+        .card-3d:hover {
+            transform: rotateX(6deg) rotateY(-4deg) translateZ(20px);
+            box-shadow: 0 40px 80px rgba(212, 175, 55, 0.25),
+                        0 0 40px rgba(212, 175, 55, 0.15);
+        }
+
+        /* النص الذهبي المضيء والبارز */
+        .gold-3d-text {
+            background: linear-gradient(135deg, #fff3a1 0%, #d4af37 45%, #aa7c11 70%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 20px rgba(0,0,0,0.8);
+            filter: drop-shadow(0px 4px 10px rgba(212, 175, 55, 0.4));
+        }
+
+        /* الجمل والهيروغليفية الخفيفة في الخلفية */
+        .hieroglyph-pattern {
+            position: absolute;
+            opacity: 0.08;
+            font-size: 2rem;
+            letter-spacing: 12px;
+            user-select: none;
+            pointer-events: none;
+            color: #d4af37;
+            white-space: nowrap;
+            animation: floatText 40s linear infinite;
+        }
+
+        @keyframes floatText {
+            from { transform: translateX(100%); }
+            to { transform: translateX(-100%); }
+        }
+
+        /* تأثير أهرامات مروي بالـ SVG مع عمق 3D */
+        .pyramid-silhouette {
+            filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.2));
+            transform: translateZ(40px);
+        }
+
+        /* زر الإضاءة والذهبي البارز */
+        .btn-gold {
+            background: linear-gradient(135deg, #d4af37 0%, #8a640f 100%);
+            color: #0d0a06;
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4),
+                        0 0 0 2px rgba(255, 235, 150, 0.5) inset;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateZ(50px);
+        }
+
+        .btn-gold:hover {
+            transform: translateZ(70px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.7),
+                        0 0 20px rgba(255, 255, 255, 0.8);
+            background: linear-gradient(135deg, #ffe066 0%, #d4af37 100%);
+        }
+
+        /* توهج الذهب الدائري في المنتصف */
+        .gold-glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, rgba(0, 0, 0, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-4">
+<body class="desert-bg min-h-screen flex items-center justify-center relative overflow-hidden p-4">
 
-    <!-- رندر الثلاثي الأبعاد -->
-    <div id="canvas-container"></div>
-
-    <!-- واجهة خفيفة ونظيفة جداً بدون زحمة -->
-    <div class="ui-clean flex justify-between items-start w-full max-w-7xl mx-auto">
-        <div class="bg-slate-900/80 border border-slate-700/60 px-4 py-3 rounded-2xl backdrop-blur-md shadow-xl text-white">
-            <h1 class="text-lg font-black text-red-500">جبهة 🎖️</h1>
-            <p class="text-[11px] text-slate-300">اسحب بالماوس للتنقل الحر في العالم</p>
-        </div>
+    <!-- نقش هيروغليفي متحرك في الخلفية -->
+    <div class="hieroglyph-pattern top-10 font-serif">
+        𓀀 𓀁 𓀂 𓀃 𓀄 𓀅 𓀆 𓀇 𓀈 𓀉 𓀊 𓀋 𓀌 𓀍 𓀎 𓀏 𓀐 𓏤 𓏥 𓏦 𓂀 𓋹 𓍹 𓍺 𓎤 𓎥 𓎦
+    </div>
+    <div class="hieroglyph-pattern bottom-12 font-serif" style="animation-duration: 60s; animation-direction: reverse;">
+        𓂀 𓋹 𓏤 𓀀 𓀁 𓀂 𓀃 𓀄 𓀅 𓀆 𓁀 𓁁 𓁂 𓁃 𓁄 𓁅 𓁆 𓁇 𓎢 𓎣 𓎤 𓎥 𓎦 𓎧 𓎨
     </div>
 
-    <script>
-        let scene, camera, renderer;
-        let isDragging = false;
-        let previousMousePosition = { x: 0, y: 0 };
-        let cameraTarget = { x: 0, z: 0 };
+    <!-- توهج الذهب الخفي -->
+    <div class="gold-glow"></div>
 
-        function init3D() {
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x38bdf8); // سماوي نهاري ساطع
-            scene.fog = new THREE.FogExp2(0x38bdf8, 0.001);
+    <!-- الحاوية الرئيسية بتقنية 3D -->
+    <div class="perspective-container w-full max-w-4xl z-10">
+        
+        <div class="card-3d rounded-3xl p-8 md:p-14 text-center relative overflow-hidden flex flex-col items-center justify-center">
+            
+            <!-- زخرفة أركان ذهبية كلاسيكية -->
+            <div class="absolute top-4 right-4 text-amber-500 opacity-40 text-xl">𓋹</div>
+            <div class="absolute top-4 left-4 text-amber-500 opacity-40 text-xl">𓂀</div>
+            <div class="absolute bottom-4 right-4 text-amber-500 opacity-40 text-xl">𓍹</div>
+            <div class="absolute bottom-4 left-4 text-amber-500 opacity-40 text-xl">𓍺</div>
 
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 5000);
-            camera.position.set(0, 200, 300);
-            camera.lookAt(0, 0, 0);
+            <!-- أهرامات مروي سودانية (رسوم متجهة ثلاثية الأبعاد) -->
+            <div class="pyramid-silhouette mb-4">
+                <svg width="180" height="90" viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- الهرم الرئيسي المروي (زاوية حادة تميز أهرامات البجراوية) -->
+                    <polygon points="100,10 135,90 65,90" fill="url(#goldGradient1)" stroke="#d4af37" stroke-width="1"/>
+                    <polygon points="100,10 135,90 100,90" fill="rgba(0,0,0,0.35)"/> <!-- ظل الهرم -->
+                    
+                    <!-- هرم مجاور أصغر -->
+                    <polygon points="50,30 80,90 20,90" fill="url(#goldGradient2)" stroke="#b8860b" stroke-width="1"/>
+                    <polygon points="50,30 80,90 50,90" fill="rgba(0,0,0,0.4)"/>
+                    
+                    <!-- هرم ثالث -->
+                    <polygon points="150,40 175,90 125,90" fill="url(#goldGradient2)" stroke="#b8860b" stroke-width="1"/>
+                    <polygon points="150,40 175,90 150,90" fill="rgba(0,0,0,0.4)"/>
 
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
-            document.getElementById('canvas-container').appendChild(renderer.domElement);
+                    <defs>
+                        <linearGradient id="goldGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ffe066" />
+                            <stop offset="50%" stop-color="#d4af37" />
+                            <stop offset="100%" stop-color="#7a5200" />
+                        </linearGradient>
+                        <linearGradient id="goldGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#d4af37" />
+                            <stop offset="100%" stop-color="#4a3200" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
 
-            // إضاءة نهارية صافية وقوية
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
-            scene.add(ambientLight);
+            <!-- العنونة الرئيسية بارزة للخارج -->
+            <div style="transform: translateZ(60px);">
+                <p class="text-xs md:text-sm tracking-widest text-amber-400/80 mb-2 font-bold uppercase">
+                    𓋹 المساعد الذكي لقسم التاريخ وعلم الآثار 𓋹
+                </p>
+                <h1 class="text-5xl md:text-7xl font-extrabold gold-3d-text mb-4 tracking-normal">
+                    ود الحاج AI
+                </h1>
+                <p class="text-amber-100/70 text-sm md:text-base max-w-lg mx-auto mb-8 font-serif leading-relaxed">
+                    منصة الذكاء الاصطناعي الأكاديمية لاستخراج واستكشاف اجابات المحاضرات والوثائق التاريخية والأثرية بكل دقة وسرعة.
+                </p>
+            </div>
 
-            const sunLight = new THREE.DirectionalLight(0xffffff, 1.3);
-            sunLight.position.set(400, 800, 400);
-            sunLight.castShadow = true;
-            scene.add(sunLight);
+            <!-- زر التفاعل البارز للغاية (زر ابدأ البحث) -->
+            <div style="transform: translateZ(80px);" class="w-full max-w-md">
+                <a href="#search" class="btn-gold inline-flex items-center justify-center gap-3 w-full py-4 px-8 rounded-2xl font-bold text-lg md:text-xl cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span>ابدأ البحث عن إجابات المحاضرات</span>
+                </a>
+            </div>
 
-            createTerrain();
-            createRiver();
-            createCity();
+            <!-- تفاصيل إضافية أسفل الكارت -->
+            <div class="mt-8 flex items-center gap-6 text-xs text-amber-500/60 font-serif" style="transform: translateZ(30px);">
+                <span>• مدعوم بقواعد بيانات المحاضرات</span>
+                <span>• آليات بحث ذكية في المخطوطات</span>
+            </div>
 
-            // تفاعل السحب والانتقال السلس بالماوس (مثل الألعاب الاستراتيجية)
-            const canvas = renderer.domElement;
-            canvas.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                previousMousePosition = { x: e.clientX, y: e.clientY };
-            });
+        </div>
 
-            canvas.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
+    </div>
 
-                const deltaX = e.clientX - previousMousePosition.x;
-                const deltaY = e.clientY - previousMousePosition.y;
-
-                // تحريك الكاميرا بسلاسة يميناً ويساراً وفوق وتحت في الخريطة
-                camera.position.x -= deltaX * 0.8;
-                camera.position.z -= deltaY * 0.8;
-
-                previousMousePosition = { x: e.clientX, y: e.clientY };
-            });
-
-            window.addEventListener('mouseup', () => { isDragging = false; });
-            window.addEventListener('resize', onWindowResize, false);
-
-            animate();
-        }
-
-        function createTerrain() {
-            const groundGeo = new THREE.PlaneGeometry(6000, 6000);
-            const groundMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.8 });
-            const ground = new THREE.Mesh(groundGeo, groundMat);
-            ground.rotation.x = -Math.PI / 2;
-            ground.receiveShadow = true;
-            scene.add(ground);
-        }
-
-        function createRiver() {
-            const riverGeo = new THREE.PlaneGeometry(120, 6000);
-            const riverMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.2 });
-            const river = new THREE.Mesh(riverGeo, riverMat);
-            river.rotation.x = -Math.PI / 2;
-            river.position.set(-400, 1, 0);
-            scene.add(river);
-        }
-
-        function createCity() {
-            for (let i = 0; i < 45; i++) {
-                const width = 35 + Math.random() * 30;
-                const depth = 35 + Math.random() * 30;
-                const height = 90 + Math.random() * 180;
-
-                const x = (Math.random() - 0.5) * 2000;
-                const z = (Math.random() - 0.5) * 2000;
-
-                const buildingGroup = new THREE.Group();
-
-                const bGeo = new THREE.BoxGeometry(width, height, depth);
-                const bMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.3 });
-                const mesh = new THREE.Mesh(bGeo, bMat);
-                mesh.position.y = height / 2;
-                mesh.castShadow = true;
-                buildingGroup.add(mesh);
-
-                // شبابيك واضحة ومرئية
-                const windowGeo = new THREE.BoxGeometry(width * 0.85, 2, depth * 0.85);
-                const windowMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
-                for (let h = 15; h < height - 10; h += 20) {
-                    const win = new THREE.Mesh(windowGeo, windowMat);
-                    win.position.y = h;
-                    buildingGroup.add(win);
-                }
-
-                buildingGroup.position.set(x, 0, z);
-                scene.add(buildingGroup);
-            }
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        window.onload = init3D;
-    </script>
 </body>
 </html>
