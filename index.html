@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ود الحاج AI - تجربة 3D تفاعلية</title>
+    <title>ود الحاج AI - كلية الآداب قسم علم الآثار</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Three.js Library -->
@@ -11,7 +11,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Reem+Kufi:wght@500;700;900&display=swap" rel="stylesheet">
 
     <style>
         * {
@@ -19,50 +19,48 @@
             padding: 0;
             box-sizing: border-box;
         }
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             font-family: 'Reem Kufi', sans-serif;
             background-color: #050302;
             color: #f3e5ab;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            overflow-x: hidden;
+            min-height: 100vh;
         }
 
-        /* حاوية مشهد الـ 3D */
+        /* حاوية مشهد الـ 3D المطلق خلف الصفحة */
         #webgl-container {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: 100vh;
             z-index: 1;
+            pointer-events: none;
         }
 
-        /* واجهة المستخدم الزجاجية الطافية فوق الـ 3D */
+        /* طبقات المحتوى مع دعم التمرير للأسفل */
         .ui-layer {
             position: relative;
             z-index: 10;
-            pointer-events: none; /* للسماح بحركة الماوس بالوصول للـ 3D خلفها */
-        }
-
-        .interactive-element {
-            pointer-events: auto; /* إعادة التفاعل للأزرار والنصوص */
         }
 
         .glass-panel {
-            background: rgba(15, 10, 5, 0.55);
+            background: rgba(15, 10, 5, 0.65);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(212, 175, 55, 0.3);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8),
-                        0 0 30px rgba(212, 175, 55, 0.15);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8),
+                        0 0 30px rgba(212, 175, 55, 0.1);
         }
 
         .gold-glow-text {
             background: linear-gradient(135deg, #fff3a1 0%, #d4af37 50%, #aa7c11 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 5px 15px rgba(212, 175, 55, 0.4));
+            filter: drop-shadow(0 4px 12px rgba(212, 175, 55, 0.4));
         }
 
         .btn-gold-3d {
@@ -74,82 +72,184 @@
         }
 
         .btn-gold-3d:hover {
-            transform: translateY(-3px) scale(1.03);
+            transform: translateY(-3px) scale(1.02);
             box-shadow: 0 15px 40px rgba(212, 175, 55, 0.7),
-                        0 0 25px rgba(255, 255, 255, 0.9);
+                        0 0 25px rgba(255, 255, 255, 0.8);
             background: linear-gradient(135deg, #ffe066 0%, #d4af37 100%);
         }
 
-        /* الجمل الهيروغليفية في الزوايا */
         .hieroglyph {
             font-size: 1.5rem;
-            color: rgba(212, 175, 55, 0.4);
+            color: rgba(212, 175, 55, 0.5);
             user-select: none;
+        }
+
+        /* خطوط زخرفية أثرية */
+        .archeology-border {
+            border-bottom: 2px solid transparent;
+            border-image: linear-gradient(to right, transparent, #d4af37, transparent) 1;
         }
     </style>
 </head>
-<body class="flex items-center justify-center">
+<body>
 
-    <!-- 1. الكانفاس الخاص بمحرك الـ 3D -->
+    <!-- 1. خلفية الـ 3D المباشرة (Fixed Canvas) -->
     <div id="webgl-container"></div>
 
-    <!-- 2. طبقة عناصر الواجهة التفاعلية (UI Layer) -->
-    <div class="ui-layer min-h-screen w-full flex flex-col justify-between p-6 md:p-12">
+    <!-- 2. محتوى الصفحة القابل للتمرير (UI Scrollable Layer) -->
+    <div class="ui-layer min-h-screen w-full flex flex-col justify-between p-4 md:p-8">
 
-        <!-- الهيدر -->
-        <header class="flex justify-between items-center w-full max-w-7xl mx-auto interactive-element">
+        <!-- الهيدر الرئيسي -->
+        <header class="flex justify-between items-center w-full max-w-7xl mx-auto py-4">
             <div class="flex items-center gap-3">
                 <span class="hieroglyph">𓋹</span>
-                <span class="text-xl font-bold tracking-wider gold-glow-text">ود الحاج AI</span>
+                <div>
+                    <span class="text-xl md:text-2xl font-bold tracking-wider gold-glow-text block">ود الحاج AI</span>
+                    <span class="text-xs text-amber-300/60 font-mono">كلية الآداب - قسم علم الآثار</span>
+                </div>
             </div>
-            <div class="text-xs md:text-sm text-amber-200/60 font-mono border border-amber-500/20 px-3 py-1.5 rounded-full glass-panel">
-                قسم التاريخ وعلم الآثار
+            <nav class="hidden md:flex gap-6 text-sm text-amber-200/80 font-serif">
+                <a href="#presentation" class="hover:text-amber-400 transition">العرض التقديمي</a>
+                <a href="#history-info" class="hover:text-amber-400 transition">معلومات أثرية</a>
+                <a href="#lectures" class="hover:text-amber-400 transition">المحاضرات</a>
+            </nav>
+            <div class="text-xs text-amber-300/80 border border-amber-500/30 px-3 py-1.5 rounded-full glass-panel">
+                جامعة الخرطوم / كليات الآداب
             </div>
         </header>
 
-        <!-- المحتوى المركزي (البطاقة الرئيسية) -->
-        <main class="w-full max-w-2xl mx-auto text-center interactive-element my-auto">
-            <div class="glass-panel p-8 md:p-12 rounded-3xl relative overflow-hidden">
-                <div class="absolute -top-10 -left-10 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+        <!-- القسم الأول: الواجهة الرئيسية البارزة -->
+        <section class="min-h-[85vh] flex flex-col items-center justify-center text-center my-auto py-12">
+            <div class="glass-panel p-8 md:p-14 rounded-3xl relative overflow-hidden max-w-3xl w-full mx-auto">
+                <div class="absolute -top-12 -left-12 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl"></div>
                 
                 <p class="text-xs md:text-sm text-amber-400/90 tracking-widest mb-3 font-semibold">
-                    𓏤 منصة الذكاء الاصطناعي الأكاديمية 𓏤
+                    𓏤 البوابة الذكية لكلية الآداب - قسم علم الآثار 𓏤
                 </p>
 
-                <h1 class="text-4xl md:text-6xl font-black gold-glow-text mb-4 leading-tight">
+                <h1 class="text-4xl md:text-7xl font-black gold-glow-text mb-4 leading-tight">
                     ود الحاج AI
                 </h1>
 
-                <p class="text-amber-100/70 text-sm md:text-base leading-relaxed mb-8 max-w-lg mx-auto">
-                    استكشف واكتشف إجابات المحاضرات والوثائق التاريخية والأثرية في بيئة تفاعلية ثلاثية الأبعاد.
+                <p class="text-amber-100/80 text-sm md:text-lg leading-relaxed mb-8 max-w-xl mx-auto font-serif">
+                    المساعد التفاعلي الشامل لاستعراض المحاضرات والملخصات التاريخية وفك شفرات النصوص والآثار النوبية والكوشية بكل سهولة.
                 </p>
 
-                <a href="#search" class="btn-gold-3d inline-flex items-center justify-center gap-3 w-full py-4 px-8 rounded-2xl font-bold text-lg md:text-xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <span>ابدأ البحث عن إجابات المحاضرات</span>
-                </a>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <a href="#presentation" class="btn-gold-3d inline-flex items-center justify-center gap-3 w-full sm:w-auto py-4 px-8 rounded-2xl font-bold text-base md:text-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <span>ابدأ البحث عن إجابات المحاضرات</span>
+                    </a>
+                    
+                    <a href="#presentation" class="glass-panel text-amber-300 hover:text-white px-6 py-4 rounded-2xl font-bold text-sm md:text-base transition w-full sm:w-auto border border-amber-500/30">
+                        استعرض العرض التقديمي ↓
+                    </a>
+                </div>
             </div>
-        </main>
+        </section>
+
+        <!-- القسم الثاني: عرض تقديمي تفاعلي (Interactive Presentation) -->
+        <section id="presentation" class="max-w-6xl mx-auto w-full py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-5xl font-extrabold gold-glow-text mb-3">
+                    العرض التقديمي لقسم علم الآثار
+                </h2>
+                <p class="text-amber-200/60 font-serif text-sm md:text-base">نظرة عامة على المحاور الرئيسية والمناهج الأكاديمية</p>
+                <div class="archeology-border w-32 mx-auto mt-4"></div>
+            </div>
+
+            <!-- بطاقات العرض التقديمي -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- شريحة 1 -->
+                <div class="glass-panel p-6 rounded-2xl border-t-4 border-amber-500 hover:scale-[1.02] transition duration-300">
+                    <div class="text-3xl mb-3">𓉐</div>
+                    <h3 class="text-xl font-bold text-amber-300 mb-2">1. الآثار القديمة والكوشية</h3>
+                    <p class="text-amber-100/70 text-xs md:text-sm font-serif leading-relaxed">
+                        دراسة الحضارات النوبية القديمة من فترة نبتة ومروي، وتحليل العمارة الهرمية، الفخار المروي، والخط المروي القديم.
+                    </p>
+                </div>
+
+                <!-- شريحة 2 -->
+                <div class="glass-panel p-6 rounded-2xl border-t-4 border-amber-500 hover:scale-[1.02] transition duration-300">
+                    <div class="text-3xl mb-3">𓃭</div>
+                    <h3 class="text-xl font-bold text-amber-300 mb-2">2. التنقيب الميداني والمتاحف</h3>
+                    <p class="text-amber-100/70 text-xs md:text-sm font-serif leading-relaxed">
+                        طرق الكشف الأثري الحديثة، الفحوصات المعملية لـ الكربون-14، وإدارة المتاحف لحفظ التراث الإنساني.
+                    </p>
+                </div>
+
+                <!-- شريحة 3 -->
+                <div class="glass-panel p-6 rounded-2xl border-t-4 border-amber-500 hover:scale-[1.02] transition duration-300">
+                    <div class="text-3xl mb-3">𓋹</div>
+                    <h3 class="text-xl font-bold text-amber-300 mb-2">3. الذكاء الاصطناعي الأثري</h3>
+                    <p class="text-amber-100/70 text-xs md:text-sm font-serif leading-relaxed">
+                        دمج نموذج "ود الحاج AI" لقراءة وتحليل أسئلة المحاضرات والمراجع الأكاديمية المخزنة بنظام `.txt`.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- القسم الثالث: معلومات أثرية وتاريخية معروفة (مع امكانية التمرير للأسفل) -->
+        <section id="history-info" class="max-w-6xl mx-auto w-full py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-5xl font-extrabold gold-glow-text mb-3">
+                    معلومات أثرية وثقافية بارزة
+                </h2>
+                <p class="text-amber-200/60 font-serif text-sm md:text-base">حقائق تاريخية موثقة يستند إليها قسم علم الآثار</p>
+                <div class="archeology-border w-32 mx-auto mt-4"></div>
+            </div>
+
+            <div class="space-y-8">
+                <!-- معلومة 1 -->
+                <div class="glass-panel p-8 rounded-3xl flex flex-col md:flex-row gap-6 items-center">
+                    <div class="text-6xl text-amber-400 font-serif">𓁹</div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-amber-300 mb-2">حضارة كرمة (2500 - 1500 ق.م)</h3>
+                        <p class="text-amber-100/80 font-serif text-sm md:text-base leading-relaxed">
+                            تعتبر إحدى أقدم الحضارات المركزية في إفريقيا. اشتهرت ببناء "الدفوفة الشرقية والغربية" وهي منشآت ضخمة من اللبن، بالإضافة إلى صناعة الفخار المصقول الرقيق ذو الحافة السوداء الشهير.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- معلومة 2 -->
+                <div class="glass-panel p-8 rounded-3xl flex flex-col md:flex-row gap-6 items-center">
+                    <div class="text-6xl text-amber-400 font-serif">𓉴</div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-amber-300 mb-2">أهرامات مروي (البجراوية)</h3>
+                        <p class="text-amber-100/80 font-serif text-sm md:text-base leading-relaxed">
+                            تتميز أهرامات مروي بزاوية ميلان حادة وزوايا قائمة نوبية الفريدة، حيث تحتوي المنطقة على أكثر من 200 هرم مدفني للملوك والملكات الكوشيين (الكنداكات).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- معلومة 3 -->
+                <div class="glass-panel p-8 rounded-3xl flex flex-col md:flex-row gap-6 items-center">
+                    <div class="text-6xl text-amber-400 font-serif">𓎤</div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-amber-300 mb-2">جبل البركل والمنطقة الأثرية</h3>
+                        <p class="text-amber-100/80 font-serif text-sm md:text-base leading-relaxed">
+                            موقع مسجل ضمن قائمة التراث العالمي لليونسكو. كان يمثل المركز الديني الأهم لمعبد آمون في العصر الكوشي، ويعتبر رمزاً للملكية والسلطة الدينية.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- الفوتر -->
-        <footer class="flex justify-between items-center w-full max-w-7xl mx-auto text-xs text-amber-500/50 interactive-element">
-            <div class="flex gap-2 items-center">
-                <span class="hieroglyph">𓂀</span>
-                <span>تفاعل 3D حي (حرك الماوس للمعاينة)</span>
-            </div>
-            <div>كلية الآداب والتاريخ</div>
+        <footer class="w-full max-w-7xl mx-auto py-8 border-t border-amber-500/20 text-center text-xs text-amber-500/60 font-serif mt-12">
+            <p class="mb-2">كلية الآداب - قسم علم الآثار | المساعد الذكي "ود الحاج AI"</p>
+            <p>جميع الحقوق محفوظة © 2026</p>
         </footer>
 
     </div>
 
-    <!-- 3. كود Three.js لبناء مشهد 3D تفاعلي للصحراء والأهرامات -->
+    <!-- 3. كود Three.js لبناء المشهد الـ 3D التفاعلي -->
     <script>
-        // إعداد المشهد والكاميرا والمحرك
         const container = document.getElementById('webgl-container');
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x0a0603, 0.03);
+        scene.fog = new THREE.FogExp2(0x050302, 0.025);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 2, 8);
@@ -160,142 +260,99 @@
         renderer.shadowMap.enabled = true;
         container.appendChild(renderer.domElement);
 
-        // --- الإضاءة (Lighting) ---
-        const ambientLight = new THREE.AmbientLight(0xffd580, 0.6);
+        // الإضاءة
+        const ambientLight = new THREE.AmbientLight(0xffd580, 0.7);
         scene.add(ambientLight);
 
-        // ضوء أصفر ذهبي يمثل شمس الصحراء
         const sunLight = new THREE.DirectionalLight(0xffa500, 2.5);
-        sunLight.position.set(5, 10, 5);
+        sunLight.position.set(5, 12, 5);
         sunLight.castShadow = true;
         scene.add(sunLight);
 
-        // ضوء بؤري ناعم من الأسفل
-        const pointLight = new THREE.PointLight(0xff8c00, 1.5, 20);
-        pointLight.position.set(0, 0, 3);
-        scene.add(pointLight);
-
-        // --- المجسمات (3D Pyramids & Terrain) ---
+        // الأهرامات
         const pyramidGroup = new THREE.Group();
-
-        // خامة الذهب المعتق للأهرامات
         const goldMaterial = new THREE.MeshStandardMaterial({
             color: 0xd4af37,
-            metalness: 0.8,
-            roughness: 0.25,
+            metalness: 0.85,
+            roughness: 0.2,
             flatShading: true
         });
 
-        // دالة لإنشاء أهرامات مروي (زوايا حادة نوبية)
         function createPyramid(radius, height, x, z) {
             const geometry = new THREE.ConeGeometry(radius, height, 4);
             const pyramid = new THREE.Mesh(geometry, goldMaterial);
             pyramid.position.set(x, height / 2 - 1, z);
             pyramid.rotation.y = Math.PI / 4;
             pyramid.castShadow = true;
-            pyramid.receiveShadow = true;
             return pyramid;
         }
 
-        // إنشاء هرم مروي الرئيسي في المنتصف
-        const mainPyramid = createPyramid(2.2, 4.5, 0, -1);
+        const mainPyramid = createPyramid(2.2, 4.8, 0, -1);
+        const sidePyramid1 = createPyramid(1.3, 2.8, -3.5, -2);
+        const sidePyramid2 = createPyramid(1.1, 2.3, 3.5, -1.5);
+        
         pyramidGroup.add(mainPyramid);
-
-        // أهرامات جانبية أصغر
-        const sidePyramid1 = createPyramid(1.3, 2.8, -3.2, -2);
-        const sidePyramid2 = createPyramid(1.1, 2.3, 3.2, -1.5);
         pyramidGroup.add(sidePyramid1);
         pyramidGroup.add(sidePyramid2);
-
         scene.add(pyramidGroup);
 
-        // أرضية الصحراء الكثيبية
-        const planeGeo = new THREE.PlaneGeometry(60, 60, 32, 32);
-        const planeMat = new THREE.MeshStandardMaterial({
-            color: 0x2b1808,
-            roughness: 0.9,
-            metalness: 0.1,
-            wireframe: false
-        });
+        // الأرضية
+        const planeGeo = new THREE.PlaneGeometry(80, 80);
+        const planeMat = new THREE.MeshStandardMaterial({ color: 0x1f1207, roughness: 0.9 });
         const plane = new THREE.Mesh(planeGeo, planeMat);
         plane.rotation.x = -Math.PI / 2;
         plane.position.y = -1;
-        plane.receiveShadow = true;
         scene.add(plane);
 
-        // --- جزيئات رمل ونجوم عائمة (Dust Particles) ---
-        const particlesCount = 400;
+        // النجوم والرواسب العائمة
+        const particlesCount = 500;
         const particleGeo = new THREE.BufferGeometry();
         const positions = new Float32Array(particlesCount * 3);
 
         for (let i = 0; i < particlesCount * 3; i += 3) {
-            positions[i] = (Math.random() - 0.5) * 20;
-            positions[i + 1] = Math.random() * 10 - 1;
-            positions[i + 2] = (Math.random() - 0.5) * 20;
+            positions[i] = (Math.random() - 0.5) * 25;
+            positions[i + 1] = Math.random() * 12 - 1;
+            positions[i + 2] = (Math.random() - 0.5) * 25;
         }
 
         particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const particleMat = new THREE.PointsMaterial({
-            size: 0.05,
-            color: 0xffd700,
-            transparent: true,
-            opacity: 0.6
-        });
+        const particleMat = new THREE.PointsMaterial({ size: 0.05, color: 0xffd700, transparent: true, opacity: 0.7 });
         const particles = new THREE.Points(particleGeo, particleMat);
         scene.add(particles);
 
-        // --- تفاعل الماوس مع الـ 3D (Mouse Interaction) ---
-        let mouseX = 0;
-        let mouseY = 0;
-        let targetX = 0;
-        let targetY = 0;
-
-        const windowHalfX = window.innerWidth / 2;
-        const windowHalfY = window.innerHeight / 2;
+        // تفاعل الماوس والتمرير (Scroll) مع الـ 3D
+        let mouseX = 0, mouseY = 0;
+        let targetX = 0, targetY = 0;
 
         document.addEventListener('mousemove', (e) => {
-            mouseX = (e.clientX - windowHalfX) / 100;
-            mouseY = (e.clientY - windowHalfY) / 100;
+            mouseX = (e.clientX - window.innerWidth / 2) / 100;
+            mouseY = (e.clientY - window.innerHeight / 2) / 100;
         });
 
-        // لدعم الشاشات اللمسية (الهواتف)
-        document.addEventListener('touchmove', (e) => {
-            if (e.touches.length > 0) {
-                mouseX = (e.touches[0].clientX - windowHalfX) / 100;
-                mouseY = (e.touches[0].clientY - windowHalfY) / 100;
-            }
-        });
-
-        // --- حلقة التحريك والأنيميشن (Animation Loop) ---
         const clock = new THREE.Clock();
 
         function animate() {
             requestAnimationFrame(animate);
             const elapsedTime = clock.getElapsedTime();
 
-            // دوران بطيء مستمر للأهرامات
-            pyramidGroup.rotation.y = elapsedTime * 0.15;
+            // دوران الأهرامات وتأثرها بالـ Scroll
+            const scrollY = window.scrollY;
+            pyramidGroup.rotation.y = elapsedTime * 0.15 + (scrollY * 0.002);
 
-            // استجابة الكاميرا والمجسمات لحركة الماوس بسلاسة (Interpolation)
             targetX += (mouseX - targetX) * 0.05;
             targetY += (mouseY - targetY) * 0.05;
 
-            pyramidGroup.rotation.x = targetY * 0.2;
-            pyramidGroup.rotation.z = -targetX * 0.1;
+            pyramidGroup.rotation.x = targetY * 0.15;
+            camera.position.x = targetX * 0.4;
+            camera.position.y = 2 - (scrollY * 0.003); // نزول حركة الكاميرا مع السكرول
 
-            camera.position.x = targetX * 0.5;
-            camera.position.y = 2 - (targetY * 0.5);
-            camera.lookAt(0, 1, 0);
-
-            // تحريك جزيئات الذهب العائمة
-            particles.rotation.y = elapsedTime * 0.03;
+            particles.rotation.y = elapsedTime * 0.02;
 
             renderer.render(scene, camera);
         }
 
         animate();
 
-        // إعادة ضبط الحجم عند تغيير حجم الشاشة
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
