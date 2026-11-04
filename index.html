@@ -5,97 +5,164 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>جامعة إفريقيا العالمية - كلية إنديمي للمعادن والنفط</title>
     <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --accent-color: #00f0ff;
+            --accent-hover: #00acc1;
+            --text-main: #f0f6fc;
+            --text-secondary: #8b949e;
+            --border-color: #30363d;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
+            background-color: var(--bg-color);
             margin: 0;
             padding: 20px;
-            color: #333;
+            color: var(--text-main);
         }
+
         .container {
-            max-width: 850px;
+            max-width: 900px;
             margin: 0 auto;
-            background: #fff;
+            background: var(--card-bg);
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--border-color);
         }
+
+        .leader-badge {
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(138, 43, 226, 0.1));
+            border: 1px dashed var(--accent-color);
+            color: var(--accent-color);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.05);
+        }
+
         h2, h3 {
             text-align: center;
-            color: #2c3e50;
+            color: var(--text-main);
             margin: 5px 0;
         }
+
+        h2 {
+            color: var(--accent-color);
+            font-size: 22px;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
         .subtitle {
             text-align: center;
-            color: #7f8c8d;
-            font-size: 14px;
+            color: var(--text-secondary);
+            font-size: 13px;
             margin-bottom: 25px;
         }
+
         .search-container {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 25px;
         }
+
         .search-box {
             flex: 1;
-            padding: 12px 15px;
+            padding: 14px 18px;
             font-size: 16px;
-            border: 2px solid #cbd5e1;
-            border-radius: 8px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        .search-box:focus {
-            border-color: #3498db;
-        }
-        .search-btn {
-            background-color: #3498db;
+            background-color: #0d1117;
+            border: 2px solid var(--border-color);
             color: white;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, #00f0ff, #0077ff);
+            color: #0d1117;
             border: none;
-            padding: 0 25px;
+            padding: 0 30px;
             font-size: 16px;
-            border-radius: 8px;
+            font-weight: bold;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
         }
+
         .search-btn:hover {
-            background-color: #2980b9;
+            opacity: 0.9;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+            transform: translateY(-1px);
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
+            overflow: hidden;
+            border-radius: 10px;
         }
+
         th, td {
-            padding: 12px 15px;
+            padding: 14px 18px;
             text-align: right;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border-color);
         }
+
         th {
-            background-color: #3498db;
-            color: white;
+            background-color: #21262d;
+            color: var(--accent-color);
             font-weight: 600;
+            font-size: 14px;
         }
+
+        tr {
+            transition: background-color 0.2s;
+        }
+
         tr:hover {
-            background-color: #f8fafc;
+            background-color: rgba(0, 240, 255, 0.03);
         }
+
+        td strong {
+            color: var(--accent-color);
+        }
+
         .no-results {
             text-align: center;
-            padding: 20px;
-            color: #e74c3c;
+            padding: 25px;
+            color: #ff5555;
             font-weight: bold;
+            background: rgba(255, 85, 85, 0.05);
+            border-radius: 10px;
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div class="leader-badge">إدارة ليدر قاسم</div>
+    
     <h2>جامعة إفريقيا العالمية</h2>
     <h3>كلية إنديمي للمعادن والنفط</h3>
     <div class="subtitle">قائمة طلاب الفصل الدراسي الأول - عام (سبتمبر - ديسمبر 2026م)</div>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-box" placeholder="ابحث بالاسم أو الرقم الجامعي (مثال: محمد علوي أو ST2605682)..." oninput="searchStudent()">
+        <input type="text" id="searchInput" class="search-box" placeholder="اكتب جزءاً من الاسم أو الرقم الجامعي للبحث الفوري..." oninput="searchStudent()">
         <button class="search-btn" onclick="searchStudent()">بحث</button>
     </div>
 
@@ -112,4 +179,4 @@
             <!-- سيتم تعبئة البيانات برمجياً -->
         </tbody>
     </table>
-    <div id="noResults" class="no-results" style="display: none;">عذراً، لم يتم العثور على نتائج تطابق بحثك
+    <div id="noResults" class="no-results" style="display: none;">عذراً، لم يتم العث
