@@ -25,6 +25,8 @@
 
         .container {
             max-width: 900px;
+            max-height: 90vh; /* تحديد أقصى ارتفاع */
+            overflow-y: auto;  /* إضافة شريط تمرير داخلي إذا طال المحتوى */
             margin: 0 auto;
             background: var(--card-bg);
             padding: 30px;
@@ -141,15 +143,24 @@
             color: var(--accent-color);
         }
 
-        .no-results {
+        .initial-msg, .no-results {
             text-align: center;
             padding: 30px;
-            color: #f87171;
-            font-weight: bold;
-            background: rgba(248, 113, 113, 0.08);
             border-radius: 12px;
             margin-top: 15px;
             font-size: 16px;
+            font-weight: bold;
+        }
+
+        .initial-msg {
+            color: var(--accent-color);
+            background: rgba(0, 240, 255, 0.05);
+            border: 1px dashed var(--accent-color);
+        }
+
+        .no-results {
+            color: #f87171;
+            background: rgba(248, 113, 113, 0.08);
         }
     </style>
 </head>
@@ -163,11 +174,14 @@
     <div class="subtitle">قائمة طلاب الفصل الدراسي الأول - عام (سبتمبر - ديسمبر 2026م)</div>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-box" placeholder="اكتب جزءاً من الاسم أو الرقم الجامعي (بحث فوري)..." oninput="searchStudent()" onkeydown="if(event.key==='Enter') searchStudent()">
+        <input type="text" id="searchInput" class="search-box" placeholder="اكتب جزءاً من الاسم أو الرقم الجامعي للبحث..." oninput="searchStudent()" onkeydown="if(event.key==='Enter') searchStudent()">
         <button class="search-btn" onclick="searchStudent()">بحث</button>
     </div>
 
-    <table id="studentsTable">
+    <!-- رسالة تظهر قبل إجراء أي بحث -->
+    <div id="initialMsg" class="initial-msg">يرجى كتابة اسم الطالب أو الرقم الجامعي في خانة البحث أعلاه لعرض النتائج.</div>
+
+    <table id="studentsTable" style="display: none;">
         <thead>
             <tr>
                 <th>الرقم</th>
@@ -177,28 +191,51 @@
             </tr>
         </thead>
         <tbody id="tableBody">
-            <!-- سيتم تعبئة البيانات برمجياً -->
+            <!-- سيتم تعبئة البيانات برمجياً عند البحث -->
         </tbody>
     </table>
+    
     <div id="noResults" class="no-results" style="display: none;">عذراً، لم يتم العثور على نتائج تطابق بحثك. تأكد من صحة الحروف أو الأرقام المدخلة.</div>
 </div>
 
 <!-- استدعاء ملف البيانات المنفصل -->
 <script src="students_data.js"></script>
 <script>
-    function displayTable(data) {
-        const tbody = document.getElementById('tableBody');
+    function searchStudent() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        const table = document.getElementById('studentsTable');
+        const initialMsg = document.getElementById('initialMsg');
         const noResults = document.getElementById('noResults');
-        tbody.innerHTML = '';
+        const tbody = document.getElementById('tableBody');
 
-        if (data.length === 0) {
-            noResults.style.display = 'block';
-            return;
-        } else {
+        // إذا كانت خانة البحث فارغة، نخفي الجدول ونعرض رسالة التوجيه
+        if (!query) {
+            table.style.display = 'none';
             noResults.style.display = 'none';
+            initialMsg.style.display = 'block';
+            return;
         }
 
-        data.forEach(student => {
+        initialMsg.style.display = 'none';
+
+        // تصفية الطلاب بناءً على المدخلات الجزئية
+        const filtered = students.filter(student => 
+            student.name.toLowerCase().includes(query) || 
+            student.code.toLowerCase().includes(query)
+        );
+
+        tbody.innerHTML = '';
+
+        if (filtered.length === 0) {
+            table.style.display = 'none';
+            noResults.style.display = 'block';
+            return;
+        }
+
+        noResults.style.display = 'none';
+        table.style.display = 'table';
+
+        filtered.forEach(student => {
             const row = `<tr>
                 <td>${student.id}</td>
                 <td>${student.name}</td>
@@ -207,27 +244,6 @@
             </tr>`;
             tbody.innerHTML += row;
         });
-    }
-
-    function searchStudent() {
-        const query = document.getElementById('searchInput').value.toLowerCase().trim();
-        if (!query) {
-            displayTable(students);
-            return;
-        }
-        const filtered = students.filter(student => 
-            student.name.toLowerCase().includes(query) || 
-            student.code.toLowerCase().includes(query)
-        );
-        displayTable(filtered);
-    }
-
-    // عرض القائمة كاملة عند تحميل الصفحة لأول مرة
-    if (typeof students !== 'undefined') {
-        displayTable(students);
-    } else {
-        document.getElementById('noResults').innerText = 'تنبيه: تأكد من وضع ملف students_data.js في نفس المجلد مع ملف index.html';
-        document.getElementById('noResults').style.display = 'block';
     }
 </script>
 
