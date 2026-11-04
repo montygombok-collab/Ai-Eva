@@ -6,13 +6,13 @@
     <title>جامعة إفريقيا العالمية - كلية إنديمي للمعادن والنفط</title>
     <style>
         :root {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
+            --bg-color: #0b0f19;
+            --card-bg: #111827;
             --accent-color: #00f0ff;
             --accent-hover: #00acc1;
-            --text-main: #f0f6fc;
-            --text-secondary: #8b949e;
-            --border-color: #30363d;
+            --text-main: #f9fafb;
+            --text-secondary: #9ca3af;
+            --border-color: #1f2937;
         }
 
         body {
@@ -28,42 +28,42 @@
             margin: 0 auto;
             background: var(--card-bg);
             padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.15);
             border: 1px solid var(--border-color);
         }
 
         .leader-badge {
             text-align: center;
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(138, 43, 226, 0.1));
-            border: 1px dashed var(--accent-color);
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(138, 43, 226, 0.15));
+            border: 1px solid var(--accent-color);
             color: var(--accent-color);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 15px;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             letter-spacing: 1px;
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.05);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
         }
 
         h2, h3 {
             text-align: center;
             color: var(--text-main);
-            margin: 5px 0;
+            margin: 8px 0;
         }
 
         h2 {
             color: var(--accent-color);
-            font-size: 22px;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+            font-size: 24px;
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
         }
 
         .subtitle {
             text-align: center;
             color: var(--text-secondary);
-            font-size: 13px;
-            margin-bottom: 25px;
+            font-size: 14px;
+            margin-bottom: 30px;
         }
 
         .search-container {
@@ -74,38 +74,38 @@
 
         .search-box {
             flex: 1;
-            padding: 14px 18px;
+            padding: 15px 20px;
             font-size: 16px;
-            background-color: #0d1117;
+            background-color: #0b0f19;
             border: 2px solid var(--border-color);
             color: white;
-            border-radius: 10px;
+            border-radius: 12px;
             outline: none;
             transition: all 0.3s ease;
         }
 
         .search-box:focus {
             border-color: var(--accent-color);
-            box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
         }
 
         .search-btn {
             background: linear-gradient(135deg, #00f0ff, #0077ff);
-            color: #0d1117;
+            color: #0b0f19;
             border: none;
             padding: 0 30px;
             font-size: 16px;
             font-weight: bold;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
         }
 
         .search-btn:hover {
-            opacity: 0.9;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
-            transform: translateY(-1px);
+            opacity: 0.95;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
+            transform: translateY(-2px);
         }
 
         table {
@@ -113,20 +113,20 @@
             border-collapse: collapse;
             margin-top: 10px;
             overflow: hidden;
-            border-radius: 10px;
+            border-radius: 12px;
         }
 
         th, td {
-            padding: 14px 18px;
+            padding: 15px 20px;
             text-align: right;
             border-bottom: 1px solid var(--border-color);
         }
 
         th {
-            background-color: #21262d;
+            background-color: #1f2937;
             color: var(--accent-color);
             font-weight: 600;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         tr {
@@ -134,7 +134,7 @@
         }
 
         tr:hover {
-            background-color: rgba(0, 240, 255, 0.03);
+            background-color: rgba(0, 240, 255, 0.05);
         }
 
         td strong {
@@ -143,12 +143,13 @@
 
         .no-results {
             text-align: center;
-            padding: 25px;
-            color: #ff5555;
+            padding: 30px;
+            color: #f87171;
             font-weight: bold;
-            background: rgba(255, 85, 85, 0.05);
-            border-radius: 10px;
+            background: rgba(248, 113, 113, 0.08);
+            border-radius: 12px;
             margin-top: 15px;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -162,7 +163,7 @@
     <div class="subtitle">قائمة طلاب الفصل الدراسي الأول - عام (سبتمبر - ديسمبر 2026م)</div>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-box" placeholder="اكتب جزءاً من الاسم أو الرقم الجامعي للبحث الفوري..." oninput="searchStudent()">
+        <input type="text" id="searchInput" class="search-box" placeholder="اكتب جزءاً من الاسم أو الرقم الجامعي (بحث فوري)..." oninput="searchStudent()" onkeydown="if(event.key==='Enter') searchStudent()">
         <button class="search-btn" onclick="searchStudent()">بحث</button>
     </div>
 
@@ -179,4 +180,56 @@
             <!-- سيتم تعبئة البيانات برمجياً -->
         </tbody>
     </table>
-    <div id="noResults" class="no-results" style="display: none;">عذراً، لم يتم العث
+    <div id="noResults" class="no-results" style="display: none;">عذراً، لم يتم العثور على نتائج تطابق بحثك. تأكد من صحة الحروف أو الأرقام المدخلة.</div>
+</div>
+
+<!-- استدعاء ملف البيانات المنفصل -->
+<script src="students_data.js"></script>
+<script>
+    function displayTable(data) {
+        const tbody = document.getElementById('tableBody');
+        const noResults = document.getElementById('noResults');
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+            noResults.style.display = 'block';
+            return;
+        } else {
+            noResults.style.display = 'none';
+        }
+
+        data.forEach(student => {
+            const row = `<tr>
+                <td>${student.id}</td>
+                <td>${student.name}</td>
+                <td><strong>${student.code}</strong></td>
+                <td>${student.country}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+
+    function searchStudent() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        if (!query) {
+            displayTable(students);
+            return;
+        }
+        const filtered = students.filter(student => 
+            student.name.toLowerCase().includes(query) || 
+            student.code.toLowerCase().includes(query)
+        );
+        displayTable(filtered);
+    }
+
+    // عرض القائمة كاملة عند تحميل الصفحة لأول مرة
+    if (typeof students !== 'undefined') {
+        displayTable(students);
+    } else {
+        document.getElementById('noResults').innerText = 'تنبيه: تأكد من وضع ملف students_data.js في نفس المجلد مع ملف index.html';
+        document.getElementById('noResults').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
