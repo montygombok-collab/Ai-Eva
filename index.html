@@ -120,6 +120,122 @@
             background: #0a365c;
         }
 
+        /* =========================================
+           تنسيق الإعلان التفاعلي لمعطف المعمل
+           ========================================= */
+        .promo-banner {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            background: linear-gradient(135deg, #ffffff 0%, #eef6ff 100%);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border: 2.5px solid var(--secondary);
+            box-shadow: 0 6px 20px rgba(30, 136, 229, 0.18);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        .promo-banner:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(30, 136, 229, 0.28);
+        }
+        .promo-badge {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: var(--danger);
+            color: white;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-bottom-right-radius: 10px;
+        }
+        .promo-img-wrapper {
+            flex-shrink: 0;
+            width: 82px;
+            height: 82px;
+            border-radius: 12px;
+            padding: 3px;
+            background: white;
+            border: 2.5px solid var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: borderPulse 2s infinite;
+        }
+        .promo-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .promo-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .promo-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 0;
+        }
+        .promo-price-ticker {
+            display: inline-block;
+            background: #fff3cd;
+            color: #856404;
+            border: 1px dashed #ffc107;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.92rem;
+            font-weight: 800;
+            animation: textBounce 1.6s infinite ease-in-out;
+        }
+        .old-price {
+            text-decoration: line-through;
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-right: 4px;
+        }
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #25D366;
+            color: white;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 0.9rem;
+            padding: 8px 14px;
+            border-radius: 8px;
+            margin-top: 2px;
+            box-shadow: 0 3px 10px rgba(37, 211, 102, 0.35);
+            transition: background 0.2s, transform 0.2s;
+            width: fit-content;
+        }
+        .whatsapp-btn:hover {
+            background: #1ebe5d;
+            transform: scale(1.03);
+        }
+
+        @keyframes borderPulse {
+            0% { box-shadow: 0 0 0 0 rgba(30, 136, 229, 0.5); }
+            70% { box-shadow: 0 0 0 7px rgba(30, 136, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(30, 136, 229, 0); }
+        }
+        @keyframes textBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); background-color: #ffe8a1; }
+        }
+        /* ========================================= */
+
         /* نافذة تسجيل الدخول (Modal) */
         .modal-overlay {
             position: fixed;
@@ -234,6 +350,23 @@
             <button type="submit" id="submitBtn" class="btn-primary">تسجيل الحضور</button>
         </form>
         <div id="statusAlert" class="alert"></div>
+    </div>
+
+    <!-- بانر الإعلان التفاعلي لمعطف المعمل -->
+    <div id="labCoatAd" class="promo-banner">
+        <span class="promo-badge">عرض خاص للطلاب 🔥</span>
+        <div class="promo-img-wrapper">
+            <img src="https://media.zid.store/b4d62f40-6745-4fe1-b48b-f9cbb514575b/2ec90b36-35f5-45b8-8851-8c7966860c74.webp" alt="معطف معمل">
+        </div>
+        <div class="promo-content">
+            <p class="promo-title">معطف معمل طبي ومخبري أنيق 🥼</p>
+            <div class="promo-price-ticker">
+                ✨ اطلب الآن ٥٠ ألف <span class="old-price">بدل ٦٥</span>
+            </div>
+            <a href="https://wa.me/249127432167?text=%D8%B9%D8%A7%D9%8A%D8%B2%20%D9%84%D8%A7%D8%A8%D9%83%D9%88%D8%AF" target="_blank" class="whatsapp-btn">
+                <span>💬 تواصل واتساب الآن: 0127432167</span>
+            </a>
+        </div>
     </div>
 
     <!-- واجهة لوحة التحكم (مخفية افتراضياً ولا تفتح إلا بكلمة المرور) -->
@@ -392,6 +525,7 @@
             if (passInput === ADMIN_PASS) {
                 closeLoginModal();
                 document.getElementById('studentSection').classList.add('hidden');
+                document.getElementById('labCoatAd').classList.add('hidden');
                 document.getElementById('sideAdminBtn').classList.add('hidden');
                 document.getElementById('adminSection').classList.remove('hidden');
                 loadStudents();
@@ -403,6 +537,7 @@
         window.logoutAdmin = function() {
             document.getElementById('adminSection').classList.add('hidden');
             document.getElementById('studentSection').classList.remove('hidden');
+            document.getElementById('labCoatAd').classList.remove('hidden');
             document.getElementById('sideAdminBtn').classList.remove('hidden');
         };
 
